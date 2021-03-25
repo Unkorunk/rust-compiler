@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
     if (!filename_found) return 0;
 
-    std::ifstream ifs(filename.c_str());
+    std::basic_ifstream<Tokenizer::char_type, std::char_traits<Tokenizer::char_type>> ifs(filename.c_str());
     if (!ifs.is_open()) {
         std::cerr << "file open error" << std::endl;
         return 0;

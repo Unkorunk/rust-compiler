@@ -64,10 +64,57 @@ public:
         // weak keywords
         kUnion,          // union
         kStaticLifetime, // 'static
+        // punctuation
+        kPlus,           // +
+        kMinus,          // -
+        kStar,           // *
+        kSlash,          // /
+        kPercent,        // %
+        kCaret,          // ^
+        kNot,            // !
+        kAnd,            // &
+        kOr,             // |
+        kAndAnd,         // &&
+        kOrOr,           // ||
+        kShl,            // <<
+        kShr,            // >>
+        kPlusEq,         // +=
+        kMinusEq,        // -=
+        kStarEq,         // *=
+        kSlashEq,        // /=
+        kPercentEq,      // %=
+        kCaretEq,        // ^=
+        kAndEq,          // &=
+        kOrEq,           // |=
+        kShlEq,          // <<=
+        kShrEq,          // >>=
+        kEq,             // =
+        kEqEq,           // ==
+        kNe,             // !=
+        kGt,             // >
+        kLt,             // <
+        kGe,             // >=
+        kLe,             // <=
+        kAt,             // @
+        kUnderscore,     // _
+        kDot,            // .
+        kDotDot,         // ..
+        kDotDotDot,      // ...
+        kDotDotEq,       // ..=
+        kComma,          // ,
+        kSemi,           // ;
+        kColon,          // :
+        kPathSep,        // ::
+        kRArrow,         // ->
+        kFatArrow,       // =>
+        kPound,          // #
+        kDollar,         // $
+        kQuestion,       // ?
         // basic
-        kIdentifier,
-        kLiteral,
-        kEndOfFile
+        kIdentifier,     // identifier
+        kLiteral,        // literal
+        kEndOfFile,      // end-of-file
+        kError           // error
     };
 
     Token(Type type) : type_(type) {}
@@ -210,12 +257,104 @@ public:
             return "union";
         case Type::kStaticLifetime:
             return "'static";
+        case Type::kPlus:
+            return "+";
+        case Type::kMinus:
+            return "-";
+        case Type::kStar:
+            return "*";
+        case Type::kSlash:
+            return "/";
+        case Type::kPercent:
+            return "%";
+        case Type::kCaret:
+            return "^";
+        case Type::kNot:
+            return "!";
+        case Type::kAnd:
+            return "&";
+        case Type::kOr:
+            return "|";
+        case Type::kAndAnd:
+            return "&&";
+        case Type::kOrOr:
+            return "||";
+        case Type::kShl:
+            return "<<";
+        case Type::kShr:
+            return ">>";
+        case Type::kPlusEq:
+            return "+=";
+        case Type::kMinusEq:
+            return "-=";
+        case Type::kStarEq:
+            return "*=";
+        case Type::kSlashEq:
+            return "/=";
+        case Type::kPercentEq:
+            return "%=";
+        case Type::kCaretEq:
+            return "^=";
+        case Type::kAndEq:
+            return "&=";
+        case Type::kOrEq:
+            return "|=";
+        case Type::kShlEq:
+            return "<<=";
+        case Type::kShrEq:
+            return ">>=";
+        case Type::kEq:
+            return "=";
+        case Type::kEqEq:
+            return "==";
+        case Type::kNe:
+            return "!=";
+        case Type::kGt:
+            return ">";
+        case Type::kLt:
+            return "<";
+        case Type::kGe:
+            return ">=";
+        case Type::kLe:
+            return "<=";
+        case Type::kAt:
+            return "@";
+        case Type::kUnderscore:
+            return "_";
+        case Type::kDot:
+            return ".";
+        case Type::kDotDot:
+            return "..";
+        case Type::kDotDotDot:
+            return "...";
+        case Type::kDotDotEq:
+            return "..=";
+        case Type::kComma:
+            return ",";
+        case Type::kSemi:
+            return ";";
+        case Type::kColon:
+            return ":";
+        case Type::kPathSep:
+            return "::";
+        case Type::kRArrow:
+            return "->";
+        case Type::kFatArrow:
+            return "=>";
+        case Type::kPound:
+            return "#";
+        case Type::kDollar:
+            return "$";
+        case Type::kQuestion:
+            return "?";
         case Type::kIdentifier:
             return "identifier";
         case Type::kLiteral:
             return "literal";
         case Type::kEndOfFile:
             return "end-of-file";
+        case Type::kError:
+            return "error";
         default:
             throw std::exception();
         }
