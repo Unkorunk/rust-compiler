@@ -1,22 +1,22 @@
 #include "Tokenizer.hpp"
 
-Tokenizer::Tokenizer(istream_type *stream) : stream_(stream) {}
+Tokenizer::Tokenizer(stream_type *stream) : stream_(stream) {}
 
 bool Tokenizer::HasNext() const {
-    return false;
+    return !IsEOF();
 }
 
 Token Tokenizer::Next() {
     SkipWhitespace();
 
-    if (!IsEOF()) {
+    if (IsEOF()) {
         return Token(Token::Type::kEndOfFile);
     }
 
     char_type c = PeekChar(0);
     if (IsDecDigit(c)) {
         return TokenizeInteger();
-    } else if (IsAlphanumeric(c)) {
+    } else if (c != '_' && IsAlphanumeric(c)) {
         Token token(Token::Type::kEndOfFile);
         if (TryTokenizeKeyword(&token)) {
             return token;
@@ -29,10 +29,10 @@ Token Tokenizer::Next() {
             c = PeekChar(1);           \
             if (c == '=') {            \
                 SkipChar(2);           \
-                return Token(op);      \
+                return Token(opEq);    \
             }                          \
             SkipChar(1);               \
-            return Token(opEq);        \
+            return Token(op);          \
         }
 
     switch (c)
@@ -94,7 +94,7 @@ Token Tokenizer::Next() {
         if (c == '=') {
             SkipChar(2);
             return Token(Token::Type::kOrEq);
-        } else if (c == '&') {
+        } else if (c == '|') {
             SkipChar(2);
             return Token(Token::Type::kOrOr);
         }
@@ -231,45 +231,21 @@ Token Tokenizer::Next() {
 }
 
 bool Tokenizer::IsEOF() const {
-    return !stream_->eof();
+    return stream_->eof();
 }
 
-Tokenizer::char_type Tokenizer::PeekChar(size_t offset) {
-    if (offset >= buf2_.size()) {
-        throw std::exception();
-    }
+Tokenizer::char_type Tokenizer::PeekChar(std::streamoff offset) {
+    std::streampos old_pos = stream_->tellg();
+    
+    stream_->seekg(offset, std::ios_base::cur);
+    char_type c = stream_->peek();
+    stream_->seekg(old_pos);
 
-    if (buf1_position_ >= buf1_length_) {
-        if (buf2_initialized_) {
-            buf1_.swap(buf2_);
-            buf2_initialized_ = false;
-        } else {
-            stream_->read(buf1_.data(), buf1_.size());
-            buf1_length_ = stream_->gcount();
-            buf1_position_ = 0;
-        }
-    }
-
-    if (buf1_position_ + offset >= buf1_length_) {
-        if (!buf2_initialized_) {
-            stream_->read(buf2_.data(), buf2_.size());
-            buf2_length_ = stream_->gcount();
-
-            buf2_initialized_ = true;
-        }
-
-        if (buf1_position_ + offset < buf1_length_ + buf2_length_) {
-            return buf2_[buf1_position_ + offset - buf1_length_];
-        }
-    } else {
-        return buf1_[buf1_position_ + offset];
-    }
-
-    return ' ';
+    return (c == std::char_traits<char_type>::eof() ? ' ' : c);
 }
 
-void Tokenizer::SkipChar(size_t offset) {
-    buf1_position_ += offset;
+void Tokenizer::SkipChar(std::streamsize offset) {
+    stream_->ignore(offset);
 }
 
 bool Tokenizer::IsWhitespace(char_type it) {
@@ -304,7 +280,7 @@ bool Tokenizer::IsHexDigit(char_type it) {
 }
 
 void Tokenizer::SkipWhitespace() {
-    while (IsEOF() && IsWhitespace(PeekChar(0))) {
+    while (!IsEOF() && IsWhitespace(PeekChar(0))) {
         SkipChar(1);
     }
 }
@@ -350,7 +326,68 @@ Token Tokenizer::TokenizeRawByteString() {
 }
 
 Token Tokenizer::TokenizeInteger() {
-    // TODO
+    long long result = 0;
+    bool is_digit_found = false;
+
+    char_type c = PeekChar(0);
+
+    int system = (c != '0' ? 10 : -1);
+    if (system == -1) {
+        SkipChar(1);
+        c = PeekChar(0);
+        
+        if (c == 'b') {
+            system = 2;
+            SkipChar(1);
+            c = PeekChar(0);
+        } else if (c == 'o') {
+            system = 8;
+            SkipChar(1);
+            c = PeekChar(0);
+        } else if (c == 'x') {
+            system = 16;
+            SkipChar(1);
+            c = PeekChar(0);
+        } else if (IsDecDigit(c)) {
+            system = 10;
+            is_digit_found = true;
+        } else {
+            return Token(Token::Type::kLiteral);
+        }
+    }
+
+    while (!IsEOF()) {
+        if (system == 2 && IsBinDigit(c) || system == 8 && IsOctDigit(c) ||
+            system == 10 && IsDecDigit(c)) {
+            result *= 10;
+
+            result += c - '0';
+
+            is_digit_found = true;
+        } else if (system == 16 && IsHexDigit(c)) {
+            result *= 10;
+
+            if (c >= '0' && c <= '9') {
+                result += c - '0';
+            } else if (c >= 'a' && c <= 'f') {
+                result += 10 + (c - 'a');
+            } else {
+                result += 10 + (c - 'A');
+            }
+
+            is_digit_found = true;
+        } else if (c != '_') {
+            break;
+        }
+
+        SkipChar(1);
+        c = PeekChar(0);
+    }
+
+    if (!is_digit_found) {
+        return Token(Token::Type::kError);
+    }
+
     return Token(Token::Type::kLiteral);
 }
 

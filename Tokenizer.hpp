@@ -2,30 +2,26 @@
 
 #include <sstream>
 #include <array>
+#include <fstream>
 
 #include "Token.hpp"
 
 class Tokenizer {
 public:
     using char_type = char32_t;
-    using istream_type = std::basic_istream<char_type, std::char_traits<char_type>>;
+    using stream_type = std::basic_ifstream<char_type, std::char_traits<char_type>>;
 
-    explicit Tokenizer(istream_type *stream);
+    explicit Tokenizer(stream_type *stream);
 
     bool HasNext() const;
     Token Next();
 
 private:
-    istream_type *stream_;
-    
-    std::array<char_type, 2048> buf1_{}, buf2_;
-    std::streamsize buf1_length_ = 0, buf2_length_ = 0;
-    std::size_t buf1_position_ = 0;
-    bool buf2_initialized_ = false;
+    stream_type *stream_;
 
     bool IsEOF() const;
-    char_type PeekChar(size_t offset);
-    void SkipChar(size_t offset);
+    char_type PeekChar(std::streamoff offset);
+    void SkipChar(std::streamsize offset);
 
     static bool IsWhitespace(char_type it);
 
