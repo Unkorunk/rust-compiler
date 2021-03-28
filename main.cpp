@@ -3,23 +3,27 @@
 
 #include "Tokenizer.hpp"
 
+const bool is_debug = true;
+
 int main(int argc, char **argv) {
-    bool print_tokenizer = false;
+    bool print_tokenizer = is_debug;
 
-    std::string filename;
-    bool filename_found = false;
+    std::string filename = (is_debug ? "main.rs" : "");
+    bool filename_found = is_debug;
 
-    for (int k = 1; k < argc; k++) {
-        std::string arg(argv[k]);
+    if (!is_debug) {
+        for (int k = 1; k < argc; k++) {
+            std::string arg(argv[k]);
 
-        if (arg == "-t") {
-            print_tokenizer = true;
-        } else if (filename_found) {
-            std::cerr << "invalid arguments" << std::endl;
-            return 0;
-        } else {
-            filename = arg;
-            filename_found = true;
+            if (arg == "-t") {
+                print_tokenizer = true;
+            } else if (filename_found) {
+                std::cerr << "invalid arguments" << std::endl;
+                return 0;
+            } else {
+                filename = arg;
+                filename_found = true;
+            }
         }
     }
 

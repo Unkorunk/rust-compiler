@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <exception>
 
+#include "TokenValue.hpp"
+
 class Token {
 public:
     enum class Type {
@@ -114,13 +116,20 @@ public:
         kIdentifier,     // identifier
         kLiteral,        // literal
         kEndOfFile,      // end-of-file
-        kError           // error
+        kError,          // error
+        kEmpty
     };
 
-    Token(Type type) : type_(type) {}
+    Token() : type_(Token::Type::kEmpty), position_(0, 0, 0, 0) {}
+    explicit Token(Type type, uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
+        type_(type), position_(start_line, start_column, end_line, end_column) {}
+    explicit Token(TokenValue value, uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
+        type_(Type::kLiteral), value_(value), position_(start_line, start_column, end_line, end_column) {}
 
     struct Position {
-        uint32_t start_line{}, start_column{}, end_line{}, end_column{};
+        uint32_t start_line, start_column, end_line, end_column;
+        Position(uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
+            start_line(start_line), start_column(start_column), end_line(end_line), end_column(end_column) {}
 
         std::string ToString() const {
             std::ostringstream oss;
@@ -143,7 +152,11 @@ public:
     std::string ToString() const {
         std::ostringstream oss;
 
-        oss << position_.ToString() << " " << TypeToString(type_);
+        oss << position_.ToString() << ' ' << TypeToString(type_);
+
+        if (type_ == Type::kLiteral) {
+            oss << " (" << value_.ToString() << ")";
+        }
 
         return oss.str();
     }
@@ -363,5 +376,6 @@ public:
 private:
     Position position_;
     Type type_;
+    TokenValue value_;
 
 };
