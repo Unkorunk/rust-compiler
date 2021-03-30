@@ -54,8 +54,6 @@ private:
     Token TokenizeRawByteString();
     // number literals
     Token TokenizeNumber();
-    // boolean literals
-    Token TokenizeBoolean();
     // TODO lifetimes and loop labels
 
     uint32_t start_line_ = 1, start_column_ = 1;

@@ -27,6 +27,12 @@ Token Tokenizer::Next() {
         c == 'b' && c1 != '\'' && c1 != '"' && (c1 != 'r' || c2 != '"' && c2 != '#')) { //! byte and byte string literals
         Token token;
         if (TryTokenizeKeyword(&token)) {
+            if (token.GetType() == Token::Type::kTrue) {
+                return MakeLiteral(TokenValue(true));
+            } else if (token.GetType() == Token::Type::kFalse) {
+                return MakeLiteral(TokenValue(false));
+            }
+
             return token;
         }
         return TokenizeIdentifier();
@@ -416,7 +422,7 @@ bool Tokenizer::TryTokenizeKeyword(Token *token) {
         if (iter1 == keywords.end()) {
             if (best_match != Token::Type::kEmpty) {
                 *token = MakeToken(best_match);
-                SkipChar(pos);
+                SkipChar(pos - 1);
                 return true;
             }
             return false;
@@ -431,7 +437,7 @@ bool Tokenizer::TryTokenizeKeyword(Token *token) {
         } else {
             if (best_match != Token::Type::kEmpty) {
                 *token = MakeToken(best_match);
-                SkipChar(pos);
+                SkipChar(pos - 1);
                 return true;
             }
             return false;
@@ -741,9 +747,4 @@ Token Tokenizer::TokenizeNumber() {
     }
 
     return MakeLiteral(token_value);
-}
-
-Token Tokenizer::TokenizeBoolean() {
-    // TODO
-    return MakeToken(Token::Type::kLiteral);
 }

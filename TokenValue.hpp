@@ -5,12 +5,14 @@
 class TokenValue {
 public:
     enum class Type {
-        kU8, kU16, kU32, kU64, kU128, kUSize,
+        kBool, kU8, kU16, kU32, kU64, kU128, kUSize,
         kI8, kI16, kI32, kI64, kI128, kISize,
         kF32, kF64, kText, kEmpty
     };
 
     TokenValue() : type_(Type::kEmpty) {}
+
+    TokenValue(bool val) : _bool(val), type_(Type::kBool) {}
 
     TokenValue(uint8_t val) : _u8(val), type_(Type::kU8) {}
     TokenValue(uint16_t val) : _u16(val), type_(Type::kU16) {}
@@ -28,6 +30,11 @@ public:
     TokenValue(double val) : _f64(val), type_(Type::kF64) {}
 
     TokenValue(std::string val) : _text(val), type_(Type::kText) {}
+
+    operator bool() const {
+        if (type_ != Type::kBool) throw std::exception();
+        return _bool;
+    }
 
     operator uint8_t() const {
         if (type_ != Type::kU8) throw std::exception();
@@ -84,6 +91,9 @@ public:
         if (type_ != Type::kEmpty) {
             switch (type_)
             {
+            case Type::kBool:
+                oss << ' ' << _bool;
+                break;
             case Type::kU8:
                 oss << ' ' << static_cast<uint16_t>(_u8);
                 break;
@@ -132,6 +142,8 @@ public:
     static std::string TypeToString(Type type) {
         switch (type)
         {
+        case Type::kBool:
+            return "bool";
         case Type::kU8:
             return "u8";
         case Type::kU16:
@@ -168,6 +180,8 @@ private:
     Type type_;
 
     union {
+        bool _bool;
+
         uint8_t _u8;
         uint16_t _u16;
         uint32_t _u32;
