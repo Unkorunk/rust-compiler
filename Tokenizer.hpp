@@ -4,6 +4,7 @@
 #include <array>
 #include <fstream>
 #include <vector>
+#include <stack>
 
 #include "Token.hpp"
 
@@ -65,6 +66,8 @@ private:
     Token MakeToken(TokenValue value) {
         return Token(value, start_line_, start_column_, current_line_, current_column_);
     }
+
+    std::stack<char_type> curly_braces_stack, square_brackets_stack, parentheses_stack;
 
     template <typename T>
     static bool TryParse(const std::vector<int8_t>& digits, T *result) {

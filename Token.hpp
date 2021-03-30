@@ -112,6 +112,13 @@ public:
         kPound,          // #
         kDollar,         // $
         kQuestion,       // ?
+        // bracket punctuation
+        kOpenCurlyBr,    // {
+        kCloseCurlyBr,   // }
+        kOpenSquareBr,   // [
+        kCloseSquareBr,  // ]
+        kOpenRoundBr,    // (
+        kCloseRoundBr,   // )
         // basic
         kIdentifier,     // identifier
         kLiteral,        // literal
@@ -360,6 +367,18 @@ public:
             return "$";
         case Type::kQuestion:
             return "?";
+        case Type::kOpenCurlyBr:
+            return "{";
+        case Type::kCloseCurlyBr:
+            return "}";
+        case Type::kOpenSquareBr:
+            return "[";
+        case Type::kCloseSquareBr:
+            return "]";
+        case Type::kOpenRoundBr:
+            return "(";
+        case Type::kCloseRoundBr:
+            return ")";
         case Type::kIdentifier:
             return "identifier";
         case Type::kLiteral:

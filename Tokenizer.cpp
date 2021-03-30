@@ -37,6 +37,21 @@ Token Tokenizer::Next() {
             return MakeToken(op);       \
         }
 
+    #define BracketsCheck(os, ot, cs, ct, stack)       \
+        case os: {                                     \
+            SkipChar(1);                               \
+            stack.push(os);                            \
+            return MakeToken(ot);                      \
+        }                                              \
+        case cs: {                                     \
+            SkipChar(1);                               \
+            if (stack.empty() || stack.top() != os) {  \
+                return MakeToken(Token::Type::kError); \
+            }                                          \
+            stack.pop();                               \
+            return MakeToken(ct);                      \
+        }
+
     switch (c)
     {
     case '\'':
@@ -226,6 +241,9 @@ Token Tokenizer::Next() {
     OpWithEq('%', Token::Type::kPercent, Token::Type::kPercentEq)
     OpWithEq('^', Token::Type::kCaret, Token::Type::kCaretEq)
     OpWithEq('!', Token::Type::kNot, Token::Type::kNe)
+    BracketsCheck('{', Token::Type::kOpenCurlyBr, '}', Token::Type::kCloseCurlyBr, curly_braces_stack)
+    BracketsCheck('[', Token::Type::kOpenSquareBr, ']', Token::Type::kCloseSquareBr, square_brackets_stack)
+    BracketsCheck('(', Token::Type::kOpenRoundBr, ')', Token::Type::kCloseRoundBr, parentheses_stack)
     default:
         SkipChar(1);
         return MakeToken(Token::Type::kError);
