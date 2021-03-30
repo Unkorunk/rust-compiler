@@ -128,10 +128,10 @@ public:
     };
 
     Token() : type_(Token::Type::kEmpty), position_(0, 0, 0, 0) {}
-    explicit Token(Type type, uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
+    Token(Type type, uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
         type_(type), position_(start_line, start_column, end_line, end_column) {}
-    explicit Token(TokenValue value, uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
-        type_(Type::kLiteral), value_(value), position_(start_line, start_column, end_line, end_column) {}
+    Token(TokenValue value, Type type, uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
+        type_(type), value_(value), position_(start_line, start_column, end_line, end_column) {}
 
     struct Position {
         uint32_t start_line, start_column, end_line, end_column;
@@ -161,7 +161,7 @@ public:
 
         oss << position_.ToString() << ' ' << TypeToString(type_);
 
-        if (type_ == Type::kLiteral) {
+        if (type_ == Type::kLiteral || type_ == Type::kIdentifier || type_ == Type::kError) {
             oss << " (" << value_.ToString() << ")";
         }
 

@@ -7,7 +7,7 @@ public:
     enum class Type {
         kU8, kU16, kU32, kU64, kU128, kUSize,
         kI8, kI16, kI32, kI64, kI128, kISize,
-        kF32, kF64, kEmpty
+        kF32, kF64, kText, kEmpty
     };
 
     TokenValue() : type_(Type::kEmpty) {}
@@ -26,6 +26,8 @@ public:
 
     TokenValue(float val) : _f32(val), type_(Type::kF32) {}
     TokenValue(double val) : _f64(val), type_(Type::kF64) {}
+
+    TokenValue(std::string val) : _text(val), type_(Type::kText) {}
 
     operator uint8_t() const {
         if (type_ != Type::kU8) throw std::exception();
@@ -70,6 +72,11 @@ public:
         return _f64;
     }
 
+    operator std::string() const {
+        if (type_ != Type::kText) throw std::exception();
+        return _text;
+    }
+
     std::string ToString() const {
         std::ostringstream oss;
 
@@ -111,6 +118,9 @@ public:
             case Type::kF64:
                 oss << ' ' << _f64;
                 break;
+            case Type::kText:
+                oss << ' ' << _text;
+                break;
             default:
                 throw std::exception();
             }
@@ -146,6 +156,8 @@ public:
             return "f32";
         case Type::kF64:
             return "f64";
+        case Type::kText:
+            return "text";
         case Type::kEmpty:
             return "empty";
         default:
@@ -169,4 +181,6 @@ private:
         float _f32;
         double _f64;
     };
+
+    std::string _text;
 };

@@ -16,9 +16,15 @@ Token Tokenizer::Next() {
     AssignStart();
 
     char_type c = PeekChar(0);
+    char_type c1 = PeekChar(1);
+    char_type c2 = PeekChar(2);
     if (IsDecDigit(c)) {
         return TokenizeNumber();
-    } else if (c != '_' && IsAlphanumeric(c)) {
+    } else if (c == '_' && IsAlphanumeric(PeekChar(1)) ||
+        c >= 'a' && c <= 'z' && c != 'r' && c != 'b' ||
+        c >= 'A' && c <= 'Z' ||
+        c == 'r' && (c1 != '"' && (c1 != '#' || c2 != '"' && c2 != '#')) || //! raw string literals
+        c == 'b' && c1 != '\'' && c1 != '"' && (c1 != 'r' || c2 != '"' && c2 != '#')) { //! byte and byte string literals
         Token token;
         if (TryTokenizeKeyword(&token)) {
             return token;
@@ -46,7 +52,7 @@ Token Tokenizer::Next() {
         case cs: {                                     \
             SkipChar(1);                               \
             if (stack.empty() || stack.top() != os) {  \
-                return MakeToken(Token::Type::kError); \
+                return MakeError("TODO"); \
             }                                          \
             stack.pop();                               \
             return MakeToken(ct);                      \
@@ -55,7 +61,7 @@ Token Tokenizer::Next() {
     switch (c)
     {
     case '\'':
-        if (CheckSeq(1, { 's', 't', 'a', 't', 'i', 'c' })) {
+        if (CheckSeq(1, { 's', 't', 'a', 't', 'i', 'c' })) { //! !static - keyword
             SkipChar(7);
             return MakeToken(Token::Type::kStaticLifetime);
         }
@@ -79,7 +85,7 @@ Token Tokenizer::Next() {
         }
 
         SkipChar(1);
-        return MakeToken(Token::Type::kError);
+        return MakeError("TODO");
     }
     case '-': {
         c = PeekChar(1);
@@ -250,7 +256,7 @@ Token Tokenizer::Next() {
     BracketsCheck('(', Token::Type::kOpenRoundBr, ')', Token::Type::kCloseRoundBr, parentheses_stack)
     default:
         SkipChar(1);
-        return MakeToken(Token::Type::kError);
+        return MakeError("TODO");
     }
 }
 
@@ -270,22 +276,26 @@ Tokenizer::char_type Tokenizer::PeekChar(std::streamoff offset) {
 
 void Tokenizer::SkipChar(std::streamsize offset) {
     while (offset != 0 && !IsEOF()) {
-        char_type c = stream_->get();
-
-        if (c == '\t') {
-            current_column_ += tab_size_;
-        } else if (c == '\n') {
-            current_line_++;
-            current_column_ = 1;
-        } else if (c == '\v') {
-            current_line_++;
-        } else {
-            current_column_++;
-        }
-        // TODO not implemented other whitespace
-
+        NextChar();
         offset--;
     }
+}
+
+Tokenizer::char_type Tokenizer::NextChar() {
+    char_type c = stream_->get();
+
+    if (c == '\t') {
+        current_column_ += tab_size_;
+    } else if (c == '\n') {
+        current_line_++;
+        current_column_ = 1;
+    } else if (c == '\v') {
+        current_line_++;
+    } else {
+        current_column_++;
+    }
+
+    return c;
 }
 
 bool Tokenizer::CheckSeq(std::streamoff offset, const std::initializer_list<char_type>& seq) {
@@ -396,14 +406,17 @@ bool Tokenizer::TryTokenizeKeyword(Token *token) {
 
     Token::Type best_match = Token::Type::kEmpty;
 
+    std::streamoff pos = 0;
+
     while (true) {
-        char_type c = PeekChar(0);
+        char_type c = PeekChar(pos++);
         keyword_buf += c;
 
         auto iter1 = keywords.lower_bound(keyword_buf);
         if (iter1 == keywords.end()) {
             if (best_match != Token::Type::kEmpty) {
                 *token = MakeToken(best_match);
+                SkipChar(pos);
                 return true;
             }
             return false;
@@ -418,18 +431,109 @@ bool Tokenizer::TryTokenizeKeyword(Token *token) {
         } else {
             if (best_match != Token::Type::kEmpty) {
                 *token = MakeToken(best_match);
+                SkipChar(pos);
                 return true;
             }
             return false;
         }
-
-        SkipChar(1);
     }
 }
 
 Token Tokenizer::TokenizeIdentifier() {
-    // TODO
-    return MakeToken(Token::Type::kIdentifier);
+    const std::map<std::string, Token::Type> keywords = {
+        std::make_pair("as", Token::Type::kAs),
+        std::make_pair("break", Token::Type::kBreak),
+        std::make_pair("const", Token::Type::kConst),
+        std::make_pair("continue", Token::Type::kContinue),
+        std::make_pair("crate", Token::Type::kCrate),
+        std::make_pair("else", Token::Type::kElse),
+        std::make_pair("enum", Token::Type::kEnum),
+        std::make_pair("extern", Token::Type::kExtern),
+        std::make_pair("false", Token::Type::kFalse),
+        std::make_pair("fn", Token::Type::kFn),
+        std::make_pair("for", Token::Type::kFor),
+        std::make_pair("if", Token::Type::kIf),
+        std::make_pair("impl", Token::Type::kImpl),
+        std::make_pair("in", Token::Type::kIn),
+        std::make_pair("let", Token::Type::kLet),
+        std::make_pair("loop", Token::Type::kLoop),
+        std::make_pair("match", Token::Type::kMatch),
+        std::make_pair("mod", Token::Type::kMod),
+        std::make_pair("move", Token::Type::kMove),
+        std::make_pair("mut", Token::Type::kMut),
+        std::make_pair("pub", Token::Type::kPub),
+        std::make_pair("ref", Token::Type::kRef),
+        std::make_pair("return", Token::Type::kReturn),
+        std::make_pair("self", Token::Type::kSelfValue),
+        std::make_pair("Self", Token::Type::kSelfType),
+        std::make_pair("static", Token::Type::kStatic),
+        std::make_pair("struct", Token::Type::kStruct),
+        std::make_pair("super", Token::Type::kSuper),
+        std::make_pair("trait", Token::Type::kTrait),
+        std::make_pair("true", Token::Type::kTrue),
+        std::make_pair("type", Token::Type::kType),
+        std::make_pair("unsafe", Token::Type::kUnsafe),
+        std::make_pair("use", Token::Type::kUse),
+        std::make_pair("where", Token::Type::kWhere),
+        std::make_pair("while", Token::Type::kWhile),
+        std::make_pair("async", Token::Type::kAsync),
+        std::make_pair("await", Token::Type::kAwait),
+        std::make_pair("dyn", Token::Type::kDyn),
+        std::make_pair("abstract", Token::Type::kAbstract),
+        std::make_pair("become", Token::Type::kBecome),
+        std::make_pair("box", Token::Type::kBox),
+        std::make_pair("do", Token::Type::kDo),
+        std::make_pair("final", Token::Type::kFinal),
+        std::make_pair("macro", Token::Type::kMacro),
+        std::make_pair("override", Token::Type::kOverride),
+        std::make_pair("priv", Token::Type::kPriv),
+        std::make_pair("typeof", Token::Type::kTypeof),
+        std::make_pair("unsized", Token::Type::kUnsized),
+        std::make_pair("virtual", Token::Type::kVirtual),
+        std::make_pair("yield", Token::Type::kYield),
+        std::make_pair("try", Token::Type::kTry)
+    };
+
+    bool is_raw_identifier = false;
+
+    char_type c = PeekChar(0);
+    if (c == 'r' && PeekChar(1) == '#') {
+        is_raw_identifier = true;
+        SkipChar(2);
+        c = PeekChar(0);
+    }
+
+    std::string identifier_buf;
+    identifier_buf += c;
+
+    if (c == '_') {
+        SkipChar(1);
+        c = PeekChar(0);
+        if (!IsAlphanumeric(c)) {
+            return MakeError("TODO");
+        }
+    } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+        SkipChar(1);
+        c = PeekChar(0);
+    } else {
+        return MakeError("TODO");
+    }
+
+    while (IsAlphanumeric(c)) {
+        identifier_buf += c;
+        SkipChar(1);
+        c = PeekChar(0);
+    }
+
+    if (is_raw_identifier) {
+        if (identifier_buf != "crate" && identifier_buf != "self" && identifier_buf != "super" && identifier_buf != "Self") {
+            return MakeIdentifier(identifier_buf);
+        }
+    } else if (!keywords.count(identifier_buf)) {
+        return MakeIdentifier(identifier_buf);
+    }
+
+    return MakeError("TODO");
 }
 
 Token Tokenizer::TokenizeCharacter() {
@@ -519,7 +623,7 @@ Token Tokenizer::TokenizeNumber() {
     } while (!IsEOF());
 
     if (!is_digit_found) {
-        return MakeToken(Token::Type::kError);
+        return MakeError("TODO");
     }
 
     if (system == 10 && !IsEOF()) {
@@ -570,35 +674,35 @@ Token Tokenizer::TokenizeNumber() {
             }
 
             if (!is_digit_after_exponent_found) {
-                return MakeToken(Token::Type::kError);
+                return MakeError("TODO");
             }
         }
 
         if (c == 'f') {
             if (is_dot_found && !is_digit_after_dot_found) {
-                return MakeToken(Token::Type::kError);
+                return MakeError("TODO");
             }
 
             if (CheckSeq(1, { '3', '2' })) {
                 SkipChar(3);
-                return MakeToken(TokenValue(std::stof(float_str)));
+                return MakeLiteral(TokenValue(std::stof(float_str)));
             } else if (CheckSeq(1, { '6', '4' })) {
                 SkipChar(3);
-                return MakeToken(TokenValue(std::stod(float_str)));
+                return MakeLiteral(TokenValue(std::stod(float_str)));
             }
         }
 
         if (is_dot_found || is_exponent_found) {
             if (is_exponent_found && is_dot_found && !is_digit_after_dot_found) {
-                return MakeToken(Token::Type::kError);
+                return MakeError("TODO");
             }
-            return MakeToken(TokenValue(std::stod(float_str)));
+            return MakeLiteral(TokenValue(std::stod(float_str)));
         }
     }
 
     TokenValue token_value;
     if (!TryParse<uint8_t, uint16_t, uint32_t, uint64_t>(digits, &token_value)) { // TODO check u128
-        return MakeToken(Token::Type::kError);
+        return MakeError("TODO");
     }
 
     #define TP(type)                               \
@@ -606,7 +710,7 @@ Token Tokenizer::TokenizeNumber() {
         if (TryParse<type>(digits, &result)) {     \
             token_value = result;                  \
         } else {                                   \
-            return MakeToken(Token::Type::kError); \
+            return MakeError("TODO"); \
         }
 
     #define TP_BRANCH(utype, itype) \
@@ -636,7 +740,7 @@ Token Tokenizer::TokenizeNumber() {
         }
     }
 
-    return MakeToken(token_value);
+    return MakeLiteral(token_value);
 }
 
 Token Tokenizer::TokenizeBoolean() {

@@ -28,6 +28,7 @@ private:
     bool IsEOF() const;
     char_type PeekChar(std::streamoff offset);
     void SkipChar(std::streamsize offset);
+    char_type NextChar();
     bool CheckSeq(std::streamoff offset, const std::initializer_list<char_type>& seq);
 
     static bool IsWhitespace(char_type it);
@@ -65,8 +66,17 @@ private:
     Token MakeToken(Token::Type type) {
         return Token(type, start_line_, start_column_, current_line_, current_column_);
     }
-    Token MakeToken(TokenValue value) {
-        return Token(value, start_line_, start_column_, current_line_, current_column_);
+    Token MakeToken(TokenValue value, Token::Type type) {
+        return Token(value, type, start_line_, start_column_, current_line_, current_column_);
+    }
+    Token MakeError(std::string error_text) {
+        return MakeToken(TokenValue(error_text), Token::Type::kError);
+    }
+    Token MakeLiteral(TokenValue value) {
+        return MakeToken(value, Token::Type::kLiteral);
+    }
+    Token MakeIdentifier(std::string name) {
+        return MakeToken(TokenValue(name), Token::Type::kIdentifier);
     }
 
     std::stack<char_type> curly_braces_stack, square_brackets_stack, parentheses_stack;
