@@ -5,6 +5,8 @@
 #include <fstream>
 #include <vector>
 #include <stack>
+#include <algorithm>
+#include <map>
 
 #include "Token.hpp"
 
