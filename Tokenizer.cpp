@@ -17,7 +17,7 @@ Token Tokenizer::Next() {
 
     char_type c = PeekChar(0);
     if (IsDecDigit(c)) {
-        return TokenizeInteger();
+        return TokenizeNumber();
     } else if (c != '_' && IsAlphanumeric(c)) {
         Token token;
         if (TryTokenizeKeyword(&token)) {
@@ -353,7 +353,7 @@ Token Tokenizer::TokenizeRawByteString() {
     return MakeToken(Token::Type::kLiteral);
 }
 
-Token Tokenizer::TokenizeInteger() {
+Token Tokenizer::TokenizeNumber() {
     bool is_digit_found = false;
 
     char_type c = PeekChar(0);
@@ -413,121 +413,121 @@ Token Tokenizer::TokenizeInteger() {
         return MakeToken(Token::Type::kError);
     }
 
-    TokenValue token_value;
-    uint8_t tmp1;
-    if (!TryParse<uint8_t>(digits, &tmp1)) {
-        uint16_t tmp2;
-        if (!TryParse<uint16_t>(digits, &tmp2)) {
-            uint32_t tmp3;
-            if (!TryParse<uint32_t>(digits, &tmp3)) {
-                uint64_t tmp4;
-                if (!TryParse<uint64_t>(digits, &tmp4)) {
-                    return MakeToken(Token::Type::kError); // TODO check u128
-                } else {
-                    token_value = tmp4;
-                }
-            } else {
-                token_value = tmp3;
+    if (system == 10 && !IsEOF()) {
+        bool is_dot_found = false;
+        bool is_digit_after_dot_found = false;
+        bool is_exponent_found = false;
+
+        std::string float_str;
+        for (int8_t digit : digits) {
+            float_str += '0' + digit;
+        }
+
+        if (c == '.') {
+            is_dot_found = true;
+            float_str += '.';
+
+            SkipChar(1);
+            c = PeekChar(0);
+            while (IsDecDigit(c)) {
+                is_digit_after_dot_found = true;
+                float_str += c;
+                SkipChar(1);
+                c = PeekChar(0);
             }
-        } else {
-            token_value = tmp2;
-        }
-    } else {
-        token_value = tmp1;
-    }
-
-    if (!IsEOF()) {
-        int is_unsigned = -1;
-
-        if (c == 'u') {
-            is_unsigned = 1;
-        } else if (c == 'i') {
-            is_unsigned = 0;
         }
 
-        if (is_unsigned != -1) {
-            if (CheckSeq(1, { '8' })) {
-                SkipChar(2);
-                if (is_unsigned) {
-                    uint8_t result;
-                    if (TryParse<uint8_t>(digits, &result)) {
-                        token_value = result;
-                    } else {
-                        return MakeToken(Token::Type::kError);
-                    }
-                } else {
-                    int8_t result;
-                    if (TryParse<int8_t>(digits, &result)) {
-                        token_value = result;
-                    } else {
-                        return MakeToken(Token::Type::kError);
-                    }
+        if (c == 'e' || c == 'E') {
+            bool is_digit_after_exponent_found = false;
+
+            is_exponent_found = true;
+            float_str += 'e';
+
+            SkipChar(1);
+            c = PeekChar(0);
+            if (c == '+' || c == '-') {
+                float_str += c;
+            }
+
+            SkipChar(1);
+            c = PeekChar(0);
+            while(IsDecDigit(c) || c == '_') {
+                if (c != '_') {
+                    is_digit_after_exponent_found = true;
+                    float_str += c;
                 }
-            } else if (CheckSeq(1, { '1', '6' })) {
+                SkipChar(1);
+                c = PeekChar(0);
+            }
+
+            if (!is_digit_after_exponent_found) {
+                return MakeToken(Token::Type::kError);
+            }
+        }
+
+        if (c == 'f') {
+            if (is_dot_found && !is_digit_after_dot_found) {
+                return MakeToken(Token::Type::kError);
+            }
+
+            if (CheckSeq(1, { '3', '2' })) {
                 SkipChar(3);
-                if (is_unsigned) {
-                    uint16_t result;
-                    if (TryParse<uint16_t>(digits, &result)) {
-                        token_value = result;
-                    } else {
-                        return MakeToken(Token::Type::kError);
-                    }
-                } else {
-                    int16_t result;
-                    if (TryParse<int16_t>(digits, &result)) {
-                        token_value = result;
-                    } else {
-                        return MakeToken(Token::Type::kError);
-                    }
-                }
-            } else if (CheckSeq(1, { '3', '2' })) {
-                SkipChar(3);
-                if (is_unsigned) {
-                    uint32_t result;
-                    if (TryParse<uint32_t>(digits, &result)) {
-                        token_value = result;
-                    } else {
-                        return MakeToken(Token::Type::kError);
-                    }
-                } else {
-                    int32_t result;
-                    if (TryParse<int32_t>(digits, &result)) {
-                        token_value = result;
-                    } else {
-                        return MakeToken(Token::Type::kError);
-                    }
-                }
+                return MakeToken(TokenValue(std::stof(float_str)));
             } else if (CheckSeq(1, { '6', '4' })) {
                 SkipChar(3);
-                if (is_unsigned) {
-                    uint64_t result;
-                    if (TryParse<uint64_t>(digits, &result)) {
-                        token_value = result;
-                    } else {
-                        return MakeToken(Token::Type::kError);
-                    }
-                } else {
-                    int64_t result;
-                    if (TryParse<int64_t>(digits, &result)) {
-                        token_value = result;
-                    } else {
-                        return MakeToken(Token::Type::kError);
-                    }
-                }
-            } else if (CheckSeq(1, { '1', '2', '8' })) {
-                throw std::exception(); // TODO not implemented
-            } else if (CheckSeq(1, { 's', 'i', 'z', 'e' })) {
-                throw std::exception(); // TODO not implemented
+                return MakeToken(TokenValue(std::stod(float_str)));
             }
+        }
+
+        if (is_dot_found || is_exponent_found) {
+            if (is_exponent_found && is_dot_found && !is_digit_after_dot_found) {
+                return MakeToken(Token::Type::kError);
+            }
+            return MakeToken(TokenValue(std::stod(float_str)));
+        }
+    }
+
+    TokenValue token_value;
+    if (!TryParse<uint8_t, uint16_t, uint32_t, uint64_t>(digits, &token_value)) { // TODO check u128
+        return MakeToken(Token::Type::kError);
+    }
+
+    #define TP(type)                               \
+        type result;                               \
+        if (TryParse<type>(digits, &result)) {     \
+            token_value = result;                  \
+        } else {                                   \
+            return MakeToken(Token::Type::kError); \
+        }
+
+    #define TP_BRANCH(utype, itype) \
+        if (c == 'u') {             \
+            TP(utype)               \
+        } else if (c == 'i') {      \
+            TP(itype)               \
+        }
+
+    if (!IsEOF()) {
+        if (CheckSeq(1, { '8' })) {
+            SkipChar(2);
+            TP_BRANCH(uint8_t, int8_t)
+        } else if (CheckSeq(1, { '1', '6' })) {
+            SkipChar(3);
+            TP_BRANCH(uint16_t, int16_t)
+        } else if (CheckSeq(1, { '3', '2' })) {
+            SkipChar(3);
+            TP_BRANCH(uint32_t, int32_t)
+        } else if (CheckSeq(1, { '6', '4' })) {
+            SkipChar(3);
+            TP_BRANCH(uint64_t, int64_t)
+        } else if (CheckSeq(1, { '1', '2', '8' })) {
+            throw std::exception(); // TODO not implemented
+        } else if (CheckSeq(1, { 's', 'i', 'z', 'e' })) {
+            throw std::exception(); // TODO not implemented
         }
     }
 
     return MakeToken(token_value);
-}
-
-Token Tokenizer::TokenizeFloat() {
-    // TODO
-    return MakeToken(Token::Type::kLiteral);
 }
 
 Token Tokenizer::TokenizeBoolean() {

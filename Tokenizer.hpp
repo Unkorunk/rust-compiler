@@ -3,7 +3,6 @@
 #include <sstream>
 #include <array>
 #include <fstream>
-#include <initializer_list>
 #include <vector>
 
 #include "Token.hpp"
@@ -19,6 +18,8 @@ public:
     Token Next();
 
 private:
+    using string_type = std::basic_string<char_type>;
+
     stream_type *stream_;
 
     bool IsEOF() const;
@@ -48,8 +49,7 @@ private:
     Token TokenizeByteString();
     Token TokenizeRawByteString();
     // number literals
-    Token TokenizeInteger();
-    Token TokenizeFloat();
+    Token TokenizeNumber();
     // boolean literals
     Token TokenizeBoolean();
     // TODO lifetimes and loop labels
@@ -80,6 +80,21 @@ private:
             *result = tmp + digit;
         }
         return true;
+    }
+
+    template <class Type, class... Types>
+    static bool TryParse(const std::vector<int8_t>& digits, TokenValue *result) {
+        Type tmp1;
+        if (!TryParse<Type>(digits, &tmp1)) {
+            return TryParse<Types...>(digits, result);
+        }
+        *result = tmp1;
+        return true;
+    }
+
+    template <>
+    static bool TryParse(const std::vector<int8_t>& digits, TokenValue *result) {
+        return false;
     }
 
     uint32_t current_line_ = 1, current_column_ = 1;
