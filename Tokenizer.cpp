@@ -25,17 +25,7 @@ Token Tokenizer::Next() {
         c >= 'A' && c <= 'Z' ||
         c == 'r' && (c1 != '"' && (c1 != '#' || c2 != '"' && c2 != '#')) || //! raw string literals
         c == 'b' && c1 != '\'' && c1 != '"' && (c1 != 'r' || c2 != '"' && c2 != '#')) { //! byte and byte string literals
-        Token token;
-        if (TryTokenizeKeyword(&token)) {
-            if (token.GetType() == Token::Type::kTrue) {
-                return MakeLiteral(TokenValue(true));
-            } else if (token.GetType() == Token::Type::kFalse) {
-                return MakeLiteral(TokenValue(false));
-            }
-
-            return token;
-        }
-        return TokenizeIdentifier();
+        return TokenizeIdentifierOrKeyword();
     }
 
     #define OpWithEq(symbol, op, opEq)  \
@@ -58,7 +48,7 @@ Token Tokenizer::Next() {
         case cs: {                                     \
             SkipChar(1);                               \
             if (stack.empty() || stack.top() != os) {  \
-                return MakeError("TODO"); \
+                return MakeError("TODO");              \
             }                                          \
             stack.pop();                               \
             return MakeToken(ct);                      \
@@ -228,6 +218,21 @@ Token Tokenizer::Next() {
         SkipChar(1);
         return MakeToken(Token::Type::kColon);
     }
+    case '/': {
+        c = PeekChar(1);
+        if (c == '=') {
+            SkipChar(2);
+            return MakeToken(Token::Type::kSlashEq);
+        } else if (c == '/') {
+            SkipLineComment();
+            return Next();
+        } else if (c == '*') {
+            SkipMultilineComment();
+            return Next();
+        }
+        SkipChar(1);
+        return MakeToken(Token::Type::kSlash);
+    }
     SingleCheck('@', Token::Type::kAt)
     SingleCheck('_', Token::Type::kUnderscore)
     SingleCheck(',', Token::Type::kComma)
@@ -237,7 +242,6 @@ Token Tokenizer::Next() {
     SingleCheck('?', Token::Type::kQuestion)
     OpWithEq('+', Token::Type::kPlus, Token::Type::kPlusEq)
     OpWithEq('*', Token::Type::kStar, Token::Type::kStarEq)
-    OpWithEq('/', Token::Type::kSlash, Token::Type::kSlashEq)
     OpWithEq('%', Token::Type::kPercent, Token::Type::kPercentEq)
     OpWithEq('^', Token::Type::kCaret, Token::Type::kCaretEq)
     OpWithEq('!', Token::Type::kNot, Token::Type::kNe)
@@ -335,35 +339,40 @@ void Tokenizer::SkipWhitespace() {
     }
 }
 
-bool Tokenizer::TryTokenizeKeyword(Token *token) {
-    std::string keyword_buf;
-
-    Token::Type best_match = Token::Type::kEmpty;
-
-    std::streamoff pos = 0;
-
-    while (true) {
-        char_type c = PeekChar(pos++);
-        keyword_buf += c;
-
-        if (!KeywordManager::GetInstance().MaybeKeyword(keyword_buf)) {
-            if (best_match != Token::Type::kEmpty) {
-                *token = MakeToken(best_match);
-                SkipChar(pos - 1);
-                return true;
-            }
-
-            return false;
-        }
-
-        const Keyword* keyword = KeywordManager::GetInstance().Find(keyword_buf);
-        if (keyword != nullptr) {
-            best_match = keyword->GetTokenType();
-        }
+void Tokenizer::SkipLineComment() {
+    SkipChar(2);
+    while(!IsEOF() && PeekChar(0) != '\n') {
+        SkipChar(1);
     }
 }
 
-Token Tokenizer::TokenizeIdentifier() {
+void Tokenizer::SkipMultilineComment() {
+    SkipChar(2);
+
+    bool is_start_found = false;
+
+    std::stack<bool> comment_stack;
+    comment_stack.push(1);
+    while (!IsEOF() && !comment_stack.empty()) {
+        char_type c = PeekChar(0);
+        if (c == '/' && PeekChar(1) == '*') {
+            comment_stack.push(1);
+        } else if (c == '*') {
+            is_start_found = true;
+        } else if (c == '/' && is_start_found) {
+            if (comment_stack.empty() || comment_stack.top() != 1) {
+                SkipChar(1);
+                throw std::exception(); // TODO PushError("blabla")
+            }
+            comment_stack.pop();
+        } else {
+            is_start_found = false;
+        }
+        SkipChar(1);
+    }
+}
+
+Token Tokenizer::TokenizeIdentifierOrKeyword() {
     bool is_raw_identifier = false;
 
     char_type c = PeekChar(0);
@@ -401,6 +410,14 @@ Token Tokenizer::TokenizeIdentifier() {
         }
     } else if (!KeywordManager::GetInstance().IsStrictOrReservedKeyword(identifier_buf)) {
         return MakeIdentifier(identifier_buf);
+    } else if (const Keyword* keyword = KeywordManager::GetInstance().Find(identifier_buf)) {
+        if (keyword->GetTokenType() == Token::Type::kTrue) {
+            return MakeLiteral(true);
+        } else if (keyword->GetTokenType() == Token::Type::kFalse) {
+            return MakeLiteral(false);
+        }
+
+        return MakeToken(keyword->GetTokenType());
     }
 
     return MakeError("TODO");

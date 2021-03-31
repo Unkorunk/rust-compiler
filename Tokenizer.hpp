@@ -42,9 +42,10 @@ private:
     static bool IsHexDigit(char_type it);
 
     void SkipWhitespace();
+    void SkipLineComment();
+    void SkipMultilineComment();
 
-    bool TryTokenizeKeyword(Token *token);
-    Token TokenizeIdentifier();
+    Token TokenizeIdentifierOrKeyword();
     // character and string literals
     Token TokenizeCharacter();
     Token TokenizeString();
