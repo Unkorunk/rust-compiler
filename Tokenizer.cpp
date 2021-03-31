@@ -64,6 +64,11 @@ Token Tokenizer::Next() {
             return MakeToken(ct);                      \
         }
 
+    #define SingleCheck(symbol, token) \
+        case symbol:                   \
+            SkipChar(1);               \
+            return MakeToken(token);   \
+
     switch (c)
     {
     case '\'':
@@ -191,14 +196,6 @@ Token Tokenizer::Next() {
         SkipChar(1);
         return MakeToken(Token::Type::kEq);
     }
-    case '@': {
-        SkipChar(1);
-        return MakeToken(Token::Type::kAt);
-    }
-    case '_': {
-        SkipChar(1);
-        return MakeToken(Token::Type::kUnderscore);
-    }
     case '.': {
         c = PeekChar(1);
 
@@ -220,14 +217,6 @@ Token Tokenizer::Next() {
         SkipChar(1);
         return MakeToken(Token::Type::kDot);
     }
-    case ',': {
-        SkipChar(1);
-        return MakeToken(Token::Type::kComma);
-    }
-    case ';': {
-        SkipChar(1);
-        return MakeToken(Token::Type::kSemi);
-    }
     case ':': {
         c = PeekChar(1);
 
@@ -239,18 +228,13 @@ Token Tokenizer::Next() {
         SkipChar(1);
         return MakeToken(Token::Type::kColon);
     }
-    case '#': {
-        SkipChar(1);
-        return MakeToken(Token::Type::kPound);
-    }
-    case '$': {
-        SkipChar(1);
-        return MakeToken(Token::Type::kDollar);
-    }
-    case '?': {
-        SkipChar(1);
-        return MakeToken(Token::Type::kQuestion);
-    }
+    SingleCheck('@', Token::Type::kAt)
+    SingleCheck('_', Token::Type::kUnderscore)
+    SingleCheck(',', Token::Type::kComma)
+    SingleCheck(';', Token::Type::kSemi)
+    SingleCheck('#', Token::Type::kPound)
+    SingleCheck('$', Token::Type::kDollar)
+    SingleCheck('?', Token::Type::kQuestion)
     OpWithEq('+', Token::Type::kPlus, Token::Type::kPlusEq)
     OpWithEq('*', Token::Type::kStar, Token::Type::kStarEq)
     OpWithEq('/', Token::Type::kSlash, Token::Type::kSlashEq)
@@ -352,62 +336,6 @@ void Tokenizer::SkipWhitespace() {
 }
 
 bool Tokenizer::TryTokenizeKeyword(Token *token) {
-    const std::map<std::string, Token::Type> keywords = {
-        std::make_pair("as", Token::Type::kAs),
-        std::make_pair("break", Token::Type::kBreak),
-        std::make_pair("const", Token::Type::kConst),
-        std::make_pair("continue", Token::Type::kContinue),
-        std::make_pair("crate", Token::Type::kCrate),
-        std::make_pair("else", Token::Type::kElse),
-        std::make_pair("enum", Token::Type::kEnum),
-        std::make_pair("extern", Token::Type::kExtern),
-        std::make_pair("false", Token::Type::kFalse),
-        std::make_pair("fn", Token::Type::kFn),
-        std::make_pair("for", Token::Type::kFor),
-        std::make_pair("if", Token::Type::kIf),
-        std::make_pair("impl", Token::Type::kImpl),
-        std::make_pair("in", Token::Type::kIn),
-        std::make_pair("let", Token::Type::kLet),
-        std::make_pair("loop", Token::Type::kLoop),
-        std::make_pair("match", Token::Type::kMatch),
-        std::make_pair("mod", Token::Type::kMod),
-        std::make_pair("move", Token::Type::kMove),
-        std::make_pair("mut", Token::Type::kMut),
-        std::make_pair("pub", Token::Type::kPub),
-        std::make_pair("ref", Token::Type::kRef),
-        std::make_pair("return", Token::Type::kReturn),
-        std::make_pair("self", Token::Type::kSelfValue),
-        std::make_pair("Self", Token::Type::kSelfType),
-        std::make_pair("static", Token::Type::kStatic),
-        std::make_pair("struct", Token::Type::kStruct),
-        std::make_pair("super", Token::Type::kSuper),
-        std::make_pair("trait", Token::Type::kTrait),
-        std::make_pair("true", Token::Type::kTrue),
-        std::make_pair("type", Token::Type::kType),
-        std::make_pair("unsafe", Token::Type::kUnsafe),
-        std::make_pair("use", Token::Type::kUse),
-        std::make_pair("where", Token::Type::kWhere),
-        std::make_pair("while", Token::Type::kWhile),
-        std::make_pair("async", Token::Type::kAsync),
-        std::make_pair("await", Token::Type::kAwait),
-        std::make_pair("dyn", Token::Type::kDyn),
-        std::make_pair("abstract", Token::Type::kAbstract),
-        std::make_pair("become", Token::Type::kBecome),
-        std::make_pair("box", Token::Type::kBox),
-        std::make_pair("do", Token::Type::kDo),
-        std::make_pair("final", Token::Type::kFinal),
-        std::make_pair("macro", Token::Type::kMacro),
-        std::make_pair("override", Token::Type::kOverride),
-        std::make_pair("priv", Token::Type::kPriv),
-        std::make_pair("typeof", Token::Type::kTypeof),
-        std::make_pair("unsized", Token::Type::kUnsized),
-        std::make_pair("virtual", Token::Type::kVirtual),
-        std::make_pair("yield", Token::Type::kYield),
-        std::make_pair("try", Token::Type::kTry),
-        std::make_pair("union", Token::Type::kUnion),
-        // std::make_pair("'static", Token::Type::kStaticLifetime)
-    };
-
     std::string keyword_buf;
 
     Token::Type best_match = Token::Type::kEmpty;
@@ -418,88 +346,24 @@ bool Tokenizer::TryTokenizeKeyword(Token *token) {
         char_type c = PeekChar(pos++);
         keyword_buf += c;
 
-        auto iter1 = keywords.lower_bound(keyword_buf);
-        if (iter1 == keywords.end()) {
+        if (!KeywordManager::GetInstance().MaybeKeyword(keyword_buf)) {
             if (best_match != Token::Type::kEmpty) {
                 *token = MakeToken(best_match);
                 SkipChar(pos - 1);
                 return true;
             }
+
             return false;
         }
 
-        auto mismatch_result = std::mismatch(keyword_buf.begin(), keyword_buf.end(), iter1->first.begin(), iter1->first.end());
-
-        if (mismatch_result.first == keyword_buf.end()) {
-            if (keyword_buf.size() == iter1->first.size()) {
-                best_match = iter1->second;
-            }
-        } else {
-            if (best_match != Token::Type::kEmpty) {
-                *token = MakeToken(best_match);
-                SkipChar(pos - 1);
-                return true;
-            }
-            return false;
+        const Keyword* keyword = KeywordManager::GetInstance().Find(keyword_buf);
+        if (keyword != nullptr) {
+            best_match = keyword->GetTokenType();
         }
     }
 }
 
 Token Tokenizer::TokenizeIdentifier() {
-    const std::map<std::string, Token::Type> keywords = {
-        std::make_pair("as", Token::Type::kAs),
-        std::make_pair("break", Token::Type::kBreak),
-        std::make_pair("const", Token::Type::kConst),
-        std::make_pair("continue", Token::Type::kContinue),
-        std::make_pair("crate", Token::Type::kCrate),
-        std::make_pair("else", Token::Type::kElse),
-        std::make_pair("enum", Token::Type::kEnum),
-        std::make_pair("extern", Token::Type::kExtern),
-        std::make_pair("false", Token::Type::kFalse),
-        std::make_pair("fn", Token::Type::kFn),
-        std::make_pair("for", Token::Type::kFor),
-        std::make_pair("if", Token::Type::kIf),
-        std::make_pair("impl", Token::Type::kImpl),
-        std::make_pair("in", Token::Type::kIn),
-        std::make_pair("let", Token::Type::kLet),
-        std::make_pair("loop", Token::Type::kLoop),
-        std::make_pair("match", Token::Type::kMatch),
-        std::make_pair("mod", Token::Type::kMod),
-        std::make_pair("move", Token::Type::kMove),
-        std::make_pair("mut", Token::Type::kMut),
-        std::make_pair("pub", Token::Type::kPub),
-        std::make_pair("ref", Token::Type::kRef),
-        std::make_pair("return", Token::Type::kReturn),
-        std::make_pair("self", Token::Type::kSelfValue),
-        std::make_pair("Self", Token::Type::kSelfType),
-        std::make_pair("static", Token::Type::kStatic),
-        std::make_pair("struct", Token::Type::kStruct),
-        std::make_pair("super", Token::Type::kSuper),
-        std::make_pair("trait", Token::Type::kTrait),
-        std::make_pair("true", Token::Type::kTrue),
-        std::make_pair("type", Token::Type::kType),
-        std::make_pair("unsafe", Token::Type::kUnsafe),
-        std::make_pair("use", Token::Type::kUse),
-        std::make_pair("where", Token::Type::kWhere),
-        std::make_pair("while", Token::Type::kWhile),
-        std::make_pair("async", Token::Type::kAsync),
-        std::make_pair("await", Token::Type::kAwait),
-        std::make_pair("dyn", Token::Type::kDyn),
-        std::make_pair("abstract", Token::Type::kAbstract),
-        std::make_pair("become", Token::Type::kBecome),
-        std::make_pair("box", Token::Type::kBox),
-        std::make_pair("do", Token::Type::kDo),
-        std::make_pair("final", Token::Type::kFinal),
-        std::make_pair("macro", Token::Type::kMacro),
-        std::make_pair("override", Token::Type::kOverride),
-        std::make_pair("priv", Token::Type::kPriv),
-        std::make_pair("typeof", Token::Type::kTypeof),
-        std::make_pair("unsized", Token::Type::kUnsized),
-        std::make_pair("virtual", Token::Type::kVirtual),
-        std::make_pair("yield", Token::Type::kYield),
-        std::make_pair("try", Token::Type::kTry)
-    };
-
     bool is_raw_identifier = false;
 
     char_type c = PeekChar(0);
@@ -535,7 +399,7 @@ Token Tokenizer::TokenizeIdentifier() {
         if (identifier_buf != "crate" && identifier_buf != "self" && identifier_buf != "super" && identifier_buf != "Self") {
             return MakeIdentifier(identifier_buf);
         }
-    } else if (!keywords.count(identifier_buf)) {
+    } else if (!KeywordManager::GetInstance().IsStrictOrReservedKeyword(identifier_buf)) {
         return MakeIdentifier(identifier_buf);
     }
 

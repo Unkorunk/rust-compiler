@@ -9,6 +9,7 @@
 #include <map>
 
 #include "Token.hpp"
+#include "KeywordManager.hpp"
 
 class Tokenizer {
 public:
