@@ -1,6 +1,6 @@
 #include "Tokenizer.hpp"
 
-Tokenizer::Tokenizer(stream_type *stream) : stream_(stream) {}
+Tokenizer::Tokenizer(std::ifstream *stream) : stream_(stream) {}
 
 bool Tokenizer::HasNext() const {
     return !stream_.IsEOF();
@@ -15,9 +15,9 @@ Token Tokenizer::Next() {
 
     stream_.AssignStart();
 
-    char_type c = stream_.PeekChar(0);
-    char_type c1 = stream_.PeekChar(1);
-    char_type c2 = stream_.PeekChar(2);
+    char c = stream_.PeekChar(0);
+    char c1 = stream_.PeekChar(1);
+    char c2 = stream_.PeekChar(2);
     if (TokenizerHelper::IsDecDigit(c)) {
         return TokenizeNumber();
     } else if (c == '_' && TokenizerHelper::IsAlphanumeric(stream_.PeekChar(1)) ||
@@ -56,7 +56,7 @@ void Tokenizer::SkipMultilineComment() {
     std::stack<bool> comment_stack;
     comment_stack.push(1);
     while (!stream_.IsEOF() && !comment_stack.empty()) {
-        char_type c = stream_.PeekChar(0);
+        char c = stream_.PeekChar(0);
         if (c == '/' && stream_.PeekChar(1) == '*') {
             comment_stack.push(1);
         } else if (c == '*') {
@@ -77,7 +77,7 @@ void Tokenizer::SkipMultilineComment() {
 Token Tokenizer::TokenizeIdentifierOrKeyword() {
     bool is_raw_identifier = false;
 
-    char_type c = stream_.PeekChar(0);
+    char c = stream_.PeekChar(0);
     if (c == 'r' && stream_.PeekChar(1) == '#') {
         is_raw_identifier = true;
         stream_.SkipChar(2);
@@ -126,8 +126,63 @@ Token Tokenizer::TokenizeIdentifierOrKeyword() {
 }
 
 Token Tokenizer::TokenizeCharacter() {
-    // TODO
-    return MakeToken(Token::Type::kLiteral);
+    char c = stream_.PeekChar(0);
+    if (c == '\'' || c == '\n' || c == '\r' || c == '\t') {
+        stream_.SkipChar(1);
+        return MakeError("TODO");
+    }
+
+    Token token;
+
+    if (c == '\\') {
+        c = stream_.PeekChar(1);
+        stream_.SkipChar(2);
+
+        if (c == '\'') {
+            token = MakeLiteral('\'');
+        } else if (c == '"') {
+            token = MakeLiteral('\"');
+        } else if (c == 'x') {
+            c = stream_.PeekChar(0);
+            if (TokenizerHelper::IsOctDigit(c)) {
+                char symbol = c - '0';
+                c = stream_.PeekChar(1);
+                stream_.SkipChar(2);
+                if (TokenizerHelper::IsHexDigit(c)) {
+                    symbol = (symbol * 16) + TokenizerHelper::HexToInt(c);
+                    token = MakeLiteral(symbol);
+                } else {
+                    token = MakeError("TODO");
+                }
+            } else {
+                stream_.SkipChar(1);
+                token = MakeError("TODO");
+            }
+        } else if (c == 'n') {
+            token = MakeLiteral('\n');
+        } else if (c == 'r') {
+            token = MakeLiteral('\r');
+        } else if (c == 't') {
+            token = MakeLiteral('\t');
+        } else if (c == '\\') {
+            token = MakeLiteral('\\');
+        } else if (c == '0') {
+            token = MakeLiteral('\0');
+        } else {
+            token = MakeError("TODO");
+        }
+    } else {
+        stream_.SkipChar(1);
+        token = MakeLiteral(c);
+    }
+
+    if (stream_.PeekChar(0) != '\'') {
+        return MakeError("TODO");
+    }
+
+    stream_.SkipChar(1);
+
+    return token;
 }
 
 Token Tokenizer::TokenizeString() {
@@ -158,7 +213,7 @@ Token Tokenizer::TokenizeRawByteString() {
 Token Tokenizer::TokenizeNumber() {
     bool is_digit_found = false;
 
-    char_type c = stream_.PeekChar(0);
+    char c = stream_.PeekChar(0);
     if (!TokenizerHelper::IsDecDigit(c)) {
         throw std::exception();
     }
@@ -299,7 +354,7 @@ Token Tokenizer::TokenizeNumber() {
         if (TryParse<type>(digits, &result)) {     \
             token_value = result;                  \
         } else {                                   \
-            return MakeError("TODO"); \
+            return MakeError("TODO");              \
         }
 
     #define TP_BRANCH(utype, itype) \

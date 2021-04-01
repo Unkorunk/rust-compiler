@@ -4,23 +4,20 @@
 
 class InputStream {
 public:
-    using char_type = char32_t;
-    using stream_type = std::basic_ifstream<char_type, std::char_traits<char_type>>;
-
-    explicit InputStream(stream_type *stream) : stream_(stream) {}
+    explicit InputStream(std::ifstream *stream) : stream_(stream) {}
 
     bool IsEOF() const {
         return stream_->eof();
     }
 
-    char_type PeekChar(std::streamoff offset) {
+    char PeekChar(std::streamoff offset) {
         std::streampos old_pos = stream_->tellg();
         
         stream_->seekg(offset, std::ios_base::cur);
-        char_type c = stream_->peek();
+        char c = stream_->peek();
         stream_->seekg(old_pos);
 
-        return (c == std::char_traits<char_type>::eof() ? ' ' : c);
+        return (c == std::char_traits<char>::eof() ? ' ' : c);
     }
 
     void SkipChar(std::streamsize offset) {
@@ -30,8 +27,8 @@ public:
         }
     }
 
-    char_type NextChar() {
-        char_type c = stream_->get();
+    char NextChar() {
+        char c = stream_->get();
 
         if (c == '\t') {
             current_column_ += tab_size_;
@@ -47,8 +44,8 @@ public:
         return c;
     }
 
-    bool CheckSeq(std::streamoff offset, const std::initializer_list<char_type>& seq) {
-        for (char_type it : seq) {
+    bool CheckSeq(std::streamoff offset, const std::initializer_list<char>& seq) {
+        for (char it : seq) {
             if (IsEOF() || PeekChar(offset++) != it) {
                 return false;
             }
@@ -79,7 +76,7 @@ public:
     }
 
 private:
-    stream_type *stream_;
+    std::ifstream *stream_;
 
     uint32_t current_line_ = 1, current_column_ = 1;
     uint32_t start_line_ = 1, start_column_ = 1;

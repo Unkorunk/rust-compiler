@@ -9,8 +9,6 @@
 
 class Punctuation {
 public:
-    using char_type = char32_t;
-    using stream_type = std::basic_ifstream<char_type, std::char_traits<char_type>>;
     using selector_type = std::function<Token()>;
 
     Punctuation(char start_symbol, Token::Type type)
@@ -51,7 +49,7 @@ private:
     std::vector<Punctuation> children_;
 
     void TryTokenize(InputStream *stream, const Punctuation **punctuation, std::streamoff offset, std::streamoff *max_offset) const {
-        char_type c = stream->PeekChar(offset);
+        char c = stream->PeekChar(offset);
         if (start_symbol_ != c) return;
 
         bool is_child = false;

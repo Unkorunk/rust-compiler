@@ -16,17 +16,12 @@
 
 class Tokenizer {
 public:
-    using char_type = char32_t;
-    using stream_type = std::basic_ifstream<char_type, std::char_traits<char_type>>;
-
-    explicit Tokenizer(stream_type *stream);
+    explicit Tokenizer(std::ifstream *stream);
 
     bool HasNext() const;
     Token Next();
 
 private:
-    using string_type = std::basic_string<char_type>;
-
     InputStream stream_;
 
     void SkipWhitespace();
