@@ -10,6 +10,9 @@
 
 #include "Token.hpp"
 #include "KeywordManager.hpp"
+#include "Punctuation.hpp"
+#include "InputStream.hpp"
+#include "TokenizerHelper.hpp"
 
 class Tokenizer {
 public:
@@ -24,22 +27,7 @@ public:
 private:
     using string_type = std::basic_string<char_type>;
 
-    stream_type *stream_;
-
-    bool IsEOF() const;
-    char_type PeekChar(std::streamoff offset);
-    void SkipChar(std::streamsize offset);
-    char_type NextChar();
-    bool CheckSeq(std::streamoff offset, const std::initializer_list<char_type>& seq);
-
-    static bool IsWhitespace(char_type it);
-
-    static bool IsAlphanumeric(char_type it);
-
-    static bool IsBinDigit(char_type it);
-    static bool IsOctDigit(char_type it);
-    static bool IsDecDigit(char_type it);
-    static bool IsHexDigit(char_type it);
+    InputStream stream_;
 
     void SkipWhitespace();
     void SkipLineComment();
@@ -58,16 +46,11 @@ private:
     Token TokenizeNumber();
     // TODO lifetimes and loop labels
 
-    uint32_t start_line_ = 1, start_column_ = 1;
-    void AssignStart() {
-        start_line_ = current_line_;
-        start_column_ = current_column_;
-    }
     Token MakeToken(Token::Type type) {
-        return Token(type, start_line_, start_column_, current_line_, current_column_);
+        return Token(type, stream_.GetStartLine(), stream_.GetStartColumn(), stream_.GetCurrentLine(), stream_.GetCurrentColumn());
     }
     Token MakeToken(TokenValue value, Token::Type type) {
-        return Token(value, type, start_line_, start_column_, current_line_, current_column_);
+        return Token(value, type, stream_.GetStartLine(), stream_.GetStartColumn(), stream_.GetCurrentLine(), stream_.GetCurrentColumn());
     }
     Token MakeError(std::string error_text) {
         return MakeToken(TokenValue(error_text), Token::Type::kError);
@@ -79,7 +62,7 @@ private:
         return MakeToken(TokenValue(name), Token::Type::kIdentifier);
     }
 
-    std::stack<char_type> curly_braces_stack, square_brackets_stack, parentheses_stack;
+    int curly_balance = 0, square_balance = 0, round_balance = 0;
 
     template <typename T>
     static bool TryParse(const std::vector<int8_t>& digits, T *result) {
@@ -112,6 +95,86 @@ private:
         return false;
     }
 
-    uint32_t current_line_ = 1, current_column_ = 1;
-    uint32_t tab_size_ = 4; // TODO make const
+    const std::vector<Punctuation> punctuation_ = {
+        {'\'', std::bind(&Tokenizer::TokenizeCharacter, this)},
+        {'"', std::bind(&Tokenizer::TokenizeString, this)},
+        {'r', std::bind(&Tokenizer::TokenizeRawString, this)},
+        {'b', std::bind(&Tokenizer::MakeError, this, "TODO"), {
+            {'\'', std::bind(&Tokenizer::TokenizeByte, this)},
+            {'"', std::bind(&Tokenizer::TokenizeByteString, this)},
+            {'r', std::bind(&Tokenizer::TokenizeRawByteString, this)}
+        }},
+        {'-', Token::Type::kMinus, {
+            {'=', Token::Type::kMinusEq},
+            {'>', Token::Type::kRArrow}
+        }},
+        {'&', Token::Type::kAnd, {
+            {'=', Token::Type::kAndEq},
+            {'&', Token::Type::kAndAnd}
+        }},
+        {'|', Token::Type::kOr, {
+            {'=', Token::Type::kOrEq},
+            {'|', Token::Type::kOrOr}
+        }},
+        {'<', Token::Type::kLt, {
+            {'<', Token::Type::kShl, {
+                {'=', Token::Type::kShlEq}
+            }},
+            {'=', Token::Type::kLe}
+        }},
+        {'>', Token::Type::kGt, {
+            {'>', Token::Type::kShr, {
+                {'=', Token::Type::kShrEq}
+            }},
+            {'=', Token::Type::kGe}
+        }},
+        {'=', Token::Type::kEq, {
+            {'=', Token::Type::kEqEq},
+            {'>', Token::Type::kFatArrow}
+        }},
+        {'.', Token::Type::kDot, {
+            {'.', Token::Type::kDotDot, {
+                {'.', Token::Type::kDotDotDot},
+                {'=', Token::Type::kDotDotEq}
+            }}
+        }},
+        {':', Token::Type::kColon, {
+            {':', Token::Type::kPathSep}
+        }},
+        {'/', Token::Type::kSlash, {
+            {'=', Token::Type::kSlashEq},
+            {'/', [this]() { SkipLineComment(); return Next(); }},
+            {'*', [this]() { SkipMultilineComment(); return Next(); }}
+        }},
+        {'@', Token::Type::kAt},
+        {'_', Token::Type::kUnderscore},
+        {',', Token::Type::kComma},
+        {';', Token::Type::kSemi},
+        {'#', Token::Type::kPound},
+        {'$', Token::Type::kDollar},
+        {'?', Token::Type::kQuestion},
+        {'+', Token::Type::kPlus, { {'=', Token::Type::kPlusEq} }},
+        {'*', Token::Type::kStar, { {'=', Token::Type::kStarEq} }},
+        {'%', Token::Type::kPercent, { {'=', Token::Type::kPercentEq} }},
+        {'^', Token::Type::kCaret, { {'=', Token::Type::kCaretEq} }},
+        {'!', Token::Type::kNot, { {'=', Token::Type::kNe} }},
+        {'{', std::bind(&Tokenizer::TokenizeOpenBr, this, Token::Type::kOpenCurlyBr, &curly_balance)},
+        {'}', std::bind(&Tokenizer::TokenizeCloseBr, this, Token::Type::kCloseCurlyBr, &curly_balance)},
+        {'[', std::bind(&Tokenizer::TokenizeOpenBr, this, Token::Type::kOpenSquareBr, &square_balance)},
+        {']', std::bind(&Tokenizer::TokenizeCloseBr, this, Token::Type::kCloseSquareBr, &square_balance)},
+        {'(', std::bind(&Tokenizer::TokenizeOpenBr, this, Token::Type::kOpenRoundBr, &round_balance)},
+        {')', std::bind(&Tokenizer::TokenizeCloseBr, this, Token::Type::kCloseRoundBr, &round_balance)}
+    };
+
+    Token TokenizeOpenBr(Token::Type type, int *balance) {
+        (*balance)++;
+        return MakeToken(type);
+    }
+
+    Token TokenizeCloseBr(Token::Type type, int *balance) {
+        if (*balance == 0) {
+            return MakeError("TODO");
+        }
+        return MakeToken(type);
+    }
 };

@@ -11,4 +11,6 @@ add_executable(rust-compiler main.cpp
     Tokenizer.hpp Tokenizer.cpp
     Token.hpp
     Keyword.hpp KeywordManager.hpp
+    Punctuation.hpp
+    InputStream.hpp TokenizerHelper.hpp
 )
