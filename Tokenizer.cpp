@@ -53,20 +53,19 @@ void Tokenizer::SkipLineComment() {
 void Tokenizer::SkipMultilineComment() {
     bool is_start_found = false;
 
-    std::stack<bool> comment_stack;
-    comment_stack.push(1);
-    while (!stream_.IsEOF() && !comment_stack.empty()) {
+    int comment_balance = 1;
+    while (!stream_.IsEOF() && comment_balance != 0) {
         char c = stream_.PeekChar(0);
         if (c == '/' && stream_.PeekChar(1) == '*') {
-            comment_stack.push(1);
+            comment_balance++;
         } else if (c == '*') {
             is_start_found = true;
         } else if (c == '/' && is_start_found) {
-            if (comment_stack.empty() || comment_stack.top() != 1) {
+            if (comment_balance == 0) {
                 stream_.SkipChar(1);
                 throw std::exception(); // TODO PushError("blabla")
             }
-            comment_stack.pop();
+            comment_balance--;
         } else {
             is_start_found = false;
         }
@@ -135,46 +134,14 @@ Token Tokenizer::TokenizeCharacter() {
     Token token;
 
     if (c == '\\') {
-        c = stream_.PeekChar(1);
-        stream_.SkipChar(2);
-
-        if (c == '\'') {
-            token = MakeLiteral('\'');
-        } else if (c == '"') {
-            token = MakeLiteral('\"');
-        } else if (c == 'x') {
-            c = stream_.PeekChar(0);
-            if (TokenizerHelper::IsOctDigit(c)) {
-                char symbol = c - '0';
-                c = stream_.PeekChar(1);
-                stream_.SkipChar(2);
-                if (TokenizerHelper::IsHexDigit(c)) {
-                    symbol = (symbol * 16) + TokenizerHelper::HexToInt(c);
-                    token = MakeLiteral(symbol);
-                } else {
-                    token = MakeError("TODO");
-                }
-            } else {
-                stream_.SkipChar(1);
-                token = MakeError("TODO");
-            }
-        } else if (c == 'n') {
-            token = MakeLiteral('\n');
-        } else if (c == 'r') {
-            token = MakeLiteral('\r');
-        } else if (c == 't') {
-            token = MakeLiteral('\t');
-        } else if (c == '\\') {
-            token = MakeLiteral('\\');
-        } else if (c == '0') {
-            token = MakeLiteral('\0');
-        } else {
-            token = MakeError("TODO");
+        if (!TokenizerHelper::TryGetEscape(&stream_, &c)) {
+            return MakeError("TODO");
         }
     } else {
         stream_.SkipChar(1);
-        token = MakeLiteral(c);
     }
+
+    token = MakeLiteral(c);
 
     if (stream_.PeekChar(0) != '\'') {
         return MakeError("TODO");
@@ -186,8 +153,44 @@ Token Tokenizer::TokenizeCharacter() {
 }
 
 Token Tokenizer::TokenizeString() {
-    // TODO
-    return MakeToken(Token::Type::kLiteral);
+    std::string string_buf;
+
+    while (true) {
+        char c = stream_.PeekChar(0);
+        if (stream_.IsEOF()) {
+            return MakeError("TODO");
+        }
+
+        if (c == '\"') {
+            stream_.SkipChar(1);
+            break;
+        }
+
+        // ~IsolatedCR
+        if (c == '\r' && stream_.PeekChar(1) != '\n') {
+            return MakeError("TODO");
+        }
+
+        if (c == '\n') {
+            return MakeError("TODO");
+        }
+
+        if (c == '\\') {
+            if (stream_.PeekChar(1) == '\n') {
+                stream_.SkipChar(2);
+                SkipWhitespace();
+                continue;
+            } else if (!TokenizerHelper::TryGetEscape(&stream_, &c)) {
+                return MakeError("TODO");
+            }
+        } else {
+            stream_.SkipChar(1);
+        }
+
+        string_buf += c;
+    }
+
+    return MakeLiteral(string_buf);
 }
 
 Token Tokenizer::TokenizeRawString() {
@@ -249,13 +252,7 @@ Token Tokenizer::TokenizeNumber() {
             digits.push_back(c - '0');
             is_digit_found = true;
         } else if (system == 16 && TokenizerHelper::IsHexDigit(c)) {
-            if (c >= '0' && c <= '9') {
-                digits.push_back(c - '0');
-            } else if (c >= 'a' && c <= 'f') {
-                digits.push_back(10 + (c - 'a'));
-            } else {
-                digits.push_back(10 + (c - 'A'));
-            }
+            digits.push_back(TokenizerHelper::HexToInt(c));
 
             is_digit_found = true;
         } else if (c != '_') {

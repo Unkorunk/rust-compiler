@@ -141,8 +141,7 @@ public:
         std::string ToString() const {
             std::ostringstream oss;
 
-            oss << start_line << " " << start_column << " "
-                << end_line << " " << end_column;
+            oss << start_line << ' ' << start_column << ' ' << end_line << ' ' << end_column;
 
             return oss.str();
         }
@@ -162,7 +161,7 @@ public:
         oss << position_.ToString() << ' ' << TypeToString(type_);
 
         if (type_ == Type::kLiteral || type_ == Type::kIdentifier || type_ == Type::kError) {
-            oss << " (" << value_.ToString() << ")";
+            oss << " (" << value_.ToString() << ')';
         }
 
         return oss.str();

@@ -14,7 +14,7 @@ public:
         std::streampos old_pos = stream_->tellg();
         
         stream_->seekg(offset, std::ios_base::cur);
-        char c = stream_->peek();
+        int c = stream_->peek();
         stream_->seekg(old_pos);
 
         return (c == std::char_traits<char>::eof() ? ' ' : c);
@@ -28,7 +28,7 @@ public:
     }
 
     char NextChar() {
-        char c = stream_->get();
+        int c = stream_->get();
 
         if (c == '\t') {
             current_column_ += tab_size_;

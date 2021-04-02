@@ -1,5 +1,7 @@
 #pragma once
 
+#include "InputStream.hpp"
+
 class TokenizerHelper {
 public:
     static bool IsWhitespace(char it) {
@@ -40,6 +42,50 @@ public:
             return (it - '0');
         }
         throw std::exception();
+    }
+
+    static bool TryGetEscape(InputStream *stream, char *result) {
+        char c = stream->PeekChar(0);
+        if (c == '\\') {
+            c = stream->PeekChar(1);
+            stream->SkipChar(2);
+
+            if (c == '\'') {
+                *result = '\'';
+            } else if (c == '"') {
+                *result = '\"';
+            } else if (c == 'x') {
+                c = stream->PeekChar(0);
+                if (TokenizerHelper::IsOctDigit(c)) {
+                    char symbol = c - '0';
+                    c = stream->PeekChar(1);
+                    stream->SkipChar(2);
+                    if (TokenizerHelper::IsHexDigit(c)) {
+                        symbol = (symbol * 16) + TokenizerHelper::HexToInt(c);
+                        *result = symbol;
+                    } else {
+                        return false;
+                    }
+                } else {
+                    stream->SkipChar(1);
+                    return false;
+                }
+            } else if (c == 'n') {
+                *result = '\n';
+            } else if (c == 'r') {
+                *result = '\r';
+            } else if (c == 't') {
+                *result = '\t';
+            } else if (c == '\\') {
+                *result = '\\';
+            } else if (c == '0') {
+                *result = '\0';
+            } else {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 private:
