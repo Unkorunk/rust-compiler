@@ -127,25 +127,28 @@ public:
         kEmpty
     };
 
-    Token() : type_(Token::Type::kEmpty), position_(0, 0, 0, 0) {}
-    Token(Type type, uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
-        type_(type), position_(start_line, start_column, end_line, end_column) {}
-    Token(TokenValue value, Type type, uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
-        type_(type), value_(value), position_(start_line, start_column, end_line, end_column) {}
-
     struct Position {
         uint32_t start_line, start_column, end_line, end_column;
-        Position(uint32_t start_line, uint32_t start_column, uint32_t end_line, uint32_t end_column) :
-            start_line(start_line), start_column(start_column), end_line(end_line), end_column(end_column) {}
+        std::streampos start_offset, end_offset;
+        Position(uint32_t start_line, uint32_t start_column, std::streampos start_offset,
+            uint32_t end_line, uint32_t end_column, std::streampos end_offset) :
+            start_line(start_line), start_column(start_column), start_offset(start_offset),
+            end_line(end_line), end_column(end_column), end_offset(end_offset) {}
 
         std::string ToString() const {
             std::ostringstream oss;
 
-            oss << start_line << ' ' << start_column << ' ' << end_line << ' ' << end_column;
+            oss << start_line << '\t' << start_column;
 
             return oss.str();
         }
     };
+
+    Token() : type_(Token::Type::kEmpty), position_(0, 0, 0, 0, 0, 0) {}
+    Token(Type type, Position position) :
+        type_(type), position_(position) {}
+    Token(TokenValue value, Type type, Position position) :
+        type_(type), value_(value), position_(position) {}
 
     Position GetPosition() const {
         return position_;
@@ -155,13 +158,28 @@ public:
         return type_;
     }
 
-    std::string ToString() const {
+    std::string GetSource(std::ifstream *ifs) const {
+        if (position_.start_offset == position_.end_offset) {
+            return "";
+        }
+
+        auto old_streampos = ifs->tellg();
+        std::string result;
+        ifs->seekg(position_.start_offset);
+        while (ifs->tellg() != position_.end_offset) {
+            result += ifs->get();
+        }
+        ifs->seekg(old_streampos);
+        return result;
+    }
+
+    std::string ToString(std::ifstream *ifs) const {
         std::ostringstream oss;
 
-        oss << position_.ToString() << ' ' << TypeToString(type_);
+        oss << position_.ToString() << '\t' << TypeToString(type_) << '\t' << GetSource(ifs);
 
         if (type_ == Type::kLiteral || type_ == Type::kIdentifier || type_ == Type::kError) {
-            oss << " (" << value_.ToString() << ')';
+            oss << '\t' << value_.ToString();
         }
 
         return oss.str();

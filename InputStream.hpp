@@ -4,7 +4,7 @@
 
 class InputStream {
 public:
-    explicit InputStream(std::ifstream *stream) : stream_(stream) {}
+    explicit InputStream(std::ifstream *stream) : stream_(stream), current_offset_(stream->tellg()) {}
 
     bool IsEOF() const {
         return stream_->eof();
@@ -12,6 +12,7 @@ public:
 
     char PeekChar(std::streamoff offset) {
         std::streampos old_pos = stream_->tellg();
+        current_offset_ = old_pos;
         
         stream_->seekg(offset, std::ios_base::cur);
         int c = stream_->peek();
@@ -29,6 +30,7 @@ public:
 
     char NextChar() {
         int c = stream_->get();
+        current_offset_ = stream_->tellg();
 
         if (c == '\t') {
             current_column_ += tab_size_;
@@ -62,6 +64,10 @@ public:
         return current_column_;
     }
 
+    std::streampos GetCurrentOffset() const {
+        return current_offset_;
+    }
+
     uint32_t GetStartLine() const {
         return start_line_;
     }
@@ -73,13 +79,37 @@ public:
     void AssignStart() {
         start_line_ = current_line_;
         start_column_ = current_column_;
+        start_offset_ = current_offset_;
+    }
+
+    std::streampos GetStartOffset() const {
+        return start_offset_;
+    }
+
+    Token::Position GetTokenPosition() const {
+        return Token::Position(
+            GetStartLine(),
+            GetStartColumn(),
+            GetStartOffset(),
+            GetCurrentLine(),
+            GetCurrentColumn(),
+            GetCurrentOffset()
+        );
+    }
+
+    operator std::ifstream *() {
+        return stream_;
     }
 
 private:
     std::ifstream *stream_;
 
     uint32_t current_line_ = 1, current_column_ = 1;
+    std::streampos current_offset_;
+
     uint32_t start_line_ = 1, start_column_ = 1;
+    std::streampos start_offset_;
+
     const uint32_t tab_size_ = 4;
     
 };

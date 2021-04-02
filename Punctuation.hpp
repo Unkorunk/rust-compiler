@@ -33,8 +33,7 @@ public:
             if (punctuation->selector_) {
                 *token = punctuation->selector_();
             } else {
-                *token = Token(punctuation->type_, stream->GetStartLine(), stream->GetStartColumn(),
-                stream->GetCurrentLine(), stream->GetCurrentColumn());
+                *token = Token(punctuation->type_, stream->GetTokenPosition());
             }
 
             return true;

@@ -42,10 +42,10 @@ private:
     // TODO lifetimes and loop labels
 
     Token MakeToken(Token::Type type) {
-        return Token(type, stream_.GetStartLine(), stream_.GetStartColumn(), stream_.GetCurrentLine(), stream_.GetCurrentColumn());
+        return Token(type, stream_.GetTokenPosition());
     }
     Token MakeToken(TokenValue value, Token::Type type) {
-        return Token(value, type, stream_.GetStartLine(), stream_.GetStartColumn(), stream_.GetCurrentLine(), stream_.GetCurrentColumn());
+        return Token(value, type, stream_.GetTokenPosition());
     }
     Token MakeError(std::string error_text) {
         return MakeToken(TokenValue(error_text), Token::Type::kError);

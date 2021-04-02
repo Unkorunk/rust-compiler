@@ -11,7 +11,12 @@ void my_test(const std::string& test_suit_name, const std::string& test_name) {
     Tokenizer tokenizer(&ifs);
     std::ostringstream oss;
     while (tokenizer.HasNext()) {
-        oss << tokenizer.Next().ToString() << std::endl;
+        Token token = tokenizer.Next();
+        if (token.GetType() == Token::Type::kEndOfFile) {
+            break;
+        }
+
+        oss << token.ToString(&ifs) << std::endl;
     }
 
     std::string input = oss.str();
@@ -37,4 +42,9 @@ TEST(WhitespaceTest, Test1)
 TEST(WhitespaceTest, Test2)
 {
     my_test("whitespace", "test2");
+}
+
+TEST(PunctuationTest, Test2)
+{
+    my_test("punctuation", "test1");
 }

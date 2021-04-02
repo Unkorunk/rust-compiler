@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
 
     if (print_tokenizer) {
         while (tokenizer.HasNext()) {
-            std::cout << tokenizer.Next().ToString() << std::endl;
+            std::cout << tokenizer.Next().ToString(&ifs) << std::endl;
         }
 
         return 0;
