@@ -66,5 +66,31 @@ TEST(LiteralByteTest, Test3)
 
 TEST(LiteralByteTest, Test4)
 {
-    my_test("literals/byte", "test4");
+    my_test("literals/byte string", "test4");
+}
+
+TEST(LiteralByteStringTest, Test1)
+{
+    my_test("literals/byte string", "test1");
+}
+
+TEST(LiteralByteStringTest, Test2)
+{
+    my_test("literals/byte string", "test2");
+}
+
+TEST(LiteralByteStringTest, Test3)
+{
+    my_test("literals/byte string", "test3");
+}
+
+TEST(LiteralByteStringTest, Test4)
+{
+    my_test("literals/byte string", "test4");
+}
+
+
+TEST(LiteralByteStringTest, Test5)
+{
+    my_test("literals/byte string", "test5");
 }

@@ -1,0 +1,16 @@
+1	1	literal	b"Hello\x20\xff\xfa\xFb\xBf"	byte string 72 101 108 108 111 32 255 250 251 191
+1	30	literal	b"\xff"	byte string 255
+1	38	literal	b"\xaa"	byte string 170
+1	46	literal	b"\xff\xAA"	byte string 255 170
+2	5	literal	b"\xF6\xF7\xF8\xF9     \xFA"	byte string 246 247 248 249 32 32 32 32 32 250
+2	34	literal	b"\xAF"	byte string 175
+3	2	literal	b"\xff"	byte string 255
+3	10	literal	b"\xaa"	byte string 170
+3	18	literal	b"\xff\xAA"	byte string 255 170
+7	5	literal	b"\xF6\xF7\xF8\xF9     \xFA"	byte string 246 247 248 249 32 32 32 32 32 250
+7	34	literal	b"\xAF"	byte string 175
+9	5	literal	b"\xff"	byte string 255
+9	13	literal	b"\xaa"	byte string 170
+9	21	literal	b"\xff\xAA"	byte string 255 170
+10	13	literal	b"\xF6\xF7\xF8\xF9     \xFA"	byte string 246 247 248 249 32 32 32 32 32 250
+10	42	literal	b"\xAF"	byte string 175

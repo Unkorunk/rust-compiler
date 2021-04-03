@@ -210,6 +210,9 @@ Token Tokenizer::TokenizeByte() {
     } else if (c >= 0x00 && c <= 0x7f) {
         stream_.SkipChar(1);
         result = c;
+    } else {
+        stream_.SkipChar(1);
+        return MakeError("TODO");
     }
 
     if (stream_.PeekChar(0) != '\'') {
@@ -222,8 +225,50 @@ Token Tokenizer::TokenizeByte() {
 }
 
 Token Tokenizer::TokenizeByteString() {
-    // TODO
-    return MakeToken(Token::Type::kLiteral);
+    std::vector<uint8_t> byte_string_buf;
+
+    while (true) {
+        char c = stream_.PeekChar(0);
+        if (stream_.IsEOF()) {
+            return MakeError("TODO");
+        }
+
+        if (c == '\"') {
+            stream_.SkipChar(1);
+            break;
+        }
+
+        // ~IsolatedCR
+        if (c == '\r' && stream_.PeekChar(1) != '\n') {
+            return MakeError("TODO");
+        }
+
+        if (c == '\n') {
+            return MakeError("TODO");
+        }
+
+        uint8_t result;
+
+        if (c == '\\') {
+            if (stream_.PeekChar(1) == '\n') {
+                stream_.SkipChar(2);
+                SkipWhitespace();
+                continue;
+            } else if (!TokenizerHelper::TryGetByteEscape(&stream_, &result)) {
+                return MakeError("TODO");
+            }
+        } else if (c >= 0x00 && c <= 0x7f) {
+            stream_.SkipChar(1);
+            result = c;
+        } else {
+            stream_.SkipChar(1);
+            return MakeError("TODO");
+        }
+
+        byte_string_buf.push_back(result);
+    }
+
+    return MakeLiteral(byte_string_buf);
 }
 
 Token Tokenizer::TokenizeRawByteString() {

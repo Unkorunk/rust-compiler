@@ -1,0 +1,15 @@
+b"Hello World\
+           Hello World"
+        b"Rust \
+              compiler"
+b"foobar"
+
+b"foo\
+bar"
+
+
+b"foo\
+    bar"
+     b"foo\
+  bar"
+

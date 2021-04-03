@@ -1,0 +1,14 @@
+1	1	literal	b"\n"	byte string 10
+1	7	literal	b"\r"	byte string 13
+1	13	literal	b"\t"	byte string 9
+1	19	literal	b"\\"	byte string 92
+1	25	literal	b"\0"	byte string 0
+2	1	literal	b"\n\r\t\\\0"	byte string 10 13 9 92 0
+2	18	literal	b"\r"	byte string 13
+2	24	literal	b"\t"	byte string 9
+2	30	literal	b"\\"	byte string 92
+2	36	literal	b"\0"	byte string 0
+4	3	literal	b"\n"	byte string 10
+4	9	literal	b"\r"	byte string 13
+4	15	literal	b"\n\r\t\\\0"	byte string 10 13 9 92 0
+6	1	literal	b"\n\r\t\\\0"	byte string 10 13 9 92 0

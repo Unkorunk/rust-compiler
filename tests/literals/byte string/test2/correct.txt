@@ -1,0 +1,17 @@
+1	1	literal	b"\x01"	byte string 1
+1	9	literal	b"\x41\x42\x43\x61\x62\x63"	byte string 65 66 67 97 98 99
+1	37	literal	b"\x41\x42\x43"	byte string 65 66 67
+1	53	literal	b"\x61\x62\x63"	byte string 97 98 99
+3	2	literal	b"\x02"	byte string 2
+5	4	literal	b"\x41\x42\x43"	byte string 65 66 67
+5	20	literal	b"\x61\x62\x63"	byte string 97 98 99
+5	46	literal	b"\x41\x42\x43"	byte string 65 66 67
+5	62	literal	b"\x61\x62\x63"	byte string 97 98 99
+6	2	literal	b"\x41\x42\x43"	byte string 65 66 67
+6	23	literal	b"\x61\x62\x63"	byte string 97 98 99
+7	1	literal	b"\x03"	byte string 3
+9	1	literal	b"\x41\x42\x43"	byte string 65 66 67
+9	17	literal	b"\x61\x62\x63"	byte string 97 98 99
+9	35	literal	b"\x41\x42\x43"	byte string 65 66 67
+9	51	literal	b"\x61\x62\x63"	byte string 97 98 99
+11	9	literal	b"\x04"	byte string 4

@@ -1,0 +1,11 @@
+1	1	literal	b"Hello World\
+           Hello World"	byte string 72 101 108 108 111 32 87 111 114 108 100 72 101 108 108 111 32 87 111 114 108 100
+3	9	literal	b"Rust \
+              compiler"	byte string 82 117 115 116 32 99 111 109 112 105 108 101 114
+5	1	literal	b"foobar"	byte string 102 111 111 98 97 114
+7	1	literal	b"foo\
+bar"	byte string 102 111 111 98 97 114
+11	1	literal	b"foo\
+    bar"	byte string 102 111 111 98 97 114
+13	6	literal	b"foo\
+  bar"	byte string 102 111 111 98 97 114

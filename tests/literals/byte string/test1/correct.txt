@@ -1,0 +1,14 @@
+1	1	literal	b"A"	byte string 65
+1	6	literal	b"Hello World"	byte string 72 101 108 108 111 32 87 111 114 108 100
+1	21	literal	b"Rust"	byte string 82 117 115 116
+1	29	literal	b"Unkorunk"	byte string 85 110 107 111 114 117 110 107
+3	4	literal	b"B"	byte string 66
+3	9	literal	b"Hello World"	byte string 72 101 108 108 111 32 87 111 114 108 100
+5	1	literal	b"Rust"	byte string 82 117 115 116
+5	19	literal	b"Unkorunk"	byte string 85 110 107 111 114 117 110 107
+5	32	literal	b"Hello World"	byte string 72 101 108 108 111 32 87 111 114 108 100
+6	7	literal	b"Rust"	byte string 82 117 115 116
+6	15	literal	b"Unkorunk"	byte string 85 110 107 111 114 117 110 107
+7	1	literal	b"C"	byte string 67
+9	5	literal	b"2021"	byte string 50 48 50 49
+10	1	literal	b"D"	byte string 68

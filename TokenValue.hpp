@@ -7,7 +7,7 @@ public:
     enum class Type {
         kBool, kChar, kU8, kU16, kU32, kU64, kU128, kUSize,
         kI8, kI16, kI32, kI64, kI128, kISize,
-        kF32, kF64, kText, kEmpty
+        kF32, kF64, kText, kByteString, kEmpty
     };
 
     TokenValue() : type_(Type::kEmpty) {}
@@ -32,6 +32,8 @@ public:
     TokenValue(double val) : _f64(val), type_(Type::kF64) {}
 
     TokenValue(std::string val) : _text(val), type_(Type::kText) {}
+
+    TokenValue(const std::vector<uint8_t>& val) : _byte_string(val), type_(Type::kByteString) {}
 
     operator bool() const {
         if (type_ != Type::kBool) throw std::exception();
@@ -91,6 +93,11 @@ public:
         return _text;
     }
 
+    operator std::vector<uint8_t>() const {
+        if (type_ != Type::kByteString) throw std::exception();
+        return _byte_string;
+    }
+
     std::string ToString() const {
         std::ostringstream oss;
 
@@ -141,6 +148,11 @@ public:
             case Type::kText:
                 oss << ' ' << _text;
                 break;
+            case Type::kByteString:
+                for (uint8_t val : _byte_string) {
+                    oss << ' ' << static_cast<uint16_t>(val);
+                }
+                break;
             default:
                 throw std::exception();
             }
@@ -182,6 +194,8 @@ public:
             return "f64";
         case Type::kText:
             return "text";
+        case Type::kByteString:
+            return "byte string";
         case Type::kEmpty:
             return "empty";
         default:
@@ -211,4 +225,5 @@ private:
     };
 
     std::string _text;
+    std::vector<uint8_t> _byte_string;
 };
