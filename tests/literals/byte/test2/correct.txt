@@ -1,0 +1,8 @@
+1	1	literal	b'\x61'	u8 97
+1	9	literal	b'\x62'	u8 98
+1	17	literal	b'\x63'	u8 99
+1	25	literal	b'\x64'	u8 100
+2	4	literal	b'\x61'	u8 97
+3	1	literal	b'\x62'	u8 98
+3	17	literal	b'\x63'	u8 99
+4	9	literal	b'\x64'	u8 100

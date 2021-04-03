@@ -1,0 +1,7 @@
+1	1	literal	b'\xff'	u8 255
+1	9	literal	b'\xaf'	u8 175
+1	17	literal	b'\xbc'	u8 188
+1	25	literal	b'\xDD'	u8 221
+2	6	literal	b'\xf7'	u8 247
+2	14	literal	b'\xF7'	u8 247
+7	4	literal	b'\xf0'	u8 240

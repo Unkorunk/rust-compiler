@@ -1,0 +1,13 @@
+1	1	literal	b'\n'	u8 10
+1	7	literal	b'\r'	u8 13
+1	13	literal	b'\t'	u8 9
+1	19	literal	b'\\'	u8 92
+1	25	literal	b'\0'	u8 0
+2	4	literal	b'\n'	u8 10
+2	10	literal	b'\r'	u8 13
+5	1	literal	b'\t'	u8 9
+5	7	literal	b'\\'	u8 92
+5	18	literal	b'\0'	u8 0
+7	8	literal	b'\t'	u8 9
+7	14	literal	b'\\'	u8 92
+7	25	literal	b'\0'	u8 0

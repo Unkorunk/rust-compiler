@@ -48,3 +48,23 @@ TEST(PunctuationTest, Test2)
 {
     my_test("punctuation", "test1");
 }
+
+TEST(LiteralByteTest, Test1)
+{
+    my_test("literals/byte", "test1");
+}
+
+TEST(LiteralByteTest, Test2)
+{
+    my_test("literals/byte", "test2");
+}
+
+TEST(LiteralByteTest, Test3)
+{
+    my_test("literals/byte", "test3");
+}
+
+TEST(LiteralByteTest, Test4)
+{
+    my_test("literals/byte", "test4");
+}

@@ -1,0 +1,7 @@
+b'\xff' b'\xaf' b'\xbc' b'\xDD'
+     b'\xf7' b'\xF7'
+
+
+
+
+   b'\xf0'

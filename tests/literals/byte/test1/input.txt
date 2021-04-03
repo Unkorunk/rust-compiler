@@ -1,0 +1,8 @@
+
+
+b'a' b'b' b'c' b'd'
+     b'a'
+  b'b'
+           b'c'
+      b'd'
+

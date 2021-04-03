@@ -1,0 +1,8 @@
+3	1	literal	b'a'	u8 97
+3	6	literal	b'b'	u8 98
+3	11	literal	b'c'	u8 99
+3	16	literal	b'd'	u8 100
+4	6	literal	b'a'	u8 97
+5	3	literal	b'b'	u8 98
+6	12	literal	b'c'	u8 99
+7	7	literal	b'd'	u8 100

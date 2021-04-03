@@ -131,8 +131,6 @@ Token Tokenizer::TokenizeCharacter() {
         return MakeError("TODO");
     }
 
-    Token token;
-
     if (c == '\\') {
         if (!TokenizerHelper::TryGetEscape(&stream_, &c)) {
             return MakeError("TODO");
@@ -141,15 +139,13 @@ Token Tokenizer::TokenizeCharacter() {
         stream_.SkipChar(1);
     }
 
-    token = MakeLiteral(c);
-
     if (stream_.PeekChar(0) != '\'') {
         return MakeError("TODO");
     }
 
     stream_.SkipChar(1);
 
-    return token;
+    return MakeLiteral(c);
 }
 
 Token Tokenizer::TokenizeString() {
@@ -199,8 +195,30 @@ Token Tokenizer::TokenizeRawString() {
 }
 
 Token Tokenizer::TokenizeByte() {
-    // TODO
-    return MakeToken(Token::Type::kLiteral);
+    char c = stream_.PeekChar(0);
+    if (c == '\'' || c == '\n' || c == '\r' || c == '\t') {
+        stream_.SkipChar(1);
+        return MakeError("TODO");
+    }
+
+    uint8_t result;
+
+    if (c == '\\') {
+        if (!TokenizerHelper::TryGetByteEscape(&stream_, &result)) {
+            return MakeError("TODO");
+        }
+    } else if (c >= 0x00 && c <= 0x7f) {
+        stream_.SkipChar(1);
+        result = c;
+    }
+
+    if (stream_.PeekChar(0) != '\'') {
+        return MakeError("TODO");
+    }
+
+    stream_.SkipChar(1);
+
+    return MakeLiteral(result);
 }
 
 Token Tokenizer::TokenizeByteString() {
