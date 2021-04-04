@@ -15,16 +15,18 @@ Token Tokenizer::Next() {
 
     stream_.AssignStart();
 
-    char c = stream_.PeekChar(0);
+    char c0 = stream_.PeekChar(0);
     char c1 = stream_.PeekChar(1);
     char c2 = stream_.PeekChar(2);
-    if (TokenizerHelper::IsDecDigit(c)) {
+
+    if (TokenizerHelper::IsDecDigit(c0)) {
         return TokenizeNumber();
-    } else if (c == '_' && TokenizerHelper::IsAlphanumeric(stream_.PeekChar(1)) ||
-        c >= 'a' && c <= 'z' && c != 'r' && c != 'b' ||
-        c >= 'A' && c <= 'Z' ||
-        c == 'r' && (c1 != '"' && (c1 != '#' || c2 != '"' && c2 != '#')) || //! raw string literals
-        c == 'b' && c1 != '\'' && c1 != '"' && (c1 != 'r' || c2 != '"' && c2 != '#')) { //! byte and byte string literals
+    } else if (c0 == '_' && TokenizerHelper::IsAlphanumeric(c1) ||
+        c0 >= 'a' && c0 <= 'z' && c0 != 'r' && c0 != 'b' ||
+        c0 >= 'A' && c0 <= 'Z' ||
+        c0 == 'r' && (c1 != '"' && (c1 != '#' || c2 != '"' && c2 != '#')) || //! raw string literals
+        c0 == 'b' && c1 != '\'' && c1 != '"' && (c1 != 'r' || c2 != '"' && c2 != '#') || //! byte and byte string literals
+        c0 == '\'' && c1 == 's' && c2 == 't') { //! !static - keyword
         return TokenizeIdentifierOrKeyword();
     }
 
@@ -93,6 +95,9 @@ Token Tokenizer::TokenizeIdentifierOrKeyword() {
             return MakeError("TODO");
         }
     } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
+        stream_.SkipChar(1);
+        c = stream_.PeekChar(0);
+    } else if (c == '\'' && !is_raw_identifier) {
         stream_.SkipChar(1);
         c = stream_.PeekChar(0);
     } else {

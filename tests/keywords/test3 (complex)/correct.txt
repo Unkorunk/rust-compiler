@@ -1,0 +1,19 @@
+1	1	literal	1234	u16 1234
+1	7	identifier	a	text a
+1	8	literal	's'	char s
+1	14	literal	'a'	char a
+1	17	identifier	s	text s
+1	19	literal	"as"	text as
+1	30	literal	b'a'	u8 97
+1	34	identifier	s	text s
+2	5	literal	br"as"	byte string 97 115
+2	12	literal	b"as"	byte string 97 115
+2	18	as	as
+3	3	identifier	assign	text assign
+3	10	as	as
+3	13	async	async
+3	22	identifier	as1	text as1
+3	26	identifier	as1async	text as1async
+4	1	identifier	async_as	text async_as
+4	10	identifier	_as	text _as
+4	14	identifier	a_s	text a_s

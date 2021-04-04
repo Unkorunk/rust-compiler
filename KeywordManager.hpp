@@ -114,8 +114,8 @@ private:
         {"yield", Token::Type::kYield, Keyword::Type::kReserved},
         {"try", Token::Type::kTry, Keyword::Type::kReserved},
 
-        {"union", Token::Type::kUnion, Keyword::Type::kWeak},
-        {"'static", Token::Type::kStaticLifetime, Keyword::Type::kWeak}
+        {"union", Token::Type::kUnion, Keyword::Type::kStrict},
+        {"'static", Token::Type::kStaticLifetime, Keyword::Type::kStrict}
     };
 
 };

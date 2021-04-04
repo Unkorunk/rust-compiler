@@ -1,0 +1,20 @@
+1	1	identifier	asbreak	text asbreak
+1	9	identifier	constcontinue	text constcontinue
+2	1	literal	1	u8 1
+2	2	break	break
+2	8	identifier	break2	text break2
+2	15	literal	1	u8 1
+2	16	identifier	break2	text break2
+3	5	identifier	_break	text _break
+3	12	identifier	break_	text break_
+3	19	identifier	br_eak	text br_eak
+4	1	identifier	bre1ak	text bre1ak
+5	1	identifier	asasync	text asasync
+5	9	identifier	asyncas	text asyncas
+6	1	as	as
+6	4	async	async
+7	13	identifier	asyn	text asyn
+8	1	identifier	sElf	text sElf
+9	6	as	as
+9	9	identifier	ync	text ync
+10	3	identifier	abstrac	text abstrac

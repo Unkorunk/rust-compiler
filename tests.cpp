@@ -65,3 +65,7 @@ MY_TEST(LiteralRawByteStringTest, Test1, "literals/raw byte string", "test1")
 MY_TEST(LiteralRawByteStringTest, Test2, "literals/raw byte string", "test2")
 MY_TEST(LiteralRawByteStringTest, Test3, "literals/raw byte string", "test3")
 MY_TEST(LiteralRawByteStringTest, Test4, "literals/raw byte string", "test4 (error)")
+
+MY_TEST(KeywordsTest, Test1, "keywords", "test1")
+MY_TEST(KeywordsTest, Test2, "keywords", "test2 (error)")
+MY_TEST(KeywordsTest, Test3, "keywords", "test3 (complex)")

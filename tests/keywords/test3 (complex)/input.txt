@@ -1,0 +1,4 @@
+1234  a's'   'a's "as"       b'a's 
+    br"as" b"as" as
+  assign as async    as1 as1async   
+async_as _as a_s
