@@ -1,0 +1,9 @@
+2	1	literal	r""	text 
+2	9	literal	r#""#	text 
+3	5	literal	r##""##	text 
+4	1	literal	r"#"	text #
+4	14	literal	r#"""#	text "
+4	24	literal	r##""#"##	text "#
+5	3	literal	r#""""#	text ""
+6	5	literal	r#"\n Hello  \t World"#	text \n Hello  \t World
+9	1	literal	r#"\x22\x23"#	text \x22\x23

@@ -190,8 +190,48 @@ Token Tokenizer::TokenizeString() {
 }
 
 Token Tokenizer::TokenizeRawString() {
-    // TODO
-    return MakeToken(Token::Type::kLiteral);
+    std::string raw_string_buf;
+
+    int hash_require = 0;
+    while (stream_.PeekChar(0) == '#') {
+        stream_.SkipChar(1);
+        hash_require++;
+    }
+
+    char c = stream_.PeekChar(0);
+    if (c != '\"') {
+        return MakeError("TODO");
+    }
+
+    stream_.SkipChar(1);
+
+    bool is_double_quote_found = false;
+    int hash_count = 0;
+
+    c = stream_.PeekChar(0);
+    while (!is_double_quote_found || hash_count != hash_require) {
+        if (stream_.IsEOF()) {
+            return MakeError("TODO");
+        }
+
+        if (c == '"') {
+            is_double_quote_found = true;
+            hash_count = 0;
+        } else if (is_double_quote_found && c == '#') {
+            hash_count++;
+        } else {
+            is_double_quote_found = false;
+            hash_count = 0;
+        }
+
+        raw_string_buf += c;
+
+        stream_.SkipChar(1);
+        c = stream_.PeekChar(0);
+    }
+
+    raw_string_buf.resize(raw_string_buf.size() - hash_require - 1);
+    return MakeLiteral(raw_string_buf);
 }
 
 Token Tokenizer::TokenizeByte() {

@@ -34,63 +34,29 @@ void my_test(const std::string& test_suit_name, const std::string& test_name) {
     ASSERT_STREQ(input.c_str(), output.c_str());
 }
 
-TEST(WhitespaceTest, Test1)
-{
-    my_test("whitespace", "test1");
-}
+#define MY_TEST(test_suit_name, test_name, path, folder) \
+    TEST(test_suit_name, test_name)                      \
+    {                                                    \
+        my_test(path, folder);                           \
+    }
 
-TEST(WhitespaceTest, Test2)
-{
-    my_test("whitespace", "test2");
-}
+MY_TEST(WhitespaceTest, Test1, "whitespace", "test1")
+MY_TEST(WhitespaceTest, Test2, "whitespace", "test2")
 
-TEST(PunctuationTest, Test2)
-{
-    my_test("punctuation", "test1");
-}
+MY_TEST(PunctuationTest, Test1, "punctuation", "test1")
 
-TEST(LiteralByteTest, Test1)
-{
-    my_test("literals/byte", "test1");
-}
+MY_TEST(LiteralRawByteStringTest, Test1, "literals/raw byte string", "test1")
+MY_TEST(LiteralRawByteStringTest, Test2, "literals/raw byte string", "test2")
+MY_TEST(LiteralRawByteStringTest, Test3, "literals/raw byte string", "test3")
+MY_TEST(LiteralRawByteStringTest, Test4, "literals/raw byte string", "test4 (error)")
 
-TEST(LiteralByteTest, Test2)
-{
-    my_test("literals/byte", "test2");
-}
+MY_TEST(LiteralByteTest, Test1, "literals/byte", "test1")
+MY_TEST(LiteralByteTest, Test2, "literals/byte", "test2")
+MY_TEST(LiteralByteTest, Test3, "literals/byte", "test3")
+MY_TEST(LiteralByteTest, Test4, "literals/byte", "test4")
 
-TEST(LiteralByteTest, Test3)
-{
-    my_test("literals/byte", "test3");
-}
-
-TEST(LiteralByteTest, Test4)
-{
-    my_test("literals/byte string", "test4");
-}
-
-TEST(LiteralByteStringTest, Test1)
-{
-    my_test("literals/byte string", "test1");
-}
-
-TEST(LiteralByteStringTest, Test2)
-{
-    my_test("literals/byte string", "test2");
-}
-
-TEST(LiteralByteStringTest, Test3)
-{
-    my_test("literals/byte string", "test3");
-}
-
-TEST(LiteralByteStringTest, Test4)
-{
-    my_test("literals/byte string", "test4");
-}
-
-
-TEST(LiteralByteStringTest, Test5)
-{
-    my_test("literals/byte string", "test5");
-}
+MY_TEST(LiteralByteStringTest, Test1, "literals/byte string", "test1")
+MY_TEST(LiteralByteStringTest, Test2, "literals/byte string", "test2")
+MY_TEST(LiteralByteStringTest, Test3, "literals/byte string", "test3")
+MY_TEST(LiteralByteStringTest, Test4, "literals/byte string", "test4")
+MY_TEST(LiteralByteStringTest, Test5, "literals/byte string", "test5")

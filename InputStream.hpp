@@ -7,7 +7,7 @@ public:
     explicit InputStream(std::ifstream *stream) : stream_(stream), current_offset_(stream->tellg()) {}
 
     bool IsEOF() const {
-        return stream_->eof();
+        return stream_->eof() || is_eof_;
     }
 
     char PeekChar(std::streamoff offset) {
@@ -18,7 +18,14 @@ public:
         int c = stream_->peek();
         stream_->seekg(old_pos);
 
-        return (c == std::char_traits<char>::eof() ? ' ' : c);
+        if (c == std::char_traits<char>::eof()) {
+            is_eof_ = true;
+            return ' ';
+        } else {
+            is_eof_ = false;
+        }
+
+        return c;
     }
 
     void SkipChar(std::streamsize offset) {
@@ -111,5 +118,7 @@ private:
     std::streampos start_offset_;
 
     const uint32_t tab_size_ = 4;
+
+    bool is_eof_ = false;
     
 };
