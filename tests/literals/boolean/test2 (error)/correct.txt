@@ -1,0 +1,14 @@
+1	1	identifier	true_	text true_
+1	7	identifier	_true	text _true
+1	13	identifier	_true_	text _true_
+2	1	literal	1	u8 1
+2	2	literal	false	bool 0
+2	8	identifier	false1	text false1
+2	15	literal	1	u8 1
+2	16	identifier	false1	text false1
+2	23	identifier	trUe	text trUe
+2	28	identifier	False	text False
+2	34	identifier	tru1e	text tru1e
+2	40	identifier	fal3se	text fal3se
+3	1	identifier	tru	text tru
+3	5	identifier	fal	text fal

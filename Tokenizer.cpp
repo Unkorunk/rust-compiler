@@ -26,7 +26,7 @@ Token Tokenizer::Next() {
         c0 >= 'A' && c0 <= 'Z' ||
         c0 == 'r' && (c1 != '"' && (c1 != '#' || c2 != '"' && c2 != '#')) || //! raw string literals
         c0 == 'b' && c1 != '\'' && c1 != '"' && (c1 != 'r' || c2 != '"' && c2 != '#') || //! byte and byte string literals
-        c0 == '\'' && c1 == 's' && c2 == 't') { //! !static - keyword
+        c0 == '\'' && c2 != '\'') { //! lifetimes and loop labels
         return TokenizeIdentifierOrKeyword();
     }
 
@@ -76,7 +76,10 @@ void Tokenizer::SkipMultilineComment() {
 }
 
 Token Tokenizer::TokenizeIdentifierOrKeyword() {
+    std::string identifier_buf;
+
     bool is_raw_identifier = false;
+    bool is_quote_found = false;
 
     char c = stream_.PeekChar(0);
     if (c == 'r' && stream_.PeekChar(1) == '#') {
@@ -85,19 +88,31 @@ Token Tokenizer::TokenizeIdentifierOrKeyword() {
         c = stream_.PeekChar(0);
     }
 
-    std::string identifier_buf;
+    if (c == '\'') {
+        identifier_buf += c;
+
+        is_quote_found = true;
+        stream_.SkipChar(1);
+        c = stream_.PeekChar(0);
+    }
+
+    if (is_raw_identifier && is_quote_found) {
+        return MakeError("TODO");
+    }
+
     identifier_buf += c;
 
     if (c == '_') {
+        if (is_quote_found) {
+            return MakeToken(TokenValue(std::string("_")), Token::Type::kLifetimeOrLabel);
+        }
+
         stream_.SkipChar(1);
         c = stream_.PeekChar(0);
         if (!TokenizerHelper::IsAlphanumeric(c)) {
             return MakeError("TODO");
         }
     } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-        stream_.SkipChar(1);
-        c = stream_.PeekChar(0);
-    } else if (c == '\'' && !is_raw_identifier) {
         stream_.SkipChar(1);
         c = stream_.PeekChar(0);
     } else {
@@ -124,6 +139,11 @@ Token Tokenizer::TokenizeIdentifierOrKeyword() {
         }
 
         return MakeToken(keyword->GetTokenType());
+    }
+
+    if (is_quote_found) {
+        identifier_buf.erase(identifier_buf.begin());
+        return MakeToken(TokenValue(identifier_buf), Token::Type::kLifetimeOrLabel);
     }
 
     return MakeError("TODO");

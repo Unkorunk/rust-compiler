@@ -124,6 +124,7 @@ public:
         kLiteral,        // literal
         kEndOfFile,      // end-of-file
         kError,          // error
+        kLifetimeOrLabel,
         kEmpty
     };
 
@@ -404,6 +405,8 @@ public:
             return "end-of-file";
         case Type::kError:
             return "error";
+        case Type::kLifetimeOrLabel:
+            return "lifetime or label";
         default:
             throw std::exception();
         }

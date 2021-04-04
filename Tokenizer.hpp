@@ -39,7 +39,6 @@ private:
     Token TokenizeRawByteString();
     // number literals
     Token TokenizeNumber();
-    // TODO lifetimes and loop labels
 
     Token MakeToken(Token::Type type) {
         return Token(type, stream_.GetTokenPosition());
