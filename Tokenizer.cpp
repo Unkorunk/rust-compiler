@@ -26,7 +26,7 @@ Token Tokenizer::Next() {
         c0 >= 'A' && c0 <= 'Z' ||
         c0 == 'r' && (c1 != '"' && (c1 != '#' || c2 != '"' && c2 != '#')) || //! raw string literals
         c0 == 'b' && c1 != '\'' && c1 != '"' && (c1 != 'r' || c2 != '"' && c2 != '#') || //! byte and byte string literals
-        c0 == '\'' && c2 != '\'') { //! lifetimes and loop labels
+        c0 == '\'' && ((c1 == '_' || c1 >= 'a' && c1 <= 'z' || c1 >= 'A' && c1 <= 'Z') && c2 != '\'')) { //! lifetimes and loop labels
         return TokenizeIdentifierOrKeyword();
     }
 
@@ -37,7 +37,8 @@ Token Tokenizer::Next() {
         }
     }
 
-    return MakeError("TODO");
+    stream_.SkipChar(1);
+    return MakeError("unexpected symbol");
 }
 
 void Tokenizer::SkipWhitespace() {

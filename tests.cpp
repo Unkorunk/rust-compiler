@@ -45,6 +45,11 @@ MY_TEST(WhitespaceTest, Test2, "whitespace", "test2")
 
 MY_TEST(PunctuationTest, Test1, "punctuation", "test1")
 
+MY_TEST(LiteralCharacterTest, Test1, "literals/character", "test1")
+MY_TEST(LiteralCharacterTest, Test2, "literals/character", "test2")
+MY_TEST(LiteralCharacterTest, Test3, "literals/character", "test3 (error)")
+MY_TEST(LiteralCharacterTest, Test4, "literals/character", "test4")
+
 MY_TEST(LiteralRawStringTest, Test1, "literals/raw string", "test1")
 MY_TEST(LiteralRawStringTest, Test2, "literals/raw string", "test2")
 MY_TEST(LiteralRawStringTest, Test3, "literals/raw string", "test3")

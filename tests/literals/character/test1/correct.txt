@@ -1,0 +1,8 @@
+3	1	literal	'a'	char a
+3	5	literal	'b'	char b
+3	9	literal	'c'	char c
+3	13	literal	'd'	char d
+4	6	literal	'a'	char a
+5	3	literal	'b'	char b
+6	12	literal	'c'	char c
+7	7	literal	'd'	char d

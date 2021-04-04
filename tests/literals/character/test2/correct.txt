@@ -1,0 +1,8 @@
+1	1	literal	'\x61'	char a
+1	8	literal	'\x62'	char b
+1	15	literal	'\x63'	char c
+1	22	literal	'\x64'	char d
+2	4	literal	'\x61'	char a
+3	1	literal	'\x62'	char b
+3	16	literal	'\x63'	char c
+4	9	literal	'\x64'	char d
