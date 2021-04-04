@@ -45,10 +45,10 @@ MY_TEST(WhitespaceTest, Test2, "whitespace", "test2")
 
 MY_TEST(PunctuationTest, Test1, "punctuation", "test1")
 
-MY_TEST(LiteralRawByteStringTest, Test1, "literals/raw byte string", "test1")
-MY_TEST(LiteralRawByteStringTest, Test2, "literals/raw byte string", "test2")
-MY_TEST(LiteralRawByteStringTest, Test3, "literals/raw byte string", "test3")
-MY_TEST(LiteralRawByteStringTest, Test4, "literals/raw byte string", "test4 (error)")
+MY_TEST(LiteralRawStringTest, Test1, "literals/raw string", "test1")
+MY_TEST(LiteralRawStringTest, Test2, "literals/raw string", "test2")
+MY_TEST(LiteralRawStringTest, Test3, "literals/raw string", "test3")
+MY_TEST(LiteralRawStringTest, Test4, "literals/raw string", "test4 (error)")
 
 MY_TEST(LiteralByteTest, Test1, "literals/byte", "test1")
 MY_TEST(LiteralByteTest, Test2, "literals/byte", "test2")
@@ -60,3 +60,8 @@ MY_TEST(LiteralByteStringTest, Test2, "literals/byte string", "test2")
 MY_TEST(LiteralByteStringTest, Test3, "literals/byte string", "test3")
 MY_TEST(LiteralByteStringTest, Test4, "literals/byte string", "test4")
 MY_TEST(LiteralByteStringTest, Test5, "literals/byte string", "test5")
+
+MY_TEST(LiteralRawByteStringTest, Test1, "literals/raw byte string", "test1")
+MY_TEST(LiteralRawByteStringTest, Test2, "literals/raw byte string", "test2")
+MY_TEST(LiteralRawByteStringTest, Test3, "literals/raw byte string", "test3")
+MY_TEST(LiteralRawByteStringTest, Test4, "literals/raw byte string", "test4 (error)")

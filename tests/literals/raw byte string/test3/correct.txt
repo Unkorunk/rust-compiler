@@ -1,21 +1,12 @@
-1	1	literal	r"\
+1	1	literal	br"\
 
 Hello World
 
-"	text \
+"	byte string 92 10 10 72 101 108 108 111 32 87 111 114 108 100 10 10
+7	1	literal	br"
 
 Hello World
 
-
-7	1	literal	r"
-
-Hello World
-
-"	text 
-
-Hello World
-
-
-13	1	literal	r#"Rust
- compiler"#	text Rust
- compiler
+"	byte string 10 10 72 101 108 108 111 32 87 111 114 108 100 10 10
+13	1	literal	br#"Rust
+ compiler"#	byte string 82 117 115 116 10 32 99 111 109 112 105 108 101 114

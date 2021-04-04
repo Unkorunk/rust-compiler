@@ -1,0 +1,21 @@
+1	1	literal	r"\
+
+Hello World
+
+"	text \
+
+Hello World
+
+
+7	1	literal	r"
+
+Hello World
+
+"	text 
+
+Hello World
+
+
+13	1	literal	r#"Rust
+ compiler"#	text Rust
+ compiler

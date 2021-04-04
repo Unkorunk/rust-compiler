@@ -1,9 +1,9 @@
-2	1	literal	r""	text 
-2	9	literal	r#""#	text 
-3	5	literal	r##""##	text 
-4	1	literal	r"#"	text #
-4	14	literal	r#"""#	text "
-4	24	literal	r##""#"##	text "#
-5	3	literal	r#""""#	text ""
-6	5	literal	r#"\n Hello  \t World"#	text \n Hello  \t World
-9	1	literal	r#"\x22\x23"#	text \x22\x23
+2	1	literal	br""	byte string
+2	10	literal	br#""#	byte string
+3	5	literal	br##""##	byte string
+4	1	literal	br"#"	byte string 35
+4	15	literal	br#"""#	byte string 34
+4	26	literal	br##""#"##	byte string 34 35
+5	3	literal	br#""""#	byte string 34 34
+6	5	literal	br#"\n Hello  \t World"#	byte string 92 110 32 72 101 108 108 111 32 32 92 116 32 87 111 114 108 100
+9	1	literal	br#"\x22\x23"#	byte string 92 120 50 50 92 120 50 51
