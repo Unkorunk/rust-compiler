@@ -1,0 +1,22 @@
+// empty inner line doc
+//!
+
+// empty inner block doc
+/*!*/
+
+// empty line comment
+//
+
+// empty outer line doc
+///
+
+// empty block comment
+/**/
+
+// empty 2-asterisk block isn't a doc block, it is a block comment
+/***/
+
+/* The next one isn't allowed because outer doc comments
+require an item that will receive the doc */
+
+/// Where is my item?

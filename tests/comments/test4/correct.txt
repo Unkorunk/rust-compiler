@@ -1,0 +1,30 @@
+3	1	pub	pub
+3	5	mod	mod
+3	9	identifier	outer_module	text outer_module
+3	22	{	{
+19	5	pub	pub
+19	9	mod	mod
+19	13	identifier	inner_module	text inner_module
+19	26	{	{
+19	27	}	}
+21	5	pub	pub
+21	9	mod	mod
+21	13	identifier	nested_comments	text nested_comments
+21	29	{	{
+30	9	pub	pub
+30	13	mod	mod
+30	17	identifier	dummy_item	text dummy_item
+30	28	{	{
+30	29	}	}
+31	5	}	}
+33	5	pub	pub
+33	9	mod	mod
+33	13	identifier	degenerate_cases	text degenerate_cases
+33	30	{	{
+49	9	pub	pub
+49	13	mod	mod
+49	17	identifier	dummy_item	text dummy_item
+49	28	{	{
+49	29	}	}
+54	5	}	}
+60	1	}	}

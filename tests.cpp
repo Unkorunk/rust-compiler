@@ -102,6 +102,11 @@ MY_TEST(KeywordsTest, Test1, "keywords", "test1")
 MY_TEST(KeywordsTest, Test2, "keywords", "test2 (error)")
 MY_TEST(KeywordsTest, Test3, "keywords", "test3 (complex)")
 
+MY_TEST(CommentsTest, Test1, "comments", "test1")
+MY_TEST(CommentsTest, Test2, "comments", "test2")
+MY_TEST(CommentsTest, Test3, "comments", "test3")
+MY_TEST(CommentsTest, Test4, "comments", "test4")
+
 MY_TEST(IdentifiersTest, Test1, "identifiers", "test1")
 MY_TEST(IdentifiersTest, Test2, "identifiers", "test2")
 MY_TEST(IdentifiersTest, Test3, "identifiers", "test3 (error)")
