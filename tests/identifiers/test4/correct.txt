@@ -1,0 +1,4 @@
+1	1	identifier	_HelloWorld	text _HelloWorld
+2	1	identifier	_helloWorld	text _helloWorld
+3	1	identifier	_0helloWorld	text _0helloWorld
+4	1	identifier	__	text __

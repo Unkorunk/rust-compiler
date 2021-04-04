@@ -1,0 +1,15 @@
+1	1	identifier	aaaaaa	text aaaaaa
+1	8	identifier	aAaaA	text aAaaA
+1	14	identifier	a0aaaAa	text a0aaaAa
+1	22	identifier	aA0aaaAa	text aA0aaaAa
+2	1	identifier	zzzzzz	text zzzzzz
+2	8	identifier	z9z9a	text z9z9a
+2	14	identifier	ZZZZ99ZZZ	text ZZZZ99ZZZ
+3	1	identifier	Hello_World	text Hello_World
+3	13	identifier	SomeVar	text SomeVar
+4	1	identifier	first_number	text first_number
+4	14	identifier	secondNumber	text secondNumber
+5	1	identifier	number1	text number1
+5	9	identifier	number2	text number2
+5	17	identifier	number_1	text number_1
+5	26	identifier	number_2	text number_2

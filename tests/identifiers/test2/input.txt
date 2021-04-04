@@ -1,0 +1,3 @@
+r#somevar r#some_var
+  r#hello_world r#as
+  r#let r#fn

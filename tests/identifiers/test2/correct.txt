@@ -1,0 +1,6 @@
+1	1	identifier	r#somevar	text somevar
+1	11	identifier	r#some_var	text some_var
+2	3	identifier	r#hello_world	text hello_world
+2	17	identifier	r#as	text as
+3	3	identifier	r#let	text let
+3	9	identifier	r#fn	text fn
