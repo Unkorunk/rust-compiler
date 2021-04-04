@@ -41,7 +41,7 @@ public:
 
         if (c == '\t') {
             current_column_ += tab_size_;
-        } else if (c == '\n') {
+        } else if (c == '\n' || c == '\f') {
             current_line_++;
             current_column_ = 1;
         } else if (c == '\v') {

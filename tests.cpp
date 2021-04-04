@@ -42,6 +42,7 @@ void my_test(const std::string& test_suit_name, const std::string& test_name) {
 
 MY_TEST(WhitespaceTest, Test1, "whitespace", "test1")
 MY_TEST(WhitespaceTest, Test2, "whitespace", "test2")
+MY_TEST(WhitespaceTest, Test3, "whitespace", "test3")
 
 MY_TEST(PunctuationTest, Test1, "punctuation", "test1")
 MY_TEST(PunctuationTest, Test2, "punctuation", "test2 (error)")

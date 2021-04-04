@@ -1,0 +1,7 @@
+1	5	identifier	Hello	text Hello
+2	10	identifier	Wor	text Wor
+3	13	identifier	ld	text ld
+4	1	identifier	Rust	text Rust
+5	6	identifier	co	text co
+6	1	identifier	mpi	text mpi
+6	12	identifier	ler	text ler
