@@ -1,0 +1,15 @@
+"Hello World\
+           Hello World"
+        "Rust \
+              compiler"
+"fooar"
+
+"foo\
+ar"
+
+
+"foo\
+    ar"
+     "foo\
+  ar"
+

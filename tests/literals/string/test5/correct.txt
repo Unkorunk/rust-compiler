@@ -1,0 +1,11 @@
+1	1	literal	"Hello World\
+           Hello World"	text Hello WorldHello World
+3	9	literal	"Rust \
+              compiler"	text Rust compiler
+5	1	literal	"fooar"	text fooar
+7	1	literal	"foo\
+ar"	text fooar
+11	1	literal	"foo\
+    ar"	text fooar
+13	6	literal	"foo\
+  ar"	text fooar

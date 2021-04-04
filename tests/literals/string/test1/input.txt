@@ -1,0 +1,10 @@
+"A" "Hello World" "Rust" "Unkorunk"
+
+   "" "Hello World" 
+    
+"Rust"           "Unkorunk"  "Hello World" 
+      "Rust" "Unkorunk"
+"C"
+
+    "2021"
+"D"

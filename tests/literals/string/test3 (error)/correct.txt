@@ -1,0 +1,84 @@
+1	1	error	"Hello\x20\xf	text TODO
+1	14	identifier	f	text f
+1	15	error	\	text unexpected symbol
+1	16	identifier	xfa	text xfa
+1	19	error	\	text unexpected symbol
+1	20	identifier	xF	text xF
+1	22	error	\	text unexpected symbol
+1	23	identifier	xf	text xf
+1	25	literal	" "	text  
+1	28	error	\	text unexpected symbol
+1	29	identifier	xff	text xff
+1	32	literal	" "	text  
+1	35	error	\	text unexpected symbol
+1	36	identifier	xaa	text xaa
+1	39	literal	" "	text  
+1	42	error	\	text unexpected symbol
+1	43	identifier	xff	text xff
+1	46	error	\	text unexpected symbol
+1	47	identifier	xAA	text xAA
+1	50	error	"	text TODO
+2	5	error	"\xF	text TODO
+2	9	literal	6	u8 6
+2	10	error	\	text unexpected symbol
+2	11	identifier	xF7	text xF7
+2	14	error	\	text unexpected symbol
+2	15	identifier	xF8	text xF8
+2	18	error	\	text unexpected symbol
+2	19	identifier	xF9	text xF9
+2	27	error	\	text unexpected symbol
+2	28	identifier	xFA	text xFA
+2	31	literal	" "	text  
+2	34	error	\	text unexpected symbol
+2	35	identifier	xAF	text xAF
+2	38	error	"	text TODO
+3	2	error	"\xf	text TODO
+3	6	identifier	f	text f
+3	7	literal	" "	text  
+3	10	error	\	text unexpected symbol
+3	11	identifier	xaa	text xaa
+3	14	literal	" "	text  
+3	17	error	\	text unexpected symbol
+3	18	identifier	xff	text xff
+3	21	error	\	text unexpected symbol
+3	22	identifier	xAA	text xAA
+3	25	error	"	text TODO
+7	5	error	"\xF	text TODO
+7	9	literal	6	u8 6
+7	10	error	\	text unexpected symbol
+7	11	identifier	xF7	text xF7
+7	14	error	\	text unexpected symbol
+7	15	identifier	xF8	text xF8
+7	18	error	\	text unexpected symbol
+7	19	identifier	xF9	text xF9
+7	27	error	\	text unexpected symbol
+7	28	identifier	xFA	text xFA
+7	31	literal	" "	text  
+7	34	error	\	text unexpected symbol
+7	35	identifier	xAF	text xAF
+7	38	error	"	text TODO
+9	5	error	"\xf	text TODO
+9	9	identifier	f	text f
+9	10	literal	" "	text  
+9	13	error	\	text unexpected symbol
+9	14	identifier	xaa	text xaa
+9	17	literal	" "	text  
+9	20	error	\	text unexpected symbol
+9	21	identifier	xff	text xff
+9	24	error	\	text unexpected symbol
+9	25	identifier	xAA	text xAA
+9	28	error	"	text TODO
+10	13	error	"\xF	text TODO
+10	17	literal	6	u8 6
+10	18	error	\	text unexpected symbol
+10	19	identifier	xF7	text xF7
+10	22	error	\	text unexpected symbol
+10	23	identifier	xF8	text xF8
+10	26	error	\	text unexpected symbol
+10	27	identifier	xF9	text xF9
+10	35	error	\	text unexpected symbol
+10	36	identifier	xFA	text xFA
+10	39	literal	" "	text  
+10	42	error	\	text unexpected symbol
+10	43	identifier	xAF	text xAF
+10	46	error	"	text TODO

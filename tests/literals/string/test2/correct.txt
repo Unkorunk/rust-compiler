@@ -1,0 +1,17 @@
+1	1	literal	"\x01"	text 
+1	8	literal	"\x41\x42\x43\x61\x62\x63"	text ABCabc
+1	35	literal	"\x41\x42\x43"	text ABC
+1	50	literal	"\x61\x62\x63"	text abc
+3	2	literal	"\x02"	text 
+5	4	literal	"\x41\x42\x43"	text ABC
+5	19	literal	"\x61\x62\x63"	text abc
+5	44	literal	"\x41\x42\x43"	text ABC
+5	59	literal	"\x61\x62\x63"	text abc
+6	2	literal	"\x41\x42\x43"	text ABC
+6	22	literal	"\x61\x62\x63"	text abc
+7	1	literal	"\x03"	text 
+9	1	literal	"\x41\x42\x43"	text ABC
+9	16	literal	"\x61\x62\x63"	text abc
+9	33	literal	"\x41\x42\x43"	text ABC
+9	48	literal	"\x61\x62\x63"	text abc
+11	9	literal	"\x04"	text 

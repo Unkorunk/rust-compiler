@@ -1,0 +1,14 @@
+1	1	literal	"A"	text A
+1	5	literal	"Hello World"	text Hello World
+1	19	literal	"Rust"	text Rust
+1	26	literal	"Unkorunk"	text Unkorunk
+3	4	literal	""	text 
+3	7	literal	"Hello World"	text Hello World
+5	1	literal	"Rust"	text Rust
+5	18	literal	"Unkorunk"	text Unkorunk
+5	30	literal	"Hello World"	text Hello World
+6	7	literal	"Rust"	text Rust
+6	14	literal	"Unkorunk"	text Unkorunk
+7	1	literal	"C"	text C
+9	5	literal	"2021"	text 2021
+10	1	literal	"D"	text D
