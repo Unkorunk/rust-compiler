@@ -422,6 +422,7 @@ Token Tokenizer::TokenizeNumber() {
     }
 
     std::vector<int8_t> digits;
+    digits.push_back(0);
 
     do {
         if (system == 2 && TokenizerHelper::IsBinDigit(c) || system == 8 && TokenizerHelper::IsOctDigit(c) ||
@@ -460,9 +461,14 @@ Token Tokenizer::TokenizeNumber() {
 
             stream_.SkipChar(1);
             c = stream_.PeekChar(0);
-            while (TokenizerHelper::IsDecDigit(c)) {
-                is_digit_after_dot_found = true;
-                float_str += c;
+            if (c == '_') {
+                return MakeError("TODO");
+            }
+            while (TokenizerHelper::IsDecDigit(c) || c == '_') {
+                if (c != '_') {
+                    is_digit_after_dot_found = true;
+                    float_str += c;
+                }
                 stream_.SkipChar(1);
                 c = stream_.PeekChar(0);
             }
@@ -478,10 +484,10 @@ Token Tokenizer::TokenizeNumber() {
             c = stream_.PeekChar(0);
             if (c == '+' || c == '-') {
                 float_str += c;
+                stream_.SkipChar(1);
+                c = stream_.PeekChar(0);
             }
 
-            stream_.SkipChar(1);
-            c = stream_.PeekChar(0);
             while(TokenizerHelper::IsDecDigit(c) || c == '_') {
                 if (c != '_') {
                     is_digit_after_exponent_found = true;

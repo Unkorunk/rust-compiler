@@ -1,0 +1,7 @@
+1	1	literal	0.	f64 0
+1	4	literal	00.	f64 0
+1	8	literal	01.	f64 1
+1	12	literal	1.	f64 1
+2	1	literal	34567.	f64 34567
+2	8	literal	100000000000000000000.	f64 1e+20
+3	1	literal	23_00_567.	f64 2.30057e+06
