@@ -1,0 +1,59 @@
+1	1	if	if
+1	4	identifier	x	text x
+1	6	==	==
+1	9	literal	4	u8 4
+1	11	{	{
+2	5	identifier	println	text println
+2	12	!	!
+2	13	(	(
+2	14	literal	"x is four"	text x is four
+2	25	)	)
+2	26	;	;
+3	1	}	}
+3	3	else	else
+3	8	if	if
+3	11	identifier	x	text x
+3	13	==	==
+3	16	literal	3	u8 3
+3	18	{	{
+4	5	identifier	println	text println
+4	12	!	!
+4	13	(	(
+4	14	literal	"x is three"	text x is three
+4	26	)	)
+4	27	;	;
+5	1	}	}
+5	3	else	else
+5	8	{	{
+6	5	identifier	println	text println
+6	12	!	!
+6	13	(	(
+6	14	literal	"x is something else"	text x is something else
+6	35	)	)
+6	36	;	;
+7	1	}	}
+9	1	let	let
+9	5	identifier	y	text y
+9	7	=	=
+9	9	if	if
+9	12	literal	12	u8 12
+9	15	*	*
+9	17	literal	15	u8 15
+9	20	>	>
+9	22	literal	150	u8 150
+9	26	{	{
+10	5	literal	"Bigger"	text Bigger
+11	1	}	}
+11	3	else	else
+11	8	{	{
+12	5	literal	"Smaller"	text Smaller
+13	1	}	}
+13	2	;	;
+14	1	identifier	assert_eq	text assert_eq
+14	10	!	!
+14	11	(	(
+14	12	identifier	y	text y
+14	13	,	,
+14	15	literal	"Bigger"	text Bigger
+14	23	)	)
+14	24	;	;

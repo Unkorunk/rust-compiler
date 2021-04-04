@@ -1,0 +1,132 @@
+1	1	let	let
+1	5	mut	mut
+1	9	identifier	i	text i
+1	11	=	=
+1	13	literal	0	u8 0
+1	14	;	;
+3	1	while	while
+3	7	identifier	i	text i
+3	9	<	<
+3	11	literal	10	u8 10
+3	14	{	{
+4	5	identifier	i	text i
+4	7	=	=
+4	9	identifier	i	text i
+4	11	+	+
+4	13	literal	1	u8 1
+4	14	;	;
+5	1	}	}
+7	1	literal	1.	f64 1
+7	3	.	.
+7	4	literal	2	u8 2
+7	5	;	;
+8	1	literal	3.	f64 3
+8	3	.	.
+8	4	;	;
+9	1	..	..
+9	3	literal	4	u8 4
+9	4	;	;
+10	1	..	..
+10	3	;	;
+11	1	literal	5.	f64 5
+11	3	.	.
+11	4	=	=
+11	5	literal	6	u8 6
+11	6	;	;
+12	1	..=	..=
+12	4	literal	7	u8 7
+12	5	;	;
+14	1	let	let
+14	5	identifier	x	text x
+14	7	=	=
+14	9	identifier	std	text std
+14	12	::	::
+14	14	identifier	ops	text ops
+14	17	::	::
+14	19	identifier	Range	text Range
+14	25	{	{
+14	26	identifier	start	text start
+14	31	:	:
+14	33	literal	0	u8 0
+14	34	,	,
+14	36	identifier	end	text end
+14	39	:	:
+14	41	literal	10	u8 10
+14	43	}	}
+14	44	;	;
+15	1	let	let
+15	5	identifier	y	text y
+15	7	=	=
+15	9	literal	0.	f64 0
+15	11	.	.
+15	12	literal	10	u8 10
+15	14	;	;
+17	1	identifier	assert_eq	text assert_eq
+17	10	!	!
+17	11	(	(
+17	12	identifier	x	text x
+17	13	,	,
+17	15	identifier	y	text y
+17	16	)	)
+17	17	;	;
+19	1	for	for
+19	5	identifier	i	text i
+19	7	in	in
+19	10	literal	1.	f64 1
+19	12	.	.
+19	13	literal	11	u8 11
+19	16	{	{
+20	5	identifier	println	text println
+20	12	!	!
+20	13	(	(
+20	14	literal	"{}"	text {}
+20	18	,	,
+20	20	identifier	i	text i
+20	21	)	)
+20	22	;	;
+21	1	}	}
+23	1	identifier	macro_rules	text macro_rules
+23	12	!	!
+23	14	identifier	mac_variant	text mac_variant
+23	26	{	{
+24	5	(	(
+24	6	$	$
+24	7	identifier	vis	text vis
+24	10	:	:
+24	11	identifier	vis	text vis
+24	15	$	$
+24	16	identifier	name	text name
+24	20	:	:
+24	21	identifier	ident	text ident
+24	26	)	)
+24	28	=>	=>
+24	31	{	{
+25	9	enum	enum
+25	14	$	$
+25	15	identifier	name	text name
+25	20	{	{
+26	13	$	$
+26	14	identifier	vis	text vis
+26	18	identifier	Unit	text Unit
+26	22	,	,
+28	13	$	$
+28	14	identifier	vis	text vis
+28	18	identifier	Tuple	text Tuple
+28	23	(	(
+28	24	identifier	u8	text u8
+28	26	,	,
+28	28	identifier	u16	text u16
+28	31	)	)
+28	32	,	,
+30	13	$	$
+30	14	identifier	vis	text vis
+30	18	identifier	Struct	text Struct
+30	25	{	{
+30	27	identifier	f	text f
+30	28	:	:
+30	30	identifier	u8	text u8
+30	33	}	}
+30	34	,	,
+31	9	}	}
+32	5	}	}
+33	1	}	}

@@ -175,6 +175,7 @@ private:
         if (*balance == 0) {
             return MakeError("TODO");
         }
+        (*balance)--;
         return MakeToken(type);
     }
 };
