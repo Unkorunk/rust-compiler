@@ -99,7 +99,7 @@ private:
         {'\'', std::bind(&Tokenizer::TokenizeCharacter, this)},
         {'"', std::bind(&Tokenizer::TokenizeString, this)},
         {'r', std::bind(&Tokenizer::TokenizeRawString, this)},
-        {'b', std::bind(&Tokenizer::MakeError, this, "TODO"), {
+        {'b', std::bind(&Tokenizer::MakeError, this, "no matching punctuation sequence found"), {
             {'\'', std::bind(&Tokenizer::TokenizeByte, this)},
             {'"', std::bind(&Tokenizer::TokenizeByteString, this)},
             {'r', std::bind(&Tokenizer::TokenizeRawByteString, this)}
@@ -173,7 +173,7 @@ private:
 
     Token TokenizeCloseBr(Token::Type type, int *balance) {
         if (*balance == 0) {
-            return MakeError("TODO");
+            return MakeError("unbalanced sequence of brackets");
         }
         (*balance)--;
         return MakeToken(type);

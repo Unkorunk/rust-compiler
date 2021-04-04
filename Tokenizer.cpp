@@ -68,7 +68,7 @@ Token Tokenizer::SkipMultilineComment() {
         } else if (c == '/' && is_start_found) {
             if (comment_balance == 0) {
                 stream_.SkipChar(1);
-                return MakeError("TODO");
+                return MakeError("extra terminated block comment");
             }
             comment_balance--;
         } else {
@@ -102,7 +102,7 @@ Token Tokenizer::TokenizeIdentifierOrKeyword() {
     }
 
     if (is_raw_identifier && is_quote_found) {
-        return MakeError("TODO");
+        return MakeError("found invalid character; only `#` is allowed in raw string delimitation: '");
     }
 
     identifier_buf += c;
@@ -115,13 +115,13 @@ Token Tokenizer::TokenizeIdentifierOrKeyword() {
         stream_.SkipChar(1);
         c = stream_.PeekChar(0);
         if (!TokenizerHelper::IsAlphanumeric(c)) {
-            return MakeError("TODO");
+            return MakeError("expected alphanumeric symbol");
         }
     } else if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
         stream_.SkipChar(1);
         c = stream_.PeekChar(0);
     } else {
-        return MakeError("TODO");
+        return MakeError("expected alphanumeric or `_` symbol");
     }
 
     while (TokenizerHelper::IsAlphanumeric(c)) {
@@ -151,26 +151,26 @@ Token Tokenizer::TokenizeIdentifierOrKeyword() {
         return MakeToken(TokenValue(identifier_buf), Token::Type::kLifetimeOrLabel);
     }
 
-    return MakeError("TODO");
+    return MakeError("invalid sequence of characters");
 }
 
 Token Tokenizer::TokenizeCharacter() {
     char c = stream_.PeekChar(0);
     if (c == '\'' || c == '\n' || c == '\r' || c == '\t') {
         stream_.SkipChar(1);
-        return MakeError("TODO");
+        return MakeError("character constant must be escaped");
     }
 
     if (c == '\\') {
         if (!TokenizerHelper::TryGetEscape(&stream_, &c)) {
-            return MakeError("TODO");
+            return MakeError("unknown character escape");
         }
     } else {
         stream_.SkipChar(1);
     }
 
     if (stream_.PeekChar(0) != '\'') {
-        return MakeError("TODO");
+        return MakeError("unterminated character literal");
     }
 
     stream_.SkipChar(1);
@@ -184,7 +184,7 @@ Token Tokenizer::TokenizeString() {
     while (true) {
         char c = stream_.PeekChar(0);
         if (stream_.IsEOF()) {
-            return MakeError("TODO");
+            return MakeError("unexpected end-of-file");
         }
 
         if (c == '\"') {
@@ -194,11 +194,11 @@ Token Tokenizer::TokenizeString() {
 
         // ~IsolatedCR
         if (c == '\r' && stream_.PeekChar(1) != '\n') {
-            return MakeError("TODO");
+            return MakeError("invalid sequence of characters");
         }
 
         if (c == '\n') {
-            return MakeError("TODO");
+            return MakeError("unterminated string literal");
         }
 
         if (c == '\\') {
@@ -207,7 +207,7 @@ Token Tokenizer::TokenizeString() {
                 SkipWhitespace();
                 continue;
             } else if (!TokenizerHelper::TryGetEscape(&stream_, &c)) {
-                return MakeError("TODO");
+                return MakeError("unknown character escape");
             }
         } else {
             stream_.SkipChar(1);
@@ -230,7 +230,7 @@ Token Tokenizer::TokenizeRawString() {
 
     char c = stream_.PeekChar(0);
     if (c != '\"') {
-        return MakeError("TODO");
+        return MakeError("expected `\"`");
     }
 
     stream_.SkipChar(1);
@@ -241,7 +241,7 @@ Token Tokenizer::TokenizeRawString() {
     c = stream_.PeekChar(0);
     while (!is_double_quote_found || hash_count != hash_require) {
         if (stream_.IsEOF()) {
-            return MakeError("TODO");
+            return MakeError("unexpected end-of-file");
         }
 
         if (c == '"') {
@@ -268,25 +268,25 @@ Token Tokenizer::TokenizeByte() {
     char c = stream_.PeekChar(0);
     if (c == '\'' || c == '\n' || c == '\r' || c == '\t') {
         stream_.SkipChar(1);
-        return MakeError("TODO");
+        return MakeError("character constant must be escaped");
     }
 
     uint8_t result;
 
     if (c == '\\') {
         if (!TokenizerHelper::TryGetByteEscape(&stream_, &result)) {
-            return MakeError("TODO");
+            return MakeError("unknown character escape");
         }
     } else if (c >= 0x00 && c <= 0x7f) {
         stream_.SkipChar(1);
         result = c;
     } else {
         stream_.SkipChar(1);
-        return MakeError("TODO");
+        return MakeError("invalid sequence of characters");
     }
 
     if (stream_.PeekChar(0) != '\'') {
-        return MakeError("TODO");
+        return MakeError("unterminated byte literal");
     }
 
     stream_.SkipChar(1);
@@ -300,7 +300,7 @@ Token Tokenizer::TokenizeByteString() {
     while (true) {
         char c = stream_.PeekChar(0);
         if (stream_.IsEOF()) {
-            return MakeError("TODO");
+            return MakeError("unexpected end-of-file");
         }
 
         if (c == '\"') {
@@ -310,11 +310,11 @@ Token Tokenizer::TokenizeByteString() {
 
         // ~IsolatedCR
         if (c == '\r' && stream_.PeekChar(1) != '\n') {
-            return MakeError("TODO");
+            return MakeError("invalid sequence of characters");
         }
 
         if (c == '\n') {
-            return MakeError("TODO");
+            return MakeError("unterminated byte string literal");
         }
 
         uint8_t result;
@@ -325,14 +325,14 @@ Token Tokenizer::TokenizeByteString() {
                 SkipWhitespace();
                 continue;
             } else if (!TokenizerHelper::TryGetByteEscape(&stream_, &result)) {
-                return MakeError("TODO");
+                return MakeError("unknown character escape");
             }
         } else if (c >= 0x00 && c <= 0x7f) {
             stream_.SkipChar(1);
             result = c;
         } else {
             stream_.SkipChar(1);
-            return MakeError("TODO");
+            return MakeError("invalid sequence of characters");
         }
 
         byte_string_buf.push_back(result);
@@ -352,7 +352,7 @@ Token Tokenizer::TokenizeRawByteString() {
 
     char c = stream_.PeekChar(0);
     if (c != '\"') {
-        return MakeError("TODO");
+        return MakeError("expected `\"`");
     }
 
     stream_.SkipChar(1);
@@ -363,7 +363,7 @@ Token Tokenizer::TokenizeRawByteString() {
     c = stream_.PeekChar(0);
     while (!is_double_quote_found || hash_count != hash_require) {
         if (stream_.IsEOF()) {
-            return MakeError("TODO");
+            return MakeError("unexpected end-of-file");
         }
 
         if (c == '"') {
@@ -379,7 +379,7 @@ Token Tokenizer::TokenizeRawByteString() {
         if (c >= 0x00 && c <= 0x7f) {
             raw_byte_string_buf.push_back(c);
         } else {
-            return MakeError("TODO");
+            return MakeError("invalid sequence of characters");
         }
 
         stream_.SkipChar(1);
@@ -442,7 +442,7 @@ Token Tokenizer::TokenizeNumber() {
     } while (!stream_.IsEOF());
 
     if (!is_digit_found) {
-        return MakeError("TODO");
+        return MakeError("no valid digits found for number");
     }
 
     if (system == 10 && !stream_.IsEOF()) {
@@ -462,7 +462,7 @@ Token Tokenizer::TokenizeNumber() {
             stream_.SkipChar(1);
             c = stream_.PeekChar(0);
             if (c == '_') {
-                return MakeError("TODO");
+                return MakeError("unexpected `_`");
             }
             while (TokenizerHelper::IsDecDigit(c) || c == '_') {
                 if (c != '_') {
@@ -498,13 +498,13 @@ Token Tokenizer::TokenizeNumber() {
             }
 
             if (!is_digit_after_exponent_found) {
-                return MakeError("TODO");
+                return MakeError("expected at least one digit in exponent");
             }
         }
 
         if (c == 'f') {
             if (is_dot_found && !is_digit_after_dot_found) {
-                return MakeError("TODO");
+                return MakeError("expected at least one digit after dot");
             }
 
             if (stream_.CheckSeq(1, { '3', '2' })) {
@@ -518,7 +518,7 @@ Token Tokenizer::TokenizeNumber() {
 
         if (is_dot_found || is_exponent_found) {
             if (is_exponent_found && is_dot_found && !is_digit_after_dot_found) {
-                return MakeError("TODO");
+                return MakeError("expected at least one digit after dot");
             }
             return MakeLiteral(TokenValue(std::stod(float_str)));
         }
@@ -526,7 +526,7 @@ Token Tokenizer::TokenizeNumber() {
 
     TokenValue token_value;
     if (!TryParse<uint8_t, uint16_t, uint32_t, uint64_t>(digits, &token_value, system)) {
-        return MakeError("TODO");
+        return MakeError("literal out of range");
     }
 
     #define TP(type)                                   \
@@ -534,7 +534,7 @@ Token Tokenizer::TokenizeNumber() {
         if (TryParse<type>(digits, &result, system)) { \
             token_value = result;                      \
         } else {                                       \
-            return MakeError("TODO");                  \
+            return MakeError("literal out of range");  \
         }
 
     #define TP_BRANCH(utype, itype) \
@@ -570,7 +570,7 @@ Token Tokenizer::TokenizeNumber() {
     }
 
     if (TokenizerHelper::IsAlphanumeric(stream_.PeekChar(0))) {
-        return MakeError("TODO");
+        return MakeError("unexpected symbol");
     }
 
     return MakeLiteral(token_value);

@@ -1,36 +1,36 @@
-1	1	error	0x64_0	text TODO
+1	1	error	0x64_0	text unexpected symbol
 1	7	identifier	x64	text x64
-3	1	error	0	text TODO
+3	1	error	0	text unexpected symbol
 3	2	identifier	abacaba	text abacaba
 3	10	identifier	abacaba0	text abacaba0
-3	19	error	0	text TODO
+3	19	error	0	text unexpected symbol
 3	20	identifier	abacaba0	text abacaba0
-5	1	error	0	text TODO
+5	1	error	0	text unexpected symbol
 5	2	identifier	invalidSuffix	text invalidSuffix
-8	1	error	123	text TODO
+8	1	error	123	text unexpected symbol
 8	4	identifier	AFB43	text AFB43
-9	1	error	0b010	text TODO
+9	1	error	0b010	text unexpected symbol
 9	6	literal	2	u8 2
-10	1	error	0o05	text TODO
+10	1	error	0o05	text unexpected symbol
 10	5	literal	81	u8 81
-12	1	error	128_i8	text TODO
-13	1	error	256_u8	text TODO
-15	1	error	0x	text TODO
+12	1	error	128_i8	text literal out of range
+13	1	error	256_u8	text literal out of range
+15	1	error	0x	text no valid digits found for number
 15	6	literal	64	u8 64
-17	1	error	0x64	text TODO
+17	1	error	0x64	text unexpected symbol
 17	5	identifier	u	text u
 17	7	literal	32	u8 32
-19	1	error	0x64	text TODO
+19	1	error	0x64	text unexpected symbol
 19	5	identifier	u	text u
-21	1	error	0x64	text TODO
+21	1	error	0x64	text unexpected symbol
 21	5	identifier	i	text i
-23	1	error	0b_	text TODO
-24	1	error	0b____	text TODO
-26	1	error	0x64u64	text TODO
-26	8	error	0x64u64	text TODO
+23	1	error	0b_	text no valid digits found for number
+24	1	error	0b____	text no valid digits found for number
+26	1	error	0x64u64	text unexpected symbol
+26	8	error	0x64u64	text unexpected symbol
 26	15	literal	0x64u64	u64 100
-27	1	error	0x64_0	text TODO
+27	1	error	0x64_0	text unexpected symbol
 27	7	identifier	x64	text x64
-28	1	error	0x64u64	text TODO
+28	1	error	0x64u64	text unexpected symbol
 28	8	literal	0x64	u8 100
 29	1	literal	0x3	u8 3

@@ -1,4 +1,4 @@
-1	1	error	"Hello\x20\xf	text TODO
+1	1	error	"Hello\x20\xf	text unknown character escape
 1	14	identifier	f	text f
 1	15	error	\	text unexpected symbol
 1	16	identifier	xfa	text xfa
@@ -17,8 +17,8 @@
 1	43	identifier	xff	text xff
 1	46	error	\	text unexpected symbol
 1	47	identifier	xAA	text xAA
-1	50	error	"	text TODO
-2	5	error	"\xF	text TODO
+1	50	error	"	text unterminated string literal
+2	5	error	"\xF	text unknown character escape
 2	9	literal	6	u8 6
 2	10	error	\	text unexpected symbol
 2	11	identifier	xF7	text xF7
@@ -31,8 +31,8 @@
 2	31	literal	" "	text  
 2	34	error	\	text unexpected symbol
 2	35	identifier	xAF	text xAF
-2	38	error	"	text TODO
-3	2	error	"\xf	text TODO
+2	38	error	"	text unterminated string literal
+3	2	error	"\xf	text unknown character escape
 3	6	identifier	f	text f
 3	7	literal	" "	text  
 3	10	error	\	text unexpected symbol
@@ -42,8 +42,8 @@
 3	18	identifier	xff	text xff
 3	21	error	\	text unexpected symbol
 3	22	identifier	xAA	text xAA
-3	25	error	"	text TODO
-7	5	error	"\xF	text TODO
+3	25	error	"	text unterminated string literal
+7	5	error	"\xF	text unknown character escape
 7	9	literal	6	u8 6
 7	10	error	\	text unexpected symbol
 7	11	identifier	xF7	text xF7
@@ -56,8 +56,8 @@
 7	31	literal	" "	text  
 7	34	error	\	text unexpected symbol
 7	35	identifier	xAF	text xAF
-7	38	error	"	text TODO
-9	5	error	"\xf	text TODO
+7	38	error	"	text unterminated string literal
+9	5	error	"\xf	text unknown character escape
 9	9	identifier	f	text f
 9	10	literal	" "	text  
 9	13	error	\	text unexpected symbol
@@ -67,8 +67,8 @@
 9	21	identifier	xff	text xff
 9	24	error	\	text unexpected symbol
 9	25	identifier	xAA	text xAA
-9	28	error	"	text TODO
-10	13	error	"\xF	text TODO
+9	28	error	"	text unterminated string literal
+10	13	error	"\xF	text unknown character escape
 10	17	literal	6	u8 6
 10	18	error	\	text unexpected symbol
 10	19	identifier	xF7	text xF7
@@ -81,4 +81,4 @@
 10	39	literal	" "	text  
 10	42	error	\	text unexpected symbol
 10	43	identifier	xAF	text xAF
-10	46	error	"	text TODO
+10	46	error	"	text unexpected end-of-file

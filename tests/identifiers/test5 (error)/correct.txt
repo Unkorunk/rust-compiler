@@ -1,4 +1,4 @@
-1	1	error	0	text TODO
+1	1	error	0	text unexpected symbol
 1	2	identifier	abacaba	text abacaba
 2	1	_	_
-3	1	error	r#_	text TODO
+3	1	error	r#_	text expected alphanumeric symbol

@@ -1,7 +1,7 @@
-1	1	error	br##	text TODO
+1	1	error	br##	text expected `"`
 3	1	literal	br" "	byte string 32
-3	7	error	"	text TODO
+3	7	error	"	text unterminated string literal
 5	1	literal	br#" \"#	byte string 32 92
-5	10	error	"#	text TODO
+5	10	error	"#	text unterminated string literal
 7	1	error	br##" Hello "# world
-	text TODO
+	text unexpected end-of-file

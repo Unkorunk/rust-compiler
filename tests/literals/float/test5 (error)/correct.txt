@@ -4,24 +4,24 @@
 1	9	.	.
 1	11	literal	0x0	u8 0
 1	14	.	.
-3	1	error	1234e	text TODO
-3	7	error	1234E	text TODO
-3	13	error	12_34e+	text TODO
-3	21	error	12_34e-	text TODO
-5	1	error	1.	text TODO
+3	1	error	1234e	text expected at least one digit in exponent
+3	7	error	1234E	text expected at least one digit in exponent
+3	13	error	12_34e+	text expected at least one digit in exponent
+3	21	error	12_34e-	text expected at least one digit in exponent
+5	1	error	1.	text unexpected `_`
 5	3	identifier	_1	text _1
-5	6	error	1.	text TODO
+5	6	error	1.	text unexpected `_`
 5	8	identifier	_1e	text _1e
 5	11	+	+
 5	12	literal	10	u8 10
-7	1	error	1.e	text TODO
-7	5	error	1.	text TODO
+7	1	error	1.e	text expected at least one digit in exponent
+7	5	error	1.	text expected at least one digit after dot
 7	7	identifier	f32	text f32
-7	11	error	1.	text TODO
+7	11	error	1.	text expected at least one digit after dot
 7	13	identifier	f64	text f64
 9	1	.	.
 9	2	literal	13f32	f32 13
-11	1	error	5.5e	text TODO
+11	1	error	5.5e	text expected at least one digit in exponent
 11	5	identifier	f32	text f32
-11	9	error	5.5e	text TODO
+11	9	error	5.5e	text expected at least one digit in exponent
 11	13	identifier	f64	text f64

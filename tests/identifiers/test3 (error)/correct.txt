@@ -1,6 +1,6 @@
-1	1	error	r#crate	text TODO
-2	1	error	r#self	text TODO
-3	1	error	r#super	text TODO
-4	1	error	r#Self	text TODO
-5	1	error	r#'	text TODO
+1	1	error	r#crate	text invalid sequence of characters
+2	1	error	r#self	text invalid sequence of characters
+3	1	error	r#super	text invalid sequence of characters
+4	1	error	r#Self	text invalid sequence of characters
+5	1	error	r#'	text found invalid character; only `#` is allowed in raw string delimitation: '
 5	4	static	static

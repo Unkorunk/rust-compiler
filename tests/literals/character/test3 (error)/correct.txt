@@ -1,4 +1,4 @@
-1	1	error	'\xf	text TODO
+1	1	error	'\xf	text unknown character escape
 1	5	identifier	f	text f
 1	6	literal	' '	char  
 1	9	error	\	text unexpected symbol
@@ -10,14 +10,14 @@
 1	23	error	\	text unexpected symbol
 1	24	identifier	xDD	text xDD
 1	27	error	'
-	text TODO
-2	6	error	'\xf	text TODO
+	text character constant must be escaped
+2	6	error	'\xf	text unknown character escape
 2	10	literal	7	u8 7
 2	11	literal	' '	char  
 2	14	error	\	text unexpected symbol
 2	15	identifier	xF7	text xF7
 2	18	error	'
-	text TODO
-7	4	error	'\xf	text TODO
+	text character constant must be escaped
+7	4	error	'\xf	text unknown character escape
 7	8	literal	0	u8 0
-7	9	error	'	text TODO
+7	9	error	'	text unterminated character literal

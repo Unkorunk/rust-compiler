@@ -1,9 +1,9 @@
 1	1	identifier	asbreak	text asbreak
 1	9	identifier	constcontinue	text constcontinue
-2	1	error	1	text TODO
+2	1	error	1	text unexpected symbol
 2	2	break	break
 2	8	identifier	break2	text break2
-2	15	error	1	text TODO
+2	15	error	1	text unexpected symbol
 2	16	identifier	break2	text break2
 3	5	identifier	_break	text _break
 3	12	identifier	break_	text break_
