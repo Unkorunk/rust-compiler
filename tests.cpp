@@ -82,6 +82,7 @@ MY_TEST(LiteralIntegerTest, Test2, "literals/integer", "test2 (error)")
 MY_TEST(LiteralIntegerTest, Test3, "literals/integer", "test3 (error)")
 MY_TEST(LiteralIntegerTest, Test4, "literals/integer", "test4")
 MY_TEST(LiteralIntegerTest, Test5, "literals/integer", "test5 (complex)")
+MY_TEST(LiteralIntegerTest, Test6, "literals/integer", "test6")
 
 MY_TEST(LiteralBooleanTest, Test1, "literals/boolean", "test1")
 MY_TEST(LiteralBooleanTest, Test2, "literals/boolean", "test2 (error)")

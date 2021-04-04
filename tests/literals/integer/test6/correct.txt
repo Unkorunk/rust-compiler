@@ -1,0 +1,11 @@
+1	1	literal	0xfe	u8 254
+1	6	literal	0xff	u8 255
+1	11	literal	0x100	u16 256
+2	1	literal	0xf_ffe	u16 65534
+2	9	literal	0xf_fff	u16 65535
+2	17	literal	0x10000	u32 65536
+3	1	literal	0xff_fff_ffe	u32 4294967294
+3	14	literal	0xff_fff_fff	u32 4294967295
+3	27	literal	0x100_000_000	u64 4294967296
+4	1	literal	0xf_fff_fff_fff_fff_ffe	u64 18446744073709551614
+4	25	literal	0xf_fff_fff_fff_fff_fff	u64 18446744073709551615
