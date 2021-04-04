@@ -1,6 +1,7 @@
 #include "Tokenizer.hpp"
 
-Tokenizer::Tokenizer(std::ifstream *stream) : stream_(stream) {}
+Tokenizer::Tokenizer(std::ifstream *stream, TargetType target_type)
+    : stream_(stream), target_type_(target_type) {}
 
 bool Tokenizer::HasNext() const {
     return !stream_.IsEOF();
@@ -47,13 +48,14 @@ void Tokenizer::SkipWhitespace() {
     }
 }
 
-void Tokenizer::SkipLineComment() {
+Token Tokenizer::SkipLineComment() {
     while(!stream_.IsEOF() && stream_.PeekChar(0) != '\n') {
         stream_.SkipChar(1);
     }
+    return Next();
 }
 
-void Tokenizer::SkipMultilineComment() {
+Token Tokenizer::SkipMultilineComment() {
     bool is_start_found = false;
 
     int comment_balance = 1;
@@ -66,7 +68,7 @@ void Tokenizer::SkipMultilineComment() {
         } else if (c == '/' && is_start_found) {
             if (comment_balance == 0) {
                 stream_.SkipChar(1);
-                throw std::exception(); // TODO PushError("blabla")
+                return MakeError("TODO");
             }
             comment_balance--;
         } else {
@@ -74,6 +76,8 @@ void Tokenizer::SkipMultilineComment() {
         }
         stream_.SkipChar(1);
     }
+
+    return Next();
 }
 
 Token Tokenizer::TokenizeIdentifierOrKeyword() {
@@ -515,16 +519,16 @@ Token Tokenizer::TokenizeNumber() {
     }
 
     TokenValue token_value;
-    if (!TryParse<uint8_t, uint16_t, uint32_t, uint64_t>(digits, &token_value)) { // TODO check u128
+    if (!TryParse<uint8_t, uint16_t, uint32_t, uint64_t>(digits, &token_value, system)) {
         return MakeError("TODO");
     }
 
-    #define TP(type)                               \
-        type result;                               \
-        if (TryParse<type>(digits, &result)) {     \
-            token_value = result;                  \
-        } else {                                   \
-            return MakeError("TODO");              \
+    #define TP(type)                                   \
+        type result;                                   \
+        if (TryParse<type>(digits, &result, system)) { \
+            token_value = result;                      \
+        } else {                                       \
+            return MakeError("TODO");                  \
         }
 
     #define TP_BRANCH(utype, itype) \
@@ -534,7 +538,7 @@ Token Tokenizer::TokenizeNumber() {
             TP(itype)               \
         }
 
-    if (!stream_.IsEOF()) {
+    if (!stream_.IsEOF() && (c == 'i' || c == 'u')) {
         if (stream_.CheckSeq(1, { '8' })) {
             stream_.SkipChar(2);
             TP_BRANCH(uint8_t, int8_t)
@@ -547,11 +551,20 @@ Token Tokenizer::TokenizeNumber() {
         } else if (stream_.CheckSeq(1, { '6', '4' })) {
             stream_.SkipChar(3);
             TP_BRANCH(uint64_t, int64_t)
-        } else if (stream_.CheckSeq(1, { '1', '2', '8' })) {
-            throw std::exception(); // TODO not implemented
         } else if (stream_.CheckSeq(1, { 's', 'i', 'z', 'e' })) {
-            throw std::exception(); // TODO not implemented
+            stream_.SkipChar(5);
+            if (target_type_ == TargetType::kX32) {
+                TP_BRANCH(uint32_t, int32_t)
+            } else if (target_type_ == TargetType::kX64) {
+                TP_BRANCH(uint64_t, int64_t)
+            } else {
+                throw std::exception(); // not implemented
+            }
         }
+    }
+
+    if (TokenizerHelper::IsAlphanumeric(stream_.PeekChar(0))) {
+        return MakeError("TODO");
     }
 
     return MakeLiteral(token_value);

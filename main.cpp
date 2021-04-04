@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
         return 0;
     }
 
-    Tokenizer tokenizer(&ifs);
+    Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
 
     if (print_tokenizer) {
         while (tokenizer.HasNext()) {

@@ -1,10 +1,10 @@
 1	1	identifier	true_	text true_
 1	7	identifier	_true	text _true
 1	13	identifier	_true_	text _true_
-2	1	literal	1	u8 1
+2	1	error	1	text TODO
 2	2	literal	false	bool 0
 2	8	identifier	false1	text false1
-2	15	literal	1	u8 1
+2	15	error	1	text TODO
 2	16	identifier	false1	text false1
 2	23	identifier	trUe	text trUe
 2	28	identifier	False	text False

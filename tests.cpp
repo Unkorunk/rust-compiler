@@ -8,7 +8,7 @@
 void my_test(const std::string& test_suit_name, const std::string& test_name) {
     std::ifstream ifs("tests/" + test_suit_name + "/" + test_name + "/input.txt");
     
-    Tokenizer tokenizer(&ifs);
+    Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
     std::ostringstream oss;
     while (tokenizer.HasNext()) {
         Token token = tokenizer.Next();
@@ -76,6 +76,12 @@ MY_TEST(LiteralRawByteStringTest, Test1, "literals/raw byte string", "test1")
 MY_TEST(LiteralRawByteStringTest, Test2, "literals/raw byte string", "test2")
 MY_TEST(LiteralRawByteStringTest, Test3, "literals/raw byte string", "test3")
 MY_TEST(LiteralRawByteStringTest, Test4, "literals/raw byte string", "test4 (error)")
+
+MY_TEST(LiteralIntegerTest, Test1, "literals/integer", "test1")
+MY_TEST(LiteralIntegerTest, Test2, "literals/integer", "test2 (error)")
+MY_TEST(LiteralIntegerTest, Test3, "literals/integer", "test3 (error)")
+MY_TEST(LiteralIntegerTest, Test4, "literals/integer", "test4")
+MY_TEST(LiteralIntegerTest, Test5, "literals/integer", "test5 (complex)")
 
 MY_TEST(LiteralBooleanTest, Test1, "literals/boolean", "test1")
 MY_TEST(LiteralBooleanTest, Test2, "literals/boolean", "test2 (error)")

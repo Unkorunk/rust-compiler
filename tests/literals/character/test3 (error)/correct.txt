@@ -20,3 +20,4 @@
 	text TODO
 7	4	error	'\xf	text TODO
 7	8	literal	0	u8 0
+7	9	error	'	text TODO

@@ -1,0 +1,9 @@
+1	1	error	0x10_000_000_000_000_000	text TODO
+1	25	identifier	u64	text u64
+2	1	error	0x100_000_000u32	text TODO
+3	1	literal	0x1_000u16	u16 4096
+4	1	error	0x1_00u8	text TODO
+5	1	error	128i8	text TODO
+6	1	error	32_768i16	text TODO
+7	1	error	2_147_483_648i32	text TODO
+8	1	error	9_223_372_036_854_775_808i64	text TODO

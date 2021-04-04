@@ -1,0 +1,13 @@
+1	1	literal	123	u8 123
+2	1	literal	123i32	i32 123
+3	1	literal	123u32	u32 123
+4	1	literal	123_u32	u32 123
+6	1	literal	0xff	u8 255
+7	1	literal	0xff_u8	u8 255
+9	1	literal	0o70	u8 56
+10	1	literal	0o70_i16	i16 56
+12	1	literal	0b1111_1111_1001_0000	u16 65424
+13	1	literal	0b1111_1111_1001_0000i64	i64 65424
+14	1	literal	0b________1	u8 1
+16	1	literal	0usize	u64 0
+18	1	literal	0xf_fff_fff_fff_fff_fffu64	u64 18446744073709551615

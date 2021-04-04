@@ -5,8 +5,8 @@
 class TokenValue {
 public:
     enum class Type {
-        kBool, kChar, kU8, kU16, kU32, kU64, kU128, kUSize,
-        kI8, kI16, kI32, kI64, kI128, kISize,
+        kBool, kChar, kU8, kU16, kU32, kU64, kUSize,
+        kI8, kI16, kI32, kI64, kISize,
         kF32, kF64, kText, kByteString, kEmpty
     };
 
@@ -20,13 +20,11 @@ public:
     TokenValue(uint16_t val) : _u16(val), type_(Type::kU16) {}
     TokenValue(uint32_t val) : _u32(val), type_(Type::kU32) {}
     TokenValue(uint64_t val) : _u64(val), type_(Type::kU64) {}
-    // TODO u128 - not implemented
 
     TokenValue(int8_t val) : _i8(val), type_(Type::kI8) {}
     TokenValue(int16_t val) : _i16(val), type_(Type::kI16) {}
     TokenValue(int32_t val) : _i32(val), type_(Type::kI32) {}
     TokenValue(int64_t val) : _i64(val), type_(Type::kI64) {}
-    // TODO i128 - not implemented
 
     TokenValue(float val) : _f32(val), type_(Type::kF32) {}
     TokenValue(double val) : _f64(val), type_(Type::kF64) {}
@@ -61,7 +59,7 @@ public:
         if (type_ != Type::kU64) throw std::exception();
         return _u64;
     }
-    // TODO u128 - not implemented
+
     operator int8_t() const {
         if (type_ != Type::kI8) throw std::exception();
         return _i8;
@@ -78,7 +76,7 @@ public:
         if (type_ != Type::kI64) throw std::exception();
         return _i64;
     }
-    // TODO i128 - not implemented
+
     operator float() const {
         if (type_ != Type::kF32) throw std::exception();
         return _f32;
@@ -123,8 +121,6 @@ public:
             case Type::kU64:
                 oss << ' ' << _u64;
                 break;
-            case Type::kU128:
-                throw std::exception(); // TODO not implemented
             case Type::kI8:
                 oss << ' ' << static_cast<int16_t>(_i8);
                 break;
@@ -137,8 +133,6 @@ public:
             case Type::kI64:
                 oss << ' ' << _i64;
                 break;
-            case Type::kI128:
-                throw std::exception(); // TODO not implemented
             case Type::kF32:
                 oss << ' ' << _f32;
                 break;
@@ -176,8 +170,6 @@ public:
             return "u32";
         case Type::kU64:
             return "u64";
-        case Type::kU128:
-            return "u128";
         case Type::kI8:
             return "i8";
         case Type::kI16:
@@ -186,8 +178,6 @@ public:
             return "i32";
         case Type::kI64:
             return "i64";
-        case Type::kI128:
-            return "i128";
         case Type::kF32:
             return "f32";
         case Type::kF64:

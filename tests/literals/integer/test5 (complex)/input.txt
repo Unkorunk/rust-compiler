@@ -1,0 +1,34 @@
+123
+123i32 123u32
+0abacaba abacaba0 0abacaba0
+0invalidSuffix
+123_u32 127i8
+32_767i16
+2_147_483_647i32
+128_i8
+256_u8
+0x   64
+0x64u 32
+0x64u
+0x64i
+9_223_372_036_854_775_807i64
+0_xffu8
+0xf_fffu16
+0_xff_fff_fffu32
+0xf_fff_fff_fff_fff_fffu64
+0xff
+0xff_u8     
+0o70
+0o70_i16
+0b1111_1111_1001_0000
+0b1111_1111_1001_0000i64
+0b________1
+0usize
+0xf_fff_fff_fff_fff_fffu64
+123AFB43
+0b0102
+0o0581
+0b_
+0b____
+0x64u640x64u640x64u64 0x64_0x64 0x64u640x64
+0x64u3

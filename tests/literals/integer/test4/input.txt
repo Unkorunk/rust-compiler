@@ -1,0 +1,8 @@
+127i8
+32_767i16
+2_147_483_647i32
+9_223_372_036_854_775_807i64
+0xffu8
+0xf_fffu16
+0xff_fff_fffu32
+0xf_fff_fff_fff_fff_fffu64

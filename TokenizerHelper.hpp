@@ -17,7 +17,7 @@ public:
     }
 
     static bool IsBinDigit(char it) {
-        return it == '0' && it == '1';
+        return it == '0' || it == '1';
     }
 
     static bool IsOctDigit(char it) {

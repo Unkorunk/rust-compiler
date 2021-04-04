@@ -16,17 +16,23 @@
 
 class Tokenizer {
 public:
-    explicit Tokenizer(std::ifstream *stream);
+    enum class TargetType {
+        kX32,
+        kX64
+    };
+
+    explicit Tokenizer(std::ifstream *stream, TargetType target_type);
 
     bool HasNext() const;
     Token Next();
 
 private:
     InputStream stream_;
+    TargetType target_type_;
 
     void SkipWhitespace();
-    void SkipLineComment();
-    void SkipMultilineComment();
+    Token SkipLineComment();
+    Token SkipMultilineComment();
 
     Token TokenizeIdentifierOrKeyword();
     // character and string literals
@@ -59,11 +65,11 @@ private:
     int curly_balance = 0, square_balance = 0, round_balance = 0;
 
     template <typename T>
-    static bool TryParse(const std::vector<int8_t>& digits, T *result) {
+    static bool TryParse(const std::vector<int8_t>& digits, T *result, int system) {
         *result = 0;
         for (int8_t digit : digits) {
-            T tmp = *result * 10;
-            if (tmp / 10 != *result) {
+            T tmp = *result * system;
+            if (tmp / system != *result) {
                 return false;
             }
             if (tmp > std::numeric_limits<T>::max() - digit) {
@@ -75,17 +81,17 @@ private:
     }
 
     template <class Type, class... Types>
-    static bool TryParse(const std::vector<int8_t>& digits, TokenValue *result) {
+    static bool TryParse(const std::vector<int8_t>& digits, TokenValue *result, int system) {
         Type tmp1;
-        if (!TryParse<Type>(digits, &tmp1)) {
-            return TryParse<Types...>(digits, result);
+        if (!TryParse<Type>(digits, &tmp1, system)) {
+            return TryParse<Types...>(digits, result, system);
         }
         *result = tmp1;
         return true;
     }
 
     template <>
-    static bool TryParse(const std::vector<int8_t>& digits, TokenValue *result) {
+    static bool TryParse(const std::vector<int8_t>& digits, TokenValue *result, int system) {
         return false;
     }
 
@@ -137,8 +143,8 @@ private:
         }},
         {'/', Token::Type::kSlash, {
             {'=', Token::Type::kSlashEq},
-            {'/', [this]() { SkipLineComment(); return Next(); }},
-            {'*', [this]() { SkipMultilineComment(); return Next(); }}
+            {'/', std::bind(&Tokenizer::SkipLineComment, this)},
+            {'*', std::bind(&Tokenizer::SkipMultilineComment, this)}
         }},
         {'@', Token::Type::kAt},
         {'_', Token::Type::kUnderscore},
