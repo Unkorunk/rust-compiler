@@ -26,10 +26,14 @@ public:
 
     bool HasNext() const;
     Token Next();
+    Token Get();
 
 private:
     InputStream stream_;
     TargetType target_type_;
+
+    bool next_buffered_ = false;
+    Token next_;
 
     void SkipWhitespace();
     Token SkipLineComment();

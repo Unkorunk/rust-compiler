@@ -7,6 +7,11 @@ bool Tokenizer::HasNext() const {
 }
 
 Token Tokenizer::Next() {
+    if (next_buffered_) {
+        next_buffered_ = false;
+        return next_;
+    }
+
     SkipWhitespace();
 
     if (stream_.IsEOF()) {
@@ -575,4 +580,10 @@ Token Tokenizer::TokenizeNumber() {
     }
 
     return MakeLiteral(token_value);
+}
+
+Token Tokenizer::Get() {
+    next_ = Next();
+    next_buffered_ = true;
+    return next_;
 }

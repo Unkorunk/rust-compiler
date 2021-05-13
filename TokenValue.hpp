@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 
 class TokenValue {
 public:
@@ -135,56 +136,67 @@ public:
 
         oss << TypeToString(type_);
         if (type_ != Type::kEmpty) {
+            oss << ' ' << ValueToString();
+        }
+
+        return oss.str();
+    }
+
+    std::string ValueToString() const {
+        std::ostringstream oss;
+        if (type_ != Type::kEmpty) {
             switch (type_) {
             case Type::kBool:
-                oss << ' ' << bool_;
+                oss << bool_;
                 break;
             case Type::kChar:
-                oss << ' ' << char_;
+                oss << char_;
                 break;
             case Type::kU8:
-                oss << ' ' << static_cast<uint16_t>(u8_);
+                oss << static_cast<uint16_t>(u8_);
                 break;
             case Type::kU16:
-                oss << ' ' << u16_;
+                oss << u16_;
                 break;
             case Type::kU32:
-                oss << ' ' << u32_;
+                oss << u32_;
                 break;
             case Type::kU64:
-                oss << ' ' << u64_;
+                oss << u64_;
                 break;
             case Type::kI8:
-                oss << ' ' << static_cast<int16_t>(i8_);
+                oss << static_cast<int16_t>(i8_);
                 break;
             case Type::kI16:
-                oss << ' ' << i16_;
+                oss << i16_;
                 break;
             case Type::kI32:
-                oss << ' ' << i32_;
+                oss << i32_;
                 break;
             case Type::kI64:
-                oss << ' ' << i64_;
+                oss << i64_;
                 break;
             case Type::kF32:
-                oss << ' ' << f32_;
+                oss << f32_;
                 break;
             case Type::kF64:
-                oss << ' ' << f64_;
+                oss << f64_;
                 break;
             case Type::kText:
-                oss << ' ' << text_;
+                oss << text_;
                 break;
             case Type::kByteString:
-                for (uint8_t val : byte_string_) {
-                    oss << ' ' << static_cast<uint16_t>(val);
+                for (size_t i = 0; i < byte_string_.size(); i++) {
+                    oss << static_cast<uint16_t>(byte_string_[i]);
+                    if (i + 1 != byte_string_.size()) {
+                        oss << ' ';
+                    }
                 }
                 break;
             default:
                 throw std::exception();
             }
         }
-
         return oss.str();
     }
 

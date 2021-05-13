@@ -22,13 +22,24 @@ add_library(rust-compiler-tokenizer
         TokenizerHelper.hpp
         )
 
-add_executable(rust-compiler main.cpp)
-target_link_libraries(rust-compiler rust-compiler-tokenizer)
+add_library(rust-compiler-parser
+        SyntaxNode.hpp SyntaxNode.cpp
+        PrefixUnaryOperationNode.hpp PrefixUnaryOperationNode.cpp
+        BinaryOperationNode.hpp BinaryOperationNode.cpp
+        IdentifierNode.hpp
+        LiteralNode.hpp
+        ExpressionParser.hpp ExpressionParser.cpp
+        SyntaxTreeVisitor.hpp)
+
+target_link_libraries(rust-compiler-parser rust-compiler-tokenizer)
+
+add_executable(rust-compiler Main.cpp)
+target_link_libraries(rust-compiler rust-compiler-tokenizer rust-compiler-parser)
 
 enable_testing()
 
 add_executable(rust-compiler-tests Tests.cpp)
-target_link_libraries(rust-compiler-tests gtest_main rust-compiler-tokenizer)
+target_link_libraries(rust-compiler-tests gtest_main rust-compiler-tokenizer rust-compiler-parser)
 
 add_custom_command(
         TARGET rust-compiler-tests PRE_BUILD

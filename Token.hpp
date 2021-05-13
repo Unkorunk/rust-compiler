@@ -4,6 +4,7 @@
 #include <exception>
 #include <sstream>
 #include <string>
+#include <fstream>
 
 #include "TokenValue.hpp"
 
@@ -157,6 +158,10 @@ public:
 
     Type GetType() const {
         return type_;
+    }
+
+    TokenValue GetTokenValue() const {
+        return value_;
     }
 
     std::string GetSource(std::ifstream *ifs) const {
