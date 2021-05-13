@@ -1,31 +1,33 @@
 #pragma once
 
-#include <vector>
-#include <functional>
 #include <fstream>
+#include <functional>
+#include <vector>
 
-#include "Token.hpp"
 #include "InputStream.hpp"
+#include "Token.hpp"
 
 class Punctuation {
 public:
     using selector_type = std::function<Token()>;
 
-    Punctuation(char start_symbol, Token::Type type)
-        : start_symbol_(start_symbol), type_(type) {}
+    Punctuation(char start_symbol, Token::Type type) : start_symbol_(start_symbol), type_(type) {}
 
-    Punctuation(char start_symbol, Token::Type type, const std::vector<Punctuation>& children)
-        : Punctuation(start_symbol, type) { children_ = children; }
+    Punctuation(char start_symbol, Token::Type type, const std::vector<Punctuation> &children)
+        : Punctuation(start_symbol, type) {
+        children_ = children;
+    }
 
-    Punctuation(char start_symbol, selector_type selector)
-        : start_symbol_(start_symbol), selector_(selector) {}
+    Punctuation(char start_symbol, selector_type selector) : start_symbol_(start_symbol), selector_(selector) {}
 
-    Punctuation(char start_symbol, selector_type selector, const std::vector<Punctuation>& children) 
-        : Punctuation(start_symbol, selector) { children_ = children; }
+    Punctuation(char start_symbol, selector_type selector, const std::vector<Punctuation> &children)
+        : Punctuation(start_symbol, selector) {
+        children_ = children;
+    }
 
     bool TryTokenize(InputStream *stream, Token *token) const {
         std::streamoff max_offset = 0;
-        const Punctuation* punctuation = nullptr;
+        const Punctuation *punctuation = nullptr;
 
         TryTokenize(stream, &punctuation, 0, &max_offset);
         if (punctuation != nullptr) {
@@ -47,12 +49,14 @@ private:
     selector_type selector_;
     std::vector<Punctuation> children_;
 
-    void TryTokenize(InputStream *stream, const Punctuation **punctuation, std::streamoff offset, std::streamoff *max_offset) const {
+    void TryTokenize(
+        InputStream *stream, const Punctuation **punctuation, std::streamoff offset, std::streamoff *max_offset) const {
         char c = stream->PeekChar(offset);
-        if (start_symbol_ != c) return;
+        if (start_symbol_ != c)
+            return;
 
         bool is_child = false;
-        for (const Punctuation& child : children_) {
+        for (const Punctuation &child : children_) {
             child.TryTokenize(stream, punctuation, offset + 1, max_offset);
         }
 
@@ -61,5 +65,4 @@ private:
             *punctuation = this;
         }
     }
-
 };

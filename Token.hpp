@@ -1,117 +1,118 @@
 #pragma once
 
-#include <string>
-#include <sstream>
 #include <cstdint>
 #include <exception>
+#include <sstream>
+#include <string>
 
 #include "TokenValue.hpp"
 
 class Token {
 public:
-    enum class Type {
+    enum class Type
+    {
         // strict keywords
-        kAs,             // as
-        kBreak,          // break
-        kConst,          // const
-        kContinue,       // continue
-        kCrate,          // crate
-        kElse,           // else
-        kEnum,           // enum
-        kExtern,         // extern
-        kFalse,          // false
-        kFn,             // fn
-        kFor,            // for
-        kIf,             // if
-        kImpl,           // impl
-        kIn,             // in
-        kLet,            // let
-        kLoop,           // loop
-        kMatch,          // match
-        kMod,            // mod
-        kMove,           // move
-        kMut,            // mut
-        kPub,            // pub
-        kRef,            // ref
-        kReturn,         // return
-        kSelfValue,      // self
-        kSelfType,       // Self
-        kStatic,         // static
-        kStruct,         // struct
-        kSuper,          // super
-        kTrait,          // trait
-        kTrue,           // true
-        kType,           // type
-        kUnsafe,         // unsafe
-        kUse,            // use
-        kWhere,          // where
-        kWhile,          // while
-        kAsync,          // async
-        kAwait,          // await
-        kDyn,            // dyn
+        kAs,         // as
+        kBreak,      // break
+        kConst,      // const
+        kContinue,   // continue
+        kCrate,      // crate
+        kElse,       // else
+        kEnum,       // enum
+        kExtern,     // extern
+        kFalse,      // false
+        kFn,         // fn
+        kFor,        // for
+        kIf,         // if
+        kImpl,       // impl
+        kIn,         // in
+        kLet,        // let
+        kLoop,       // loop
+        kMatch,      // match
+        kMod,        // mod
+        kMove,       // move
+        kMut,        // mut
+        kPub,        // pub
+        kRef,        // ref
+        kReturn,     // return
+        kSelfValue,  // self
+        kSelfType,   // Self
+        kStatic,     // static
+        kStruct,     // struct
+        kSuper,      // super
+        kTrait,      // trait
+        kTrue,       // true
+        kType,       // type
+        kUnsafe,     // unsafe
+        kUse,        // use
+        kWhere,      // where
+        kWhile,      // while
+        kAsync,      // async
+        kAwait,      // await
+        kDyn,        // dyn
         // reserved keywords
-        kAbstract,       // abstract
-        kBecome,         // become
-        kBox,            // box
-        kDo,             // do
-        kFinal,          // final
-        kMacro,          // macro
-        kOverride,       // override
-        kPriv,           // priv
-        kTypeof,         // typeof
-        kUnsized,        // unsized
-        kVirtual,        // virtual
-        kYield,          // yield
-        kTry,            // try
+        kAbstract,  // abstract
+        kBecome,    // become
+        kBox,       // box
+        kDo,        // do
+        kFinal,     // final
+        kMacro,     // macro
+        kOverride,  // override
+        kPriv,      // priv
+        kTypeof,    // typeof
+        kUnsized,   // unsized
+        kVirtual,   // virtual
+        kYield,     // yield
+        kTry,       // try
         // weak keywords
-        kUnion,          // union
-        kStaticLifetime, // 'static
+        kUnion,           // union
+        kStaticLifetime,  // 'static
         // punctuation
-        kPlus,           // +
-        kMinus,          // -
-        kStar,           // *
-        kSlash,          // /
-        kPercent,        // %
-        kCaret,          // ^
-        kNot,            // !
-        kAnd,            // &
-        kOr,             // |
-        kAndAnd,         // &&
-        kOrOr,           // ||
-        kShl,            // <<
-        kShr,            // >>
-        kPlusEq,         // +=
-        kMinusEq,        // -=
-        kStarEq,         // *=
-        kSlashEq,        // /=
-        kPercentEq,      // %=
-        kCaretEq,        // ^=
-        kAndEq,          // &=
-        kOrEq,           // |=
-        kShlEq,          // <<=
-        kShrEq,          // >>=
-        kEq,             // =
-        kEqEq,           // ==
-        kNe,             // !=
-        kGt,             // >
-        kLt,             // <
-        kGe,             // >=
-        kLe,             // <=
-        kAt,             // @
-        kUnderscore,     // _
-        kDot,            // .
-        kDotDot,         // ..
-        kDotDotDot,      // ...
-        kDotDotEq,       // ..=
-        kComma,          // ,
-        kSemi,           // ;
-        kColon,          // :
-        kPathSep,        // ::
-        kRArrow,         // ->
-        kFatArrow,       // =>
-        kPound,          // #
-        kDollar,         // $
-        kQuestion,       // ?
+        kPlus,        // +
+        kMinus,       // -
+        kStar,        // *
+        kSlash,       // /
+        kPercent,     // %
+        kCaret,       // ^
+        kNot,         // !
+        kAnd,         // &
+        kOr,          // |
+        kAndAnd,      // &&
+        kOrOr,        // ||
+        kShl,         // <<
+        kShr,         // >>
+        kPlusEq,      // +=
+        kMinusEq,     // -=
+        kStarEq,      // *=
+        kSlashEq,     // /=
+        kPercentEq,   // %=
+        kCaretEq,     // ^=
+        kAndEq,       // &=
+        kOrEq,        // |=
+        kShlEq,       // <<=
+        kShrEq,       // >>=
+        kEq,          // =
+        kEqEq,        // ==
+        kNe,          // !=
+        kGt,          // >
+        kLt,          // <
+        kGe,          // >=
+        kLe,          // <=
+        kAt,          // @
+        kUnderscore,  // _
+        kDot,         // .
+        kDotDot,      // ..
+        kDotDotDot,   // ...
+        kDotDotEq,    // ..=
+        kComma,       // ,
+        kSemi,        // ;
+        kColon,       // :
+        kPathSep,     // ::
+        kRArrow,      // ->
+        kFatArrow,    // =>
+        kPound,       // #
+        kDollar,      // $
+        kQuestion,    // ?
         // bracket punctuation
         kOpenCurlyBr,    // {
         kCloseCurlyBr,   // }
@@ -120,10 +121,10 @@ public:
         kOpenRoundBr,    // (
         kCloseRoundBr,   // )
         // basic
-        kIdentifier,     // identifier
-        kLiteral,        // literal
-        kEndOfFile,      // end-of-file
-        kError,          // error
+        kIdentifier,  // identifier
+        kLiteral,     // literal
+        kEndOfFile,   // end-of-file
+        kError,       // error
         kLifetimeOrLabel,
         kEmpty
     };
@@ -131,10 +132,11 @@ public:
     struct Position {
         uint32_t start_line, start_column, end_line, end_column;
         std::streampos start_offset, end_offset;
-        Position(uint32_t start_line, uint32_t start_column, std::streampos start_offset,
-            uint32_t end_line, uint32_t end_column, std::streampos end_offset) :
-            start_line(start_line), start_column(start_column), start_offset(start_offset),
-            end_line(end_line), end_column(end_column), end_offset(end_offset) {}
+        Position(
+            uint32_t start_line, uint32_t start_column, std::streampos start_offset, uint32_t end_line,
+            uint32_t end_column, std::streampos end_offset)
+            : start_line(start_line), start_column(start_column), start_offset(start_offset), end_line(end_line),
+              end_column(end_column), end_offset(end_offset) {}
 
         std::string ToString() const {
             std::ostringstream oss;
@@ -146,10 +148,8 @@ public:
     };
 
     Token() : type_(Token::Type::kEmpty), position_(0, 0, 0, 0, 0, 0) {}
-    Token(Type type, Position position) :
-        type_(type), position_(position) {}
-    Token(TokenValue value, Type type, Position position) :
-        type_(type), value_(value), position_(position) {}
+    Token(Type type, Position position) : type_(type), position_(position) {}
+    Token(TokenValue value, Type type, Position position) : type_(type), value_(value), position_(position) {}
 
     Position GetPosition() const {
         return position_;
@@ -187,8 +187,7 @@ public:
     }
 
     static std::string TypeToString(Type type) {
-        switch (type)
-        {
+        switch (type) {
         case Type::kAs:
             return "as";
         case Type::kBreak:
@@ -416,5 +415,4 @@ private:
     Position position_;
     Type type_;
     TokenValue value_;
-
 };

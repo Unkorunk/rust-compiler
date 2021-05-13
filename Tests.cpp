@@ -1,13 +1,14 @@
 #include <gtest/gtest.h>
-#include <string>
+
 #include <fstream>
 #include <sstream>
+#include <string>
 
 #include "Tokenizer.hpp"
 
-void my_test(const std::string& test_suit_name, const std::string& test_name) {
+void MyTest(const std::string &test_suit_name, const std::string &test_name) {
     std::ifstream ifs("tests/" + test_suit_name + "/" + test_name + "/input.txt");
-    
+
     Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
     std::ostringstream oss;
     while (tokenizer.HasNext()) {
@@ -20,14 +21,14 @@ void my_test(const std::string& test_suit_name, const std::string& test_name) {
     }
 
     std::string input = oss.str();
-    
+
     ifs.close();
 
-    ifs.open("tests/"+ test_suit_name + "/" + test_name + "/correct.txt");
+    ifs.open("tests/" + test_suit_name + "/" + test_name + "/correct.txt");
     std::string output((std::istreambuf_iterator<char>(ifs)), (std::istreambuf_iterator<char>()));
     ifs.close();
 
-    std::ofstream ofs("tests/"+ test_suit_name + "/" + test_name + "/output.txt");
+    std::ofstream ofs("tests/" + test_suit_name + "/" + test_name + "/output.txt");
     ofs << input;
     ofs.close();
 
@@ -35,9 +36,8 @@ void my_test(const std::string& test_suit_name, const std::string& test_name) {
 }
 
 #define MY_TEST(test_suit_name, test_name, path, folder) \
-    TEST(test_suit_name, test_name)                      \
-    {                                                    \
-        my_test(path, folder);                           \
+    TEST(test_suit_name, test_name) {                    \
+        MyTest(path, folder);                            \
     }
 
 MY_TEST(WhitespaceTest, Test1, "whitespace", "test1")

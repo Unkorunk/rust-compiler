@@ -1,22 +1,23 @@
 #pragma once
 
-#include <sstream>
+#include <algorithm>
 #include <array>
 #include <fstream>
-#include <vector>
-#include <stack>
-#include <algorithm>
 #include <map>
+#include <sstream>
+#include <stack>
+#include <vector>
 
-#include "Token.hpp"
+#include "InputStream.hpp"
 #include "KeywordManager.hpp"
 #include "Punctuation.hpp"
-#include "InputStream.hpp"
+#include "Token.hpp"
 #include "TokenizerHelper.hpp"
 
 class Tokenizer {
 public:
-    enum class TargetType {
+    enum class TargetType
+    {
         kX32,
         kX64
     };
@@ -65,7 +66,7 @@ private:
     int curly_balance = 0, square_balance = 0, round_balance = 0;
 
     template <typename T>
-    static bool TryParse(const std::vector<int8_t>& digits, T *result, int system) {
+    static bool TryParse(const std::vector<int8_t> &digits, T *result, int system) {
         *result = 0;
         for (int8_t digit : digits) {
             T tmp = *result * system;
@@ -81,7 +82,7 @@ private:
     }
 
     template <class Type, class... Types>
-    static bool TryParse(const std::vector<int8_t>& digits, TokenValue *result, int system) {
+    static bool TryParse(const std::vector<int8_t> &digits, TokenValue *result, int system) {
         Type tmp1;
         if (!TryParse<Type>(digits, &tmp1, system)) {
             return TryParse<Types...>(digits, result, system);
@@ -91,7 +92,7 @@ private:
     }
 
     template <>
-    static bool TryParse(const std::vector<int8_t>& digits, TokenValue *result, int system) {
+    static bool TryParse(const std::vector<int8_t> &digits, TokenValue *result, int system) {
         return false;
     }
 

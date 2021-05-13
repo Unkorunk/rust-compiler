@@ -5,15 +5,11 @@
 class TokenizerHelper {
 public:
     static bool IsWhitespace(char it) {
-        return it == '\t' || it == '\n' || it == '\v' ||
-            it == '\f' || it == '\r' || it == ' ';
+        return it == '\t' || it == '\n' || it == '\v' || it == '\f' || it == '\r' || it == ' ';
     }
 
     static bool IsAlphanumeric(char it) {
-        return it >= 'a' && it <= 'z' ||
-            it >= 'A' && it <= 'Z' ||
-            it >= '0' && it <= '9' ||
-            it == '_';
+        return it >= 'a' && it <= 'z' || it >= 'A' && it <= 'Z' || it >= '0' && it <= '9' || it == '_';
     }
 
     static bool IsBinDigit(char it) {
@@ -29,8 +25,7 @@ public:
     }
 
     static bool IsHexDigit(char it) {
-        return IsDecDigit(it) || it >= 'a' && it <= 'f' ||
-            it >= 'A' && it <= 'F';
+        return IsDecDigit(it) || it >= 'a' && it <= 'f' || it >= 'A' && it <= 'F';
     }
 
     static char BinToInt(char it) {
@@ -154,7 +149,4 @@ public:
 
         return true;
     }
-
-private:
-
 };

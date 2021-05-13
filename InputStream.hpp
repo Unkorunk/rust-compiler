@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include "Token.hpp"
+
 class InputStream {
 public:
     explicit InputStream(std::ifstream *stream) : stream_(stream), current_offset_(stream->tellg()) {}
@@ -13,7 +15,7 @@ public:
     char PeekChar(std::streamoff offset) {
         std::streampos old_pos = stream_->tellg();
         current_offset_ = old_pos;
-        
+
         stream_->seekg(offset, std::ios_base::cur);
         int c = stream_->peek();
         stream_->seekg(old_pos);
@@ -53,7 +55,7 @@ public:
         return c;
     }
 
-    bool CheckSeq(std::streamoff offset, const std::initializer_list<char>& seq) {
+    bool CheckSeq(std::streamoff offset, const std::initializer_list<char> &seq) {
         for (char it : seq) {
             if (IsEOF() || PeekChar(offset++) != it) {
                 return false;
@@ -95,13 +97,8 @@ public:
 
     Token::Position GetTokenPosition() const {
         return Token::Position(
-            GetStartLine(),
-            GetStartColumn(),
-            GetStartOffset(),
-            GetCurrentLine(),
-            GetCurrentColumn(),
-            GetCurrentOffset()
-        );
+            GetStartLine(), GetStartColumn(), GetStartOffset(), GetCurrentLine(), GetCurrentColumn(),
+            GetCurrentOffset());
     }
 
     operator std::ifstream *() {
@@ -120,5 +117,4 @@ private:
     const uint32_t tab_size_ = 4;
 
     bool is_eof_ = false;
-    
 };

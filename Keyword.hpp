@@ -6,14 +6,15 @@
 
 class Keyword {
 public:
-    enum class Type {
+    enum class Type
+    {
         kStrict,
         kReserved,
         kWeak
     };
 
-    Keyword(const std::string& text, Token::Type token_type, Type keyword_type) :
-        text_(text), token_type_(token_type), keyword_type_(keyword_type) {}
+    Keyword(const std::string &text, Token::Type token_type, Type keyword_type)
+        : text_(text), token_type_(token_type), keyword_type_(keyword_type) {}
 
     std::string GetText() const {
         return text_;
@@ -26,10 +27,9 @@ public:
     Type GetKeywordType() const {
         return keyword_type_;
     }
-    
+
 private:
     std::string text_;
-    Token::Type token_type_;;
+    Token::Type token_type_;
     Type keyword_type_;
-
 };

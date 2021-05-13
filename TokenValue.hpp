@@ -4,96 +4,130 @@
 
 class TokenValue {
 public:
-    enum class Type {
-        kBool, kChar, kU8, kU16, kU32, kU64, kUSize,
-        kI8, kI16, kI32, kI64, kISize,
-        kF32, kF64, kText, kByteString, kEmpty
+    enum class Type
+    {
+        kBool,
+        kChar,
+        kU8,
+        kU16,
+        kU32,
+        kU64,
+        kI8,
+        kI16,
+        kI32,
+        kI64,
+        kF32,
+        kF64,
+        kText,
+        kByteString,
+        kEmpty
     };
 
     TokenValue() : type_(Type::kEmpty) {}
 
-    TokenValue(bool val) : _bool(val), type_(Type::kBool) {}
+    TokenValue(bool val) : bool_(val), type_(Type::kBool) {}
 
-    TokenValue(char val) : _char(val), type_(Type::kChar) {}
+    TokenValue(char val) : char_(val), type_(Type::kChar) {}
 
-    TokenValue(uint8_t val) : _u8(val), type_(Type::kU8) {}
-    TokenValue(uint16_t val) : _u16(val), type_(Type::kU16) {}
-    TokenValue(uint32_t val) : _u32(val), type_(Type::kU32) {}
-    TokenValue(uint64_t val) : _u64(val), type_(Type::kU64) {}
+    TokenValue(uint8_t val) : u8_(val), type_(Type::kU8) {}
+    TokenValue(uint16_t val) : u16_(val), type_(Type::kU16) {}
+    TokenValue(uint32_t val) : u32_(val), type_(Type::kU32) {}
+    TokenValue(uint64_t val) : u64_(val), type_(Type::kU64) {}
 
-    TokenValue(int8_t val) : _i8(val), type_(Type::kI8) {}
-    TokenValue(int16_t val) : _i16(val), type_(Type::kI16) {}
-    TokenValue(int32_t val) : _i32(val), type_(Type::kI32) {}
-    TokenValue(int64_t val) : _i64(val), type_(Type::kI64) {}
+    TokenValue(int8_t val) : i8_(val), type_(Type::kI8) {}
+    TokenValue(int16_t val) : i16_(val), type_(Type::kI16) {}
+    TokenValue(int32_t val) : i32_(val), type_(Type::kI32) {}
+    TokenValue(int64_t val) : i64_(val), type_(Type::kI64) {}
 
-    TokenValue(float val) : _f32(val), type_(Type::kF32) {}
-    TokenValue(double val) : _f64(val), type_(Type::kF64) {}
+    TokenValue(float val) : f32_(val), type_(Type::kF32) {}
+    TokenValue(double val) : f64_(val), type_(Type::kF64) {}
 
-    TokenValue(std::string val) : _text(val), type_(Type::kText) {}
+    TokenValue(std::string val) : text_(val), type_(Type::kText) {}
 
-    TokenValue(const std::vector<uint8_t>& val) : _byte_string(val), type_(Type::kByteString) {}
+    TokenValue(const std::vector<uint8_t> &val) : byte_string_(val), type_(Type::kByteString) {}
 
     operator bool() const {
-        if (type_ != Type::kBool) throw std::exception();
-        return _bool;
+        if (type_ != Type::kBool)
+            throw std::exception();
+        return bool_;
     }
 
     operator char() const {
-        if (type_ != Type::kChar) throw std::exception();
-        return _char;
+        if (type_ != Type::kChar)
+            throw std::exception();
+        return char_;
     }
 
     operator uint8_t() const {
-        if (type_ != Type::kU8) throw std::exception();
-        return _u8;
+        if (type_ != Type::kU8)
+            throw std::exception();
+        return u8_;
     }
+
     operator uint16_t() const {
-        if (type_ != Type::kU16) throw std::exception();
-        return _u16;
+        if (type_ != Type::kU16)
+            throw std::exception();
+        return u16_;
     }
+
     operator uint32_t() const {
-        if (type_ != Type::kU32) throw std::exception();
-        return _u32;
+        if (type_ != Type::kU32)
+            throw std::exception();
+        return u32_;
     }
+
     operator uint64_t() const {
-        if (type_ != Type::kU64) throw std::exception();
-        return _u64;
+        if (type_ != Type::kU64)
+            throw std::exception();
+        return u64_;
     }
 
     operator int8_t() const {
-        if (type_ != Type::kI8) throw std::exception();
-        return _i8;
+        if (type_ != Type::kI8)
+            throw std::exception();
+        return i8_;
     }
+
     operator int16_t() const {
-        if (type_ != Type::kI16) throw std::exception();
-        return _i16;
+        if (type_ != Type::kI16)
+            throw std::exception();
+        return i16_;
     }
+
     operator int32_t() const {
-        if (type_ != Type::kI32) throw std::exception();
-        return _i32;
+        if (type_ != Type::kI32)
+            throw std::exception();
+        return i32_;
     }
+
     operator int64_t() const {
-        if (type_ != Type::kI64) throw std::exception();
-        return _i64;
+        if (type_ != Type::kI64)
+            throw std::exception();
+        return i64_;
     }
 
     operator float() const {
-        if (type_ != Type::kF32) throw std::exception();
-        return _f32;
+        if (type_ != Type::kF32)
+            throw std::exception();
+        return f32_;
     }
+
     operator double() const {
-        if (type_ != Type::kF64) throw std::exception();
-        return _f64;
+        if (type_ != Type::kF64)
+            throw std::exception();
+        return f64_;
     }
 
     operator std::string() const {
-        if (type_ != Type::kText) throw std::exception();
-        return _text;
+        if (type_ != Type::kText)
+            throw std::exception();
+        return text_;
     }
 
     operator std::vector<uint8_t>() const {
-        if (type_ != Type::kByteString) throw std::exception();
-        return _byte_string;
+        if (type_ != Type::kByteString)
+            throw std::exception();
+        return byte_string_;
     }
 
     std::string ToString() const {
@@ -101,49 +135,48 @@ public:
 
         oss << TypeToString(type_);
         if (type_ != Type::kEmpty) {
-            switch (type_)
-            {
+            switch (type_) {
             case Type::kBool:
-                oss << ' ' << _bool;
+                oss << ' ' << bool_;
                 break;
             case Type::kChar:
-                oss << ' ' << _char;
+                oss << ' ' << char_;
                 break;
             case Type::kU8:
-                oss << ' ' << static_cast<uint16_t>(_u8);
+                oss << ' ' << static_cast<uint16_t>(u8_);
                 break;
             case Type::kU16:
-                oss << ' ' << _u16;
+                oss << ' ' << u16_;
                 break;
             case Type::kU32:
-                oss << ' ' << _u32;
+                oss << ' ' << u32_;
                 break;
             case Type::kU64:
-                oss << ' ' << _u64;
+                oss << ' ' << u64_;
                 break;
             case Type::kI8:
-                oss << ' ' << static_cast<int16_t>(_i8);
+                oss << ' ' << static_cast<int16_t>(i8_);
                 break;
             case Type::kI16:
-                oss << ' ' << _i16;
+                oss << ' ' << i16_;
                 break;
             case Type::kI32:
-                oss << ' ' << _i32;
+                oss << ' ' << i32_;
                 break;
             case Type::kI64:
-                oss << ' ' << _i64;
+                oss << ' ' << i64_;
                 break;
             case Type::kF32:
-                oss << ' ' << _f32;
+                oss << ' ' << f32_;
                 break;
             case Type::kF64:
-                oss << ' ' << _f64;
+                oss << ' ' << f64_;
                 break;
             case Type::kText:
-                oss << ' ' << _text;
+                oss << ' ' << text_;
                 break;
             case Type::kByteString:
-                for (uint8_t val : _byte_string) {
+                for (uint8_t val : byte_string_) {
                     oss << ' ' << static_cast<uint16_t>(val);
                 }
                 break;
@@ -156,8 +189,7 @@ public:
     }
 
     static std::string TypeToString(Type type) {
-        switch (type)
-        {
+        switch (type) {
         case Type::kBool:
             return "bool";
         case Type::kChar:
@@ -192,28 +224,29 @@ public:
             throw std::exception();
         }
     }
+
 private:
     Type type_;
 
     union {
-        bool _bool;
+        bool bool_;
 
-        char _char;
+        char char_;
 
-        uint8_t _u8;
-        uint16_t _u16;
-        uint32_t _u32;
-        uint64_t _u64;
+        uint8_t u8_;
+        uint16_t u16_;
+        uint32_t u32_;
+        uint64_t u64_;
 
-        int8_t _i8;
-        int16_t _i16;
-        int32_t _i32;
-        int64_t _i64;
+        int8_t i8_;
+        int16_t i16_;
+        int32_t i32_;
+        int64_t i64_;
 
-        float _f32;
-        double _f64;
+        float f32_;
+        double f64_;
     };
 
-    std::string _text;
-    std::vector<uint8_t> _byte_string;
+    std::string text_;
+    std::vector<uint8_t> byte_string_;
 };

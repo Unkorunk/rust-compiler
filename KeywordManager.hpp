@@ -1,43 +1,43 @@
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 #include "Keyword.hpp"
 
 class KeywordManager {
 public:
-    static KeywordManager& GetInstance() {
+    static KeywordManager &GetInstance() {
         static KeywordManager manager;
         return manager;
     }
 
-    bool IsKeyword(const std::string& it) const {
+    bool IsKeyword(const std::string &it) const {
         return (this->Find(it) != nullptr);
     }
 
-    bool IsStrictKeyword(const std::string& it) const {
-        const Keyword* keyword = this->Find(it);
+    bool IsStrictKeyword(const std::string &it) const {
+        const Keyword *keyword = this->Find(it);
         return (keyword != nullptr && keyword->GetKeywordType() == Keyword::Type::kStrict);
     }
 
-    bool IsReservedKeyword(const std::string& it) const {
-        const Keyword* keyword = this->Find(it);
+    bool IsReservedKeyword(const std::string &it) const {
+        const Keyword *keyword = this->Find(it);
         return (keyword != nullptr && keyword->GetKeywordType() == Keyword::Type::kReserved);
     }
 
-    bool IsWeakKeyword(const std::string& it) const {
-        const Keyword* keyword = this->Find(it);
+    bool IsWeakKeyword(const std::string &it) const {
+        const Keyword *keyword = this->Find(it);
         return (keyword != nullptr && keyword->GetKeywordType() == Keyword::Type::kWeak);
     }
 
-    bool IsStrictOrReservedKeyword(const std::string& it) const {
+    bool IsStrictOrReservedKeyword(const std::string &it) const {
         return IsStrictKeyword(it) || IsReservedKeyword(it);
     }
 
-    const Keyword* Find(const std::string& it) const {
-        for (const Keyword& keyword : keywords_) {
+    const Keyword *Find(const std::string &it) const {
+        for (const Keyword &keyword : keywords_) {
             if (keyword.GetText() == it) {
                 return &keyword;
             }
@@ -46,9 +46,8 @@ public:
         return nullptr;
     }
 
-    bool MaybeKeyword(const std::string& it) const {
-        
-        for(const Keyword& keyword : keywords_) {
+    bool MaybeKeyword(const std::string &it) const {
+        for (const Keyword &keyword : keywords_) {
             std::string keyword_text = keyword.GetText();
             auto mismatch_result = std::mismatch(it.begin(), it.end(), keyword_text.begin(), keyword_text.end());
             if (mismatch_result.first == it.end()) {
@@ -99,7 +98,7 @@ private:
         {"async", Token::Type::kAsync, Keyword::Type::kStrict},
         {"await", Token::Type::kAwait, Keyword::Type::kStrict},
         {"dyn", Token::Type::kDyn, Keyword::Type::kStrict},
-        
+
         {"abstract", Token::Type::kAbstract, Keyword::Type::kReserved},
         {"become", Token::Type::kBecome, Keyword::Type::kReserved},
         {"box", Token::Type::kBox, Keyword::Type::kReserved},
@@ -115,7 +114,5 @@ private:
         {"try", Token::Type::kTry, Keyword::Type::kReserved},
 
         {"union", Token::Type::kUnion, Keyword::Type::kStrict},
-        {"'static", Token::Type::kStaticLifetime, Keyword::Type::kStrict}
-    };
-
+        {"'static", Token::Type::kStaticLifetime, Keyword::Type::kStrict}};
 };

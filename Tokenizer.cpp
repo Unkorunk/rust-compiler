@@ -1,7 +1,6 @@
 #include "Tokenizer.hpp"
 
-Tokenizer::Tokenizer(std::ifstream *stream, TargetType target_type)
-    : stream_(stream), target_type_(target_type) {}
+Tokenizer::Tokenizer(std::ifstream *stream, TargetType target_type) : stream_(stream), target_type_(target_type) {}
 
 bool Tokenizer::HasNext() const {
     return !stream_.IsEOF();
@@ -22,8 +21,8 @@ Token Tokenizer::Next() {
 
     if (TokenizerHelper::IsDecDigit(c0)) {
         return TokenizeNumber();
-    } else if (c0 == '_' && TokenizerHelper::IsAlphanumeric(c1) ||
-        c0 >= 'a' && c0 <= 'z' && c0 != 'r' && c0 != 'b' ||
+    } else if (
+        c0 == '_' && TokenizerHelper::IsAlphanumeric(c1) || c0 >= 'a' && c0 <= 'z' && c0 != 'r' && c0 != 'b' ||
         c0 >= 'A' && c0 <= 'Z' ||
         c0 == 'r' && (c1 != '"' && (c1 != '#' || c2 != '"' && c2 != '#')) || //! raw string literals
         c0 == 'b' && c1 != '\'' && c1 != '"' && (c1 != 'r' || c2 != '"' && c2 != '#') || //! byte and byte string literals
@@ -31,7 +30,7 @@ Token Tokenizer::Next() {
         return TokenizeIdentifierOrKeyword();
     }
 
-    for (const Punctuation& punctuation : punctuation_) {
+    for (const Punctuation &punctuation : punctuation_) {
         Token token;
         if (punctuation.TryTokenize(&stream_, &token)) {
             return token;
@@ -49,7 +48,7 @@ void Tokenizer::SkipWhitespace() {
 }
 
 Token Tokenizer::SkipLineComment() {
-    while(!stream_.IsEOF() && stream_.PeekChar(0) != '\n') {
+    while (!stream_.IsEOF() && stream_.PeekChar(0) != '\n') {
         stream_.SkipChar(1);
     }
     return Next();
@@ -131,12 +130,13 @@ Token Tokenizer::TokenizeIdentifierOrKeyword() {
     }
 
     if (is_raw_identifier) {
-        if (identifier_buf != "crate" && identifier_buf != "self" && identifier_buf != "super" && identifier_buf != "Self") {
+        if (identifier_buf != "crate" && identifier_buf != "self" && identifier_buf != "super" &&
+            identifier_buf != "Self") {
             return MakeIdentifier(identifier_buf);
         }
     } else if (!KeywordManager::GetInstance().IsStrictOrReservedKeyword(identifier_buf)) {
         return MakeIdentifier(identifier_buf);
-    } else if (const Keyword* keyword = KeywordManager::GetInstance().Find(identifier_buf)) {
+    } else if (const Keyword *keyword = KeywordManager::GetInstance().Find(identifier_buf)) {
         if (keyword->GetTokenType() == Token::Type::kTrue) {
             return MakeLiteral(true);
         } else if (keyword->GetTokenType() == Token::Type::kFalse) {
@@ -402,7 +402,7 @@ Token Tokenizer::TokenizeNumber() {
     if (system == -1) {
         stream_.SkipChar(1);
         c = stream_.PeekChar(0);
-        
+
         if (c == 'b') {
             system = 2;
             stream_.SkipChar(1);
@@ -426,7 +426,8 @@ Token Tokenizer::TokenizeNumber() {
 
     do {
         if (system == 2 && TokenizerHelper::IsBinDigit(c) || system == 8 && TokenizerHelper::IsOctDigit(c) ||
-            system == 10 && TokenizerHelper::IsDecDigit(c)) {
+            system == 10 && TokenizerHelper::IsDecDigit(c))
+        {
             digits.push_back(c - '0');
             is_digit_found = true;
         } else if (system == 16 && TokenizerHelper::IsHexDigit(c)) {
@@ -488,7 +489,7 @@ Token Tokenizer::TokenizeNumber() {
                 c = stream_.PeekChar(0);
             }
 
-            while(TokenizerHelper::IsDecDigit(c) || c == '_') {
+            while (TokenizerHelper::IsDecDigit(c) || c == '_') {
                 if (c != '_') {
                     is_digit_after_exponent_found = true;
                     float_str += c;
@@ -507,10 +508,10 @@ Token Tokenizer::TokenizeNumber() {
                 return MakeError("expected at least one digit after dot");
             }
 
-            if (stream_.CheckSeq(1, { '3', '2' })) {
+            if (stream_.CheckSeq(1, {'3', '2'})) {
                 stream_.SkipChar(3);
                 return MakeLiteral(TokenValue(std::stof(float_str)));
-            } else if (stream_.CheckSeq(1, { '6', '4' })) {
+            } else if (stream_.CheckSeq(1, {'6', '4'})) {
                 stream_.SkipChar(3);
                 return MakeLiteral(TokenValue(std::stod(float_str)));
             }
@@ -529,42 +530,42 @@ Token Tokenizer::TokenizeNumber() {
         return MakeError("literal out of range");
     }
 
-    #define TP(type)                                   \
-        type result;                                   \
-        if (TryParse<type>(digits, &result, system)) { \
-            token_value = result;                      \
-        } else {                                       \
-            return MakeError("literal out of range");  \
-        }
+#define TP(type)                                   \
+    type result;                                   \
+    if (TryParse<type>(digits, &result, system)) { \
+        token_value = result;                      \
+    } else {                                       \
+        return MakeError("literal out of range");  \
+    }
 
-    #define TP_BRANCH(utype, itype) \
-        if (c == 'u') {             \
-            TP(utype)               \
-        } else if (c == 'i') {      \
-            TP(itype)               \
-        }
+#define TP_BRANCH(utype, itype) \
+    if (c == 'u') {             \
+        TP(utype)               \
+    } else if (c == 'i') {      \
+        TP(itype)               \
+    }
 
     if (!stream_.IsEOF() && (c == 'i' || c == 'u')) {
-        if (stream_.CheckSeq(1, { '8' })) {
+        if (stream_.CheckSeq(1, {'8'})) {
             stream_.SkipChar(2);
             TP_BRANCH(uint8_t, int8_t)
-        } else if (stream_.CheckSeq(1, { '1', '6' })) {
+        } else if (stream_.CheckSeq(1, {'1', '6'})) {
             stream_.SkipChar(3);
             TP_BRANCH(uint16_t, int16_t)
-        } else if (stream_.CheckSeq(1, { '3', '2' })) {
+        } else if (stream_.CheckSeq(1, {'3', '2'})) {
             stream_.SkipChar(3);
             TP_BRANCH(uint32_t, int32_t)
-        } else if (stream_.CheckSeq(1, { '6', '4' })) {
+        } else if (stream_.CheckSeq(1, {'6', '4'})) {
             stream_.SkipChar(3);
             TP_BRANCH(uint64_t, int64_t)
-        } else if (stream_.CheckSeq(1, { 's', 'i', 'z', 'e' })) {
+        } else if (stream_.CheckSeq(1, {'s', 'i', 'z', 'e'})) {
             stream_.SkipChar(5);
             if (target_type_ == TargetType::kX32) {
                 TP_BRANCH(uint32_t, int32_t)
             } else if (target_type_ == TargetType::kX64) {
                 TP_BRANCH(uint64_t, int64_t)
             } else {
-                throw std::exception(); // not implemented
+                throw std::exception();  // not implemented
             }
         }
     }
