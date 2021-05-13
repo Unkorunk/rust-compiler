@@ -1,5 +1,5 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
 
 #include "Tokenizer.hpp"
 
@@ -23,22 +23,22 @@ int main(int argc, char **argv) {
         }
     }
 
-    if (!filename_found) return 0;
-
-    std::ifstream ifs(filename);
-    if (!ifs.is_open()) {
-        std::cerr << "file open error" << std::endl;
+    if (!filename_found) {
         return 0;
     }
 
-    Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
+    std::ifstream ifs(filename);
 
+    Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
     if (print_tokenizer) {
         while (tokenizer.HasNext()) {
-            std::cout << tokenizer.Next().ToString(&ifs) << std::endl;
-        }
+            Token token = tokenizer.Next();
+            if (token.GetType() == Token::Type::kEndOfFile) {
+                break;
+            }
 
-        return 0;
+            std::cout << token.ToString(&ifs) << std::endl;
+        }
     }
 
     ifs.close();
