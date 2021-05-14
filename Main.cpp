@@ -7,37 +7,72 @@
 
 class MyVisitor : public SyntaxTreeVisitor {
 protected:
+    int indent = 0;
+    void PrintIndent() const {
+        for (int i = 0; i < indent; i++) {
+            std::cout << ' ';
+        }
+    }
+
     void PostVisit(const LiteralNode *literalNode) override {
+        indent += 2;
+
         const auto token = literalNode->GetToken();
         const auto tokenValue = token->GetTokenValue();
 
-        std::cout << tokenValue.ValueToString();
+        PrintIndent();
+        std::cout << tokenValue.ToString() << std::endl;
+
+        indent -= 2;
     }
 
     void PostVisit(const IdentifierNode *identifierNode) override {
+        indent += 2;
+
         const auto token = identifierNode->GetToken();
         const auto tokenValue = token->GetTokenValue();
 
-        std::cout << tokenValue.ValueToString();
+        PrintIndent();
+        std::cout << tokenValue.ToString() << std::endl;
+
+        indent -= 2;
     }
 
     void PostVisit(const PrefixUnaryOperationNode *prefixUnaryOperationNode) override {
+        indent += 2;
+
         const auto token = prefixUnaryOperationNode->GetToken();
         const auto tokenType = token->GetType();
 
-        std::cout << Token::TypeToString(tokenType);
-        prefixUnaryOperationNode->GetRight()->Visit(this);
+        PrintIndent();
+        std::cout << Token::TypeToString(tokenType) << std::endl;
+        Visit(prefixUnaryOperationNode->GetRight());
+
+        indent -= 2;
     }
 
     void PostVisit(const BinaryOperationNode *binaryOperationNode) override {
+        indent += 2;
         const auto token = binaryOperationNode->GetToken();
         const auto tokenType = token->GetType();
 
-        std::cout << "(";
-        binaryOperationNode->GetLeft()->Visit(this);
-        std::cout << ") " << Token::TypeToString(tokenType) << " (";
-        binaryOperationNode->GetRight()->Visit(this);
-        std::cout << ")";
+        PrintIndent();
+        std::cout << Token::TypeToString(tokenType) << std::endl;
+
+        Visit(binaryOperationNode->GetLeft());
+        Visit(binaryOperationNode->GetRight());
+
+        indent -= 2;
+    }
+
+    void PostVisit(const ErrorNode *errorNode) override {
+        indent++;
+
+        PrintIndent();
+        std::cout << errorNode->GetError() << " " << errorNode->GetPosition().start_line << " "
+                  << errorNode->GetPosition().start_column << std::endl;
+
+        indent--;
     }
 };
 

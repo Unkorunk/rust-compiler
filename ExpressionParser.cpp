@@ -43,7 +43,7 @@ SyntaxNode *ExpressionParser::ParseFactor() {
 
         token = tokenizer_->Get();
         if (token.GetType() != Token::Type::kCloseRoundBr) {
-            // todo error
+            node->AddError(new ErrorNode("Expected )", token.GetPosition()));
         }
         tokenizer_->Next();
 
@@ -55,9 +55,7 @@ SyntaxNode *ExpressionParser::ParseFactor() {
         return new PrefixUnaryOperationNode(std::move(token), right);
     }
 
-    // todo error
-
-    return nullptr;
+    return new ErrorNode("Unexpected token", token.GetPosition());
 }
 
 const std::array<std::unordered_set<Token::Type>, 2> ExpressionParser::kPriority{

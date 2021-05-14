@@ -8,6 +8,7 @@
 #include "PrefixUnaryOperationNode.hpp"
 #include "IdentifierNode.hpp"
 #include "LiteralNode.hpp"
+#include "ErrorNode.hpp"
 #include "Tokenizer.hpp"
 
 class ExpressionParser {

@@ -29,7 +29,8 @@ add_library(rust-compiler-parser
         IdentifierNode.hpp
         LiteralNode.hpp
         ExpressionParser.hpp ExpressionParser.cpp
-        SyntaxTreeVisitor.hpp)
+        SyntaxTreeVisitor.hpp
+        ErrorNode.hpp ErrorNode.cpp)
 
 target_link_libraries(rust-compiler-parser rust-compiler-tokenizer)
 

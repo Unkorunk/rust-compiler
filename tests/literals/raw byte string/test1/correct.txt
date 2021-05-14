@@ -1,6 +1,6 @@
-2	1	literal	br""	byte string
-2	10	literal	br#""#	byte string
-3	5	literal	br##""##	byte string
+2	1	literal	br""	byte string 
+2	10	literal	br#""#	byte string 
+3	5	literal	br##""##	byte string 
 4	1	literal	br"#"	byte string 35
 4	15	literal	br#"""#	byte string 34
 4	26	literal	br##""#"##	byte string 34 35
