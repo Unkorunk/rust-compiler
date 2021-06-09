@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-#include "ExpressionParser.hpp"
+#include "SyntaxParser.hpp"
 #include "SyntaxTreeVisitor.hpp"
 #include "Tokenizer.hpp"
 
@@ -122,11 +122,13 @@ void TestParser(const std::string &test_suit_name, const std::string &test_name)
 
     Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
     std::ostringstream oss;
-    ExpressionParser parser(&tokenizer);
-    auto syntaxTree = parser.Parse();
+    SyntaxParser parser(&tokenizer);
+    auto syntaxTree = parser.ParseExpr();
 
     MyVisitor visitor(&oss);
-    visitor.Visit(syntaxTree.get());
+    if (syntaxTree.status) {
+        visitor.Visit(syntaxTree.node.get());
+    }
 
     std::string input = oss.str();
     input = input.substr(0, input.size() - 1);

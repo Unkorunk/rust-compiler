@@ -28,7 +28,7 @@ add_library(rust-compiler-parser
         BinaryOperationNode.hpp BinaryOperationNode.cpp
         IdentifierNode.hpp
         LiteralNode.hpp
-        ExpressionParser.hpp ExpressionParser.cpp
+        SyntaxParser.hpp SyntaxParser.cpp
         SyntaxTreeVisitor.hpp
         ErrorNode.hpp ErrorNode.cpp)
 

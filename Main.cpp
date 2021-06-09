@@ -1,7 +1,7 @@
 #include <fstream>
 #include <iostream>
 
-#include "ExpressionParser.hpp"
+#include "SyntaxParser.hpp"
 #include "SyntaxTreeVisitor.hpp"
 #include "Tokenizer.hpp"
 
@@ -114,11 +114,13 @@ int main(int argc, char **argv) {
         }
     }
 
-    ExpressionParser parser(&tokenizer);
-    auto syntaxTree = parser.Parse();
+    SyntaxParser parser(&tokenizer);
+    auto syntaxTree = parser.ParseExpr();
 
     MyVisitor visitor;
-    visitor.Visit(syntaxTree.get());
+    if (syntaxTree.status) {
+        visitor.Visit(syntaxTree.node.get());
+    }
 
     ifs.close();
 
