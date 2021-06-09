@@ -41,6 +41,7 @@ enable_testing()
 
 add_executable(rust-compiler-tests Tests.cpp)
 target_link_libraries(rust-compiler-tests gtest_main rust-compiler-tokenizer rust-compiler-parser)
+set_property(TARGET rust-compiler-tests PROPERTY VS_DEBUGGER_WORKING_DIRECTORY $<TARGET_FILE_DIR:rust-compiler-tests>)
 
 add_custom_command(
         TARGET rust-compiler-tests PRE_BUILD

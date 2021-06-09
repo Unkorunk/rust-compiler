@@ -87,6 +87,8 @@ protected:
 void TestTokenizer(const std::string &test_suit_name, const std::string &test_name) {
     std::ifstream ifs("tests/" + test_suit_name + "/" + test_name + "/input.txt");
 
+    ASSERT_TRUE(ifs.is_open());
+
     Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
     std::ostringstream oss;
     while (tokenizer.HasNext()) {
@@ -115,6 +117,8 @@ void TestTokenizer(const std::string &test_suit_name, const std::string &test_na
 
 void TestParser(const std::string &test_suit_name, const std::string &test_name) {
     std::ifstream ifs("tests/" + test_suit_name + "/" + test_name + "/input.txt");
+
+    ASSERT_TRUE(ifs.is_open());
 
     Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
     std::ostringstream oss;
