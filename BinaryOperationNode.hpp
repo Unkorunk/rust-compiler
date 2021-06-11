@@ -15,9 +15,7 @@ public:
     const SyntaxNode *GetLeft() const;
     const SyntaxNode *GetRight() const;
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
-        visitor->PostVisit(this);
-    }
+    void Visit(SyntaxTreeVisitor *visitor) const override;
 
 private:
     Token token_;

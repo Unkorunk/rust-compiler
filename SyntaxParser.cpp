@@ -10,15 +10,17 @@ SyntaxParser::ParseResult SyntaxParser::ParseExpr() {
     return ParseResult(true, ParseLeft(0).release());
 }
 
+// clang-format off
 /*
 Statement                     : `;` | Item | LetStatement | ExpressionStatement
 LetStatement                  : `let` Pattern ( `:` Type )? (`=` Expression )? `;`
 */
+// clang-format on
 SyntaxParser::ParseResult SyntaxParser::ParseStmt() {
     if (Accept(Token::Type::kSemi)) {
         return ParseResult(true);
     } else if (Accept(Token::Type::kLet)) {
-        return ParseLetStatement();
+        return ParseResult(true, ParseLetStatement().release());
     }
 
     auto result = ParseItem();
@@ -101,6 +103,7 @@ void SyntaxParser::Expect(Token::Type type, Token *out) {
     }
 }
 
+// clang-format off
 /*
 TUPLE_INDEX                   : INTEGER_LITERAL
 
@@ -110,7 +113,7 @@ Expression                    : ExpressionWithoutBlock | ExpressionWithBlock
 /*
 Item                          : Function | Struct | ConstantItem
 
-Function                      : `const`? `fn` IDENTIFIER `(` FunctionParameters? `)` FunctionReturnType? ( BlockExpression | `;`)
+Function                      : `const`? `fn` IDENTIFIER `(` FunctionParameters? `)` FunctionReturnType? (BlockExpression | `;`)
 FunctionParameters            : FunctionParam (`,` FunctionParam)* `,`?
 FunctionParam                 : Pattern `:` Type
 FunctionReturnType            : `->` Type
@@ -125,56 +128,70 @@ TupleField                    : Type
 
 ConstantItem                  : `const` ( IDENTIFIER | `_` ) `:` Type ( `=` Expression )? `;`
 */
+// clang-format on
 SyntaxParser::ParseResult SyntaxParser::ParseItem() {
     if (Accept(Token::Type::kConst)) {
         if (Accept(Token::Type::kFn)) {
-            return ParseFunction(true);
+            return ParseResult(true, ParseFunction(true).release());
         }
 
-        return ParseConstantItem();
+        return ParseResult(true, ParseConstantItem().release());
     } else if (Accept(Token::Type::kFn)) {
-        return ParseFunction(false);
+        return ParseResult(true, ParseFunction(false).release());
     } else if (Accept(Token::Type::kStruct)) {
-        return ParseStruct();
+        return ParseResult(true, ParseStruct().release());
     }
 
     return ParseResult(false);
 }
 
 // `fn` already process
-SyntaxParser::ParseResult SyntaxParser::ParseFunction(bool is_const) {
-    Token function_identifier;
-    Expect(Token::Type::kIdentifier, &function_identifier);
+std::unique_ptr<FunctionNode> SyntaxParser::ParseFunction(bool is_const) {
+    Token identifier;
+    Expect(Token::Type::kIdentifier, &identifier);
     Expect(Token::Type::kOpenRoundBr);
 
+    std::vector<FunctionNode::Param> params;
+
     while (!Accept(Token::Type::kCloseRoundBr)) {
-        std::unique_ptr<Pattern> pattern = ParsePattern();
+        std::unique_ptr<PatternNode> pattern = ParsePattern();
         Expect(Token::Type::kColon);
-        std::unique_ptr<Type> param_type = ParseType();
+        std::unique_ptr<TypeNode> type = ParseType();
+
+        params.emplace_back(std::move(pattern), std::move(type));
 
         if (!Accept(Token::Type::kComma)) {
             break;
         }
     }
 
+    std::unique_ptr<TypeNode> return_type_node;
     if (Accept(Token::Type::kRArrow)) {
-        std::unique_ptr<Type> return_type = ParseType();
+        return_type_node = ParseType();
     }
 
+    std::unique_ptr<BlockNode> block_node;
     if (!Accept(Token::Type::kSemi)) {
-        ParseBlockExpression();
+        Expect(Token::Type::kOpenCurlyBr);
+        block_node = ParseBlockExpression();
     }
 
-    return ParseResult(true);
+    return std::make_unique<FunctionNode>(
+        std::make_unique<IdentifierNode>(std::move(identifier)), std::move(params), std::move(return_type_node),
+        std::move(block_node), is_const);
 }
 
 // `struct` already process
-SyntaxParser::ParseResult SyntaxParser::ParseStruct() {
-    Token struct_identifier;
-    Expect(Token::Type::kIdentifier, &struct_identifier);
+std::unique_ptr<StructNode> SyntaxParser::ParseStruct() {
+    Token struct_identifier_token;
+    Expect(Token::Type::kIdentifier, &struct_identifier_token);
+
+    std::vector<StructNode::RawParam> params;
+
     if (Accept(Token::Type::kOpenRoundBr)) {
         while (!Accept(Token::Type::kCloseRoundBr)) {
-            std::unique_ptr<Type> param_type = ParseType();
+            std::unique_ptr<TypeNode> type_node = ParseType();
+            params.emplace_back(nullptr, params);
 
             if (!Accept(Token::Type::kComma)) {
                 break;
@@ -184,10 +201,12 @@ SyntaxParser::ParseResult SyntaxParser::ParseStruct() {
         Expect(Token::Type::kSemi);  // TupleStruct
     } else if (Accept(Token::Type::kOpenCurlyBr)) {
         while (true) {
-            Token param_identifier;
-            if (Accept(Token::Type::kIdentifier, &param_identifier)) {
+            Token param_identifier_token;
+            if (Accept(Token::Type::kIdentifier, &param_identifier_token)) {
                 Expect(Token::Type::kColon);
-                std::unique_ptr<Type> param_type = ParseType();
+                std::unique_ptr<TypeNode> param_type_node = ParseType();
+
+                params.emplace_back(new IdentifierNode(std::move(param_identifier_token)), param_type_node.release());
             } else {
                 break;
             }
@@ -202,50 +221,52 @@ SyntaxParser::ParseResult SyntaxParser::ParseStruct() {
         Expect(Token::Type::kSemi);  // StructStruct
     }
 
-    return ParseResult(true);
+    return std::make_unique<StructNode>(new IdentifierNode(std::move(struct_identifier_token)), params);
 }
 
 // `const` already process
-SyntaxParser::ParseResult SyntaxParser::ParseConstantItem() {
-    if (!Accept(Token::Type::kIdentifier)) {
+std::unique_ptr<ConstantItemNode> SyntaxParser::ParseConstantItem() {
+    std::unique_ptr<IdentifierNode> identifier_node;
+    Token identifier_token;
+    if (Accept(Token::Type::kIdentifier, &identifier_token)) {
+        identifier_node = std::make_unique<IdentifierNode>(std::move(identifier_token));
+    } else {
         Expect(Token::Type::kUnderscore);
     }
 
     Expect(Token::Type::kColon);
-    std::unique_ptr<Type> var_type = ParseType();
+    std::unique_ptr<TypeNode> type_node = ParseType();
+    std::unique_ptr<SyntaxNode> expr_node;
 
     if (Accept(Token::Type::kEq)) {
-        ParseExpr();
+        expr_node = ParseExpr().node;
     }
 
     Expect(Token::Type::kSemi);
 
-    return ParseResult(true);
+    return std::make_unique<ConstantItemNode>(identifier_node.release(), type_node.release(), expr_node.release());
 }
 
 // `let` already process
-SyntaxParser::ParseResult SyntaxParser::ParseLetStatement() {
-    std::unique_ptr<Pattern> pattern = ParsePattern();
+std::unique_ptr<LetNode> SyntaxParser::ParseLetStatement() {
+    std::unique_ptr<PatternNode> pattern = ParsePattern();
+    std::unique_ptr<TypeNode> type;
+    std::unique_ptr<SyntaxNode> expr;
 
     if (Accept(Token::Type::kColon)) {
-        std::unique_ptr<Type> let_type = ParseType();
+        type = ParseType();
     }
 
-    ParseResult r1(true);
-
     if (Accept(Token::Type::kEq)) {
-        auto r2 = ParseExpr();
-        if (!r2.status) {
-            return ParseResult(false);
-        }
-        r1 = ParseResult(true, r2.node.release());
+        expr = ParseExpr().node;
     }
 
     Expect(Token::Type::kSemi);
 
-    return r1;
+    return std::make_unique<LetNode>(pattern.release(), type.release(), expr.release());
 }
 
+// clang-format off
 /*
 Pattern                       : LiteralPattern     | IdentifierPattern | WildcardPattern |
                                 RestPattern        | ReferencePattern  | StructPattern   |
@@ -274,7 +295,8 @@ TuplePatternItems             : Pattern `,` | RestPattern | Pattern (`,` Pattern
 
 GroupedPattern                : `(` Pattern `)`
 */
-std::unique_ptr<SyntaxParser::Pattern> SyntaxParser::ParsePattern() {
+// clang-format on
+std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
     bool is_ref = Accept(Token::Type::kRef);
     bool is_mut = Accept(Token::Type::kMut);
     bool is_single_ref = !is_ref && !is_mut && Accept(Token::Type::kAnd);
@@ -283,14 +305,14 @@ std::unique_ptr<SyntaxParser::Pattern> SyntaxParser::ParsePattern() {
     Token literal;
     Token identifier;
     if (Accept(Token::Type::kLiteral, &literal)) {
-        return std::make_unique<LiteralPattern>(literal);
+        return std::make_unique<LiteralPatternNode>(std::make_unique<LiteralNode>(std::move(literal)));
     } else if (Accept(Token::Type::kUnderscore)) {
-        return std::make_unique<WildcardPattern>();
+        return std::make_unique<WildcardPatternNode>();
     } else if (Accept(Token::Type::kDotDot)) {
-        return std::make_unique<RestPattern>();
+        return std::make_unique<RestPatternNode>();
     } else if (Accept(Token::Type::kIdentifier, &identifier)) {
         if (Accept(Token::Type::kOpenCurlyBr)) {
-            std::vector<StructPattern::Field *> fields;
+            std::vector<std::unique_ptr<StructPatternNode::Field>> fields;
             bool is_etc = false;
             while (!Accept(Token::Type::kCloseCurlyBr)) {
                 bool is_ref = Accept(Token::Type::kRef);
@@ -299,14 +321,17 @@ std::unique_ptr<SyntaxParser::Pattern> SyntaxParser::ParsePattern() {
                 Token param_identifier;
                 if (Accept(Token::Type::kLiteral, &literal)) {
                     Expect(Token::Type::kColon);
-                    std::unique_ptr<Pattern> pattern = ParsePattern();
-                    fields.push_back(new StructPattern::TupleIndexField(literal, pattern.release()));
+                    std::unique_ptr<PatternNode> pattern = ParsePattern();
+                    fields.push_back(std::make_unique<StructPatternNode::TupleIndexField>(
+                        std::make_unique<LiteralNode>(std::move(literal)), std::move(pattern)));
                 } else if (Accept(Token::Type::kIdentifier, &param_identifier)) {
                     if (Accept(Token::Type::kColon)) {
-                        std::unique_ptr<Pattern> pattern = ParsePattern();
-                        fields.push_back(new StructPattern::IdentifierField(param_identifier, pattern.release()));
+                        std::unique_ptr<PatternNode> pattern = ParsePattern();
+                        fields.push_back(std::make_unique<StructPatternNode::IdentifierField>(
+                            std::make_unique<IdentifierNode>(std::move(param_identifier)), std::move(pattern)));
                     } else {
-                        fields.push_back(new StructPattern::RefMutIdentifierField(is_ref, is_mut, param_identifier));
+                        fields.push_back(std::make_unique<StructPatternNode::RefMutIdentifierField>(
+                            is_ref, is_mut, std::make_unique<IdentifierNode>(std::move(param_identifier))));
                     }
                 } else if (Accept(Token::Type::kDotDot)) {
                     is_etc = true;
@@ -317,56 +342,64 @@ std::unique_ptr<SyntaxParser::Pattern> SyntaxParser::ParsePattern() {
                     break;
                 }
             }
-            return std::make_unique<StructPattern>(identifier, is_etc, fields);
+            return std::make_unique<StructPatternNode>(
+                std::make_unique<IdentifierNode>(std::move(identifier)), is_etc, std::move(fields));
         } else if (Accept(Token::Type::kOpenRoundBr)) {
-            std::vector<Pattern *> patterns;
+            std::vector<std::unique_ptr<PatternNode>> patterns;
             while (!Accept(Token::Type::kCloseRoundBr)) {
-                std::unique_ptr<Pattern> pattern = ParsePattern();
+                patterns.push_back(ParsePattern());
                 if (!Accept(Token::Type::kComma)) {
                     break;
                 }
             }
-            return std::make_unique<TupleStructPattern>(identifier, patterns);
+
+            return std::make_unique<TupleStructPatternNode>(
+                std::make_unique<IdentifierNode>(std::move(identifier)), std::move(patterns));
         } else {
-            std::unique_ptr<Pattern> subpattern;
+            std::unique_ptr<PatternNode> subpattern;
             if (Accept(Token::Type::kAt)) {
                 subpattern = ParsePattern();
             }
-            return std::make_unique<IdentifierPattern>(is_ref, is_mut, identifier, subpattern.release());
+
+            return std::make_unique<IdentifierPatternNode>(
+                is_ref, is_mut, std::make_unique<IdentifierNode>(std::move(identifier)), std::move(subpattern));
         }
     } else if (Accept(Token::Type::kOpenRoundBr)) {
-        std::unique_ptr<Pattern> pattern = ParsePattern();
-        std::unique_ptr<Pattern> out;
+        std::unique_ptr<PatternNode> pattern = ParsePattern();
 
         if (Accept(Token::Type::kComma)) {
-            std::vector<Pattern *> patterns;
-            patterns.push_back(pattern.release());
+            std::vector<std::unique_ptr<PatternNode>> patterns;
+            patterns.push_back(std::move(pattern));
             while (!Accept(Token::Type::kCloseRoundBr)) {
-                pattern = ParsePattern();
+                patterns.push_back(ParsePattern());
                 if (!Accept(Token::Type::kComma)) {
                     break;
                 }
             }
-        } else if (dynamic_cast<RestPattern *>(pattern.get()) != nullptr) {
-            std::vector<Pattern *> patterns;
-            patterns.push_back(pattern.release());
-            out = std::make_unique<TuplePattern>(patterns);
-            Expect(Token::Type::kCloseRoundBr);
-        } else {
-            out = std::make_unique<GroupedPattern>(pattern.release());
-            Expect(Token::Type::kCloseRoundBr);
-        }
 
-        return out;
+            return std::make_unique<TuplePatternNode>(std::move(patterns));
+        } else if (dynamic_cast<RestPatternNode *>(pattern.get()) != nullptr) {
+            Expect(Token::Type::kCloseRoundBr);
+
+            std::vector<std::unique_ptr<PatternNode>> patterns;
+            patterns.push_back(std::move(pattern));
+
+            return std::make_unique<TuplePatternNode>(std::move(patterns));
+        } else {
+            Expect(Token::Type::kCloseRoundBr);
+
+            return std::make_unique<GroupedPatternNode>(std::move(pattern));
+        }
     } else if (is_single_ref || is_double_ref) {
         bool is_mut = Accept(Token::Type::kMut);
-        std::unique_ptr<Pattern> pattern = ParsePattern();
-        return std::make_unique<ReferencePattern>(is_single_ref, is_mut, pattern.release());
+        std::unique_ptr<PatternNode> pattern = ParsePattern();
+        return std::make_unique<ReferencePatternNode>(is_single_ref, is_mut, std::move(pattern));
     }
 
-    throw std::exception(); // todo
+    throw std::exception();  // todo
 }
 
+// clang-format off
 /*
 Type                          : ParenthesizedType | TupleType | ReferenceType | ArrayType | IDENTIFIER
 ParenthesizedType             : `(` Type `)`
@@ -374,62 +407,59 @@ TupleType                     : `(` `)` | `(` ( Type `,` )+ Type? `)`
 ReferenceType                 : `&` `mut`? Type
 ArrayType                     : `[` Type `;` Expression `]`
 */
-std::unique_ptr<SyntaxParser::Type> SyntaxParser::ParseType() {
+// clang-format on
+std::unique_ptr<TypeNode> SyntaxParser::ParseType() {
     Token identifier;
 
-    if (Accept(Token::Type::kOpenRoundBr)) {
-        std::unique_ptr<Type> result = ParseType();
-        std::unique_ptr<Type> out;
+    if (Accept(Token::Type::kAnd)) {
+        bool is_mut = Accept(Token::Type::kMut);
+        std::unique_ptr<TypeNode> result = ParseType();
 
-        if (!result) {
-            out = std::make_unique<TupleType>();
-        } else if (Accept(Token::Type::kComma)) {
-            std::vector<Type *> types;
-            types.push_back(result.release());
+        return std::make_unique<ReferenceTypeNode>(is_mut, std::move(result));
+    } else if (Accept(Token::Type::kOpenSquareBr)) {
+        std::unique_ptr<TypeNode> result = ParseType();
+        Expect(Token::Type::kSemi);
+        std::unique_ptr<SyntaxNode> expr = ParseExpr().node;
+        Expect(Token::Type::kCloseSquareBr);
 
-            while (true) {
-                result = ParseType();
-                if (result) {
-                    types.push_back(result.release());
-                } else {
-                    break;
-                }
+        return std::make_unique<ArrayTypeNode>(std::move(result), std::move(expr));
+    } else if (Accept(Token::Type::kIdentifier, &identifier)) {
+        return std::make_unique<IdentifierTypeNode>(std::make_unique<IdentifierNode>(std::move(identifier)));
+    } else if (Accept(Token::Type::kOpenRoundBr)) {
+        if (Accept(Token::Type::kCloseRoundBr)) {
+            return std::make_unique<TupleTypeNode>();
+        }
+
+        std::unique_ptr<TypeNode> result = ParseType();
+
+        if (Accept(Token::Type::kComma)) {
+            std::vector<std::unique_ptr<TypeNode>> types;
+            types.push_back(std::move(result));
+
+            while (!Accept(Token::Type::kCloseRoundBr)) {
+                types.push_back(ParseType());
 
                 if (!Accept(Token::Type::kComma)) {
                     break;
                 }
             }
 
-            out = std::make_unique<TupleType>(types);
+            return std::make_unique<TupleTypeNode>(std::move(types));
         } else {
-            out = std::make_unique<ParenthesizedType>(result.release());
+            Expect(Token::Type::kCloseRoundBr);
+
+            return std::make_unique<ParenthesizedTypeNode>(std::move(result));
         }
-
-        Expect(Token::Type::kCloseRoundBr);
-
-        return out;
-    } else if (Accept(Token::Type::kAnd)) {
-        bool is_mut = Accept(Token::Type::kMut);
-        std::unique_ptr<Type> result = ParseType();
-
-        return std::make_unique<ReferenceType>(is_mut, result.release());
-    } else if (Accept(Token::Type::kOpenSquareBr)) {
-        std::unique_ptr<Type> result = ParseType();
-        Expect(Token::Type::kSemi);
-        auto expr = ParseExpr();
-        Expect(Token::Type::kCloseSquareBr);
-
-        return std::make_unique<ArrayType>(result.release(), expr.node.release());
-    } else if (Accept(Token::Type::kIdentifier, &identifier)) {
-        return std::make_unique<IdentifierType>(identifier);
     }
 
-    throw std::exception(); // todo
+    throw std::exception();  // todo
 }
 
+// clang-format off
 /*
 ExpressionStatement           : ExpressionWithoutBlock `;` | ExpressionWithBlock `;`?
 */
+// clang-format on
 SyntaxParser::ParseResult SyntaxParser::ParseExpressionStatement() {
     auto result = ParseExpressionWithoutBlock();
     if (result.status) {
@@ -446,6 +476,7 @@ SyntaxParser::ParseResult SyntaxParser::ParseExpressionStatement() {
     return ParseResult(false);
 }
 
+// clang-format off
 /*
 ExpressionWithoutBlock        : LiteralExpression | OperatorExpression | GroupedExpression       | ArrayExpression  |
                                 IndexExpression   | TupleExpression    | TupleIndexingExpression | StructExpression |
@@ -525,10 +556,12 @@ ContinueExpression            : `continue`
 BreakExpression               : `break` Expression?
 ReturnExpression              : `return` Expression?
 */
+// clang-format on
 SyntaxParser::ParseResult SyntaxParser::ParseExpressionWithoutBlock() {
     return ParseResult(false);  // todo
 }
 
+// clang-format off
 /*
 ExpressionWithBlock           : BlockExpression | LoopExpression | IfExpression
 
@@ -540,7 +573,6 @@ Statements                    : Statement+                        |
 LoopExpression                : InfiniteLoopExpression | PredicateLoopExpression | IteratorLoopExpression
 InfiniteLoopExpression        : `loop` BlockExpression
 PredicateLoopExpression       : `while` Expression `#except struct expression#` BlockExpression
-MatchArmPatterns              : `|`? Pattern ( `|` Pattern )*
 IteratorLoopExpression        : `for` Pattern `in` Expression `#except struct expression#` BlockExpression
 
 IfExpression                  : `if` Expression `#except struct expression#` BlockExpression (
@@ -548,12 +580,81 @@ IfExpression                  : `if` Expression `#except struct expression#` Blo
                                 )?
 
 */
+// clang-format on
 SyntaxParser::ParseResult SyntaxParser::ParseExpressionWithBlock() {
-    return ParseResult(false); // todo
+    if (Accept(Token::Type::kOpenCurlyBr)) {
+        return ParseResult(true, ParseBlockExpression().release());
+    } else if (Accept(Token::Type::kLoop)) {
+        return ParseResult(true, ParseInfiniteLoopExpression().release());
+    } else if (Accept(Token::Type::kWhile)) {
+        return ParseResult(true, ParsePredicateLoopExpression().release());
+    } else if (Accept(Token::Type::kFor)) {
+        return ParseResult(true, ParseIteratorLoopExpression().release());
+    } else if (Accept(Token::Type::kIf)) {
+        return ParseResult(true, ParseIfExpression().release());
+    }
+
+    return ParseResult(false);
 }
 
-SyntaxParser::ParseResult SyntaxParser::ParseBlockExpression() {
-    return ParseResult(false); // todo
+// `{` already process
+std::unique_ptr<BlockNode> SyntaxParser::ParseBlockExpression() {
+    throw std::exception();  // todo
+}
+
+// `loop` already process
+std::unique_ptr<InfiniteLoopNode> SyntaxParser::ParseInfiniteLoopExpression() {
+    Expect(Token::Type::kOpenCurlyBr);
+    std::unique_ptr<BlockNode> block_node = ParseBlockExpression();
+
+    return std::make_unique<InfiniteLoopNode>(std::move(block_node));
+}
+
+// `while` already process
+std::unique_ptr<PredicateLoopNode> SyntaxParser::ParsePredicateLoopExpression() {
+    bool old_except_struct_expression = except_struct_expression_;
+    std::unique_ptr<SyntaxNode> expr_node = ParseExpr().node;
+    except_struct_expression_ = old_except_struct_expression;
+
+    Expect(Token::Type::kOpenCurlyBr);
+    std::unique_ptr<BlockNode> block_node = ParseBlockExpression();
+
+    return std::make_unique<PredicateLoopNode>(std::move(expr_node), std::move(block_node));
+}
+
+// `for` already process
+std::unique_ptr<IteratorLoopNode> SyntaxParser::ParseIteratorLoopExpression() {
+    std::unique_ptr<PatternNode> pattern_node = ParsePattern();
+    Expect(Token::Type::kIn);
+
+    bool old_except_struct_expression = except_struct_expression_;
+    std::unique_ptr<SyntaxNode> expr_node = ParseExpr().node;
+    except_struct_expression_ = old_except_struct_expression;
+
+    Expect(Token::Type::kOpenCurlyBr);
+    std::unique_ptr<BlockNode> block_node = ParseBlockExpression();
+
+    throw std::exception();  // todo
+}
+
+// `if` already process
+std::unique_ptr<IfNode> SyntaxParser::ParseIfExpression() {
+    bool old_except_struct_expression = except_struct_expression_;
+    ParseExpr();
+    except_struct_expression_ = old_except_struct_expression;
+
+    Expect(Token::Type::kOpenCurlyBr);
+    std::unique_ptr<BlockNode> if_block_node = ParseBlockExpression();
+
+    if (Accept(Token::Type::kElse)) {
+        if (Accept(Token::Type::kOpenCurlyBr)) {
+            std::unique_ptr<BlockNode> else_block_node = ParseBlockExpression();
+        } else if (Accept(Token::Type::kIf)) {
+            std::unique_ptr<IfNode> else_if_node = ParseIfExpression();
+        }
+    }
+
+    throw std::exception();  // todo
 }
 
 const std::array<std::unordered_set<Token::Type>, 2> SyntaxParser::kPriority{

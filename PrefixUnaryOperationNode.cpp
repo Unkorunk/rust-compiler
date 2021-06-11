@@ -9,3 +9,7 @@ const Token *PrefixUnaryOperationNode::GetToken() const {
 const SyntaxNode *PrefixUnaryOperationNode::GetRight() const {
     return right_.get();
 }
+
+void PrefixUnaryOperationNode::Visit(SyntaxTreeVisitor *visitor) const {
+    visitor->PostVisit(this);
+}

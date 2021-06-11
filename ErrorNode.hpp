@@ -10,12 +10,9 @@ class ErrorNode : public SyntaxNode {
 public:
     ErrorNode(const std::string& error, Token::Position position);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
-        visitor->PostVisit(this);
-    }
+    void Visit(SyntaxTreeVisitor *visitor) const override;
 
     std::string GetError() const;
-
     Token::Position GetPosition() const;
 
 private:

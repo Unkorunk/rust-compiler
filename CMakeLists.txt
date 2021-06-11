@@ -30,7 +30,18 @@ add_library(rust-compiler-parser
         LiteralNode.hpp
         SyntaxParser.hpp SyntaxParser.cpp
         SyntaxTreeVisitor.hpp
-        ErrorNode.hpp ErrorNode.cpp)
+        ErrorNode.hpp ErrorNode.cpp
+        "TypeNodes.hpp" "TypeNodes.cpp"
+        PatternNodes.hpp PatternNodes.cpp
+        LetNode.hpp LetNode.cpp
+        IfNode.hpp IfNode.cpp
+        IteratorLoopNode.hpp IteratorLoopNode.cpp
+        PredicateLoopNode.hpp PredicateLoopNode.cpp
+        InfiniteLoopNode.hpp InfiniteLoopNode.cpp
+        BlockNode.hpp BlockNode.cpp
+        ConstantItemNode.hpp ConstantItemNode.cpp
+        StructNode.hpp StructNode.cpp
+        FunctionNode.hpp FunctionNode.cpp)
 
 target_link_libraries(rust-compiler-parser rust-compiler-tokenizer)
 

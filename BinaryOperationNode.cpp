@@ -14,3 +14,7 @@ const SyntaxNode *BinaryOperationNode::GetLeft() const {
 const SyntaxNode *BinaryOperationNode::GetRight() const {
     return right_.get();
 }
+
+void BinaryOperationNode::Visit(SyntaxTreeVisitor *visitor) const {
+    visitor->PostVisit(this);
+}
