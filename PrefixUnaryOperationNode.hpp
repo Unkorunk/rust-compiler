@@ -1,19 +1,18 @@
 #pragma once
 
-#include "SyntaxNode.hpp"
-#include "SyntaxTreeVisitor.hpp"
+#include "ExpressionNode.hpp"
 #include "Token.hpp"
 
-class PrefixUnaryOperationNode : public SyntaxNode {
+class PrefixUnaryOperationNode : public ExpressionNode {
 public:
-    PrefixUnaryOperationNode(Token &&token, SyntaxNode *right);
+    PrefixUnaryOperationNode(Token &&token, std::unique_ptr<ExpressionNode> &&right);
 
     const Token *GetToken() const;
-    const SyntaxNode *GetRight() const;
+    const ExpressionNode *GetRight() const;
 
     void Visit(SyntaxTreeVisitor *visitor) const override;
 
 private:
     Token token_;
-    std::unique_ptr<SyntaxNode> right_;
+    std::unique_ptr<ExpressionNode> right_;
 };

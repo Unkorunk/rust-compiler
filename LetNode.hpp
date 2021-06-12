@@ -1,20 +1,23 @@
 #pragma once
 
-#include "SyntaxNode.hpp"
-#include "SyntaxTreeVisitor.hpp"
+#include "ExpressionNode.hpp"
+#include "TypeNodes.hpp"
+#include "PatternNodes.hpp"
 
 class LetNode : public SyntaxNode {
 public:
-    LetNode(PatternNode *pattern, TypeNode *type, SyntaxNode *expr);
+    LetNode(
+        std::unique_ptr<PatternNode> &&pattern, std::unique_ptr<TypeNode> &&type,
+        std::unique_ptr<ExpressionNode> &&expression);
 
     void Visit(SyntaxTreeVisitor *visitor) const override;
 
-    PatternNode *GetPattern() const;
-    TypeNode *GetType() const;
-    SyntaxNode *GetExpr() const;
+    const PatternNode *GetPattern() const;
+    const TypeNode *GetType() const;
+    const ExpressionNode *GetExpression() const;
 
 private:
     std::unique_ptr<PatternNode> pattern_;
     std::unique_ptr<TypeNode> type_;
-    std::unique_ptr<SyntaxNode> expr_;
+    std::unique_ptr<ExpressionNode> expression_;
 };

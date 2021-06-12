@@ -5,40 +5,40 @@
 #include <unordered_set>
 
 #include "BinaryOperationNode.hpp"
-#include "ErrorNode.hpp"
-#include "IdentifierNode.hpp"
-#include "LiteralNode.hpp"
-#include "PrefixUnaryOperationNode.hpp"
-#include "Tokenizer.hpp"
-#include "PatternNodes.hpp"
-#include "TypeNodes.hpp"
-#include "LetNode.hpp"
-#include "IfNode.hpp"
-#include "IteratorLoopNode.hpp"
-#include "PredicateLoopNode.hpp"
-#include "InfiniteLoopNode.hpp"
 #include "BlockNode.hpp"
 #include "ConstantItemNode.hpp"
+#include "ErrorNode.hpp"
 #include "FunctionNode.hpp"
+#include "IdentifierNode.hpp"
+#include "IfNode.hpp"
+#include "InfiniteLoopNode.hpp"
+#include "IteratorLoopNode.hpp"
+#include "LetNode.hpp"
+#include "LiteralNode.hpp"
+#include "PatternNodes.hpp"
+#include "PredicateLoopNode.hpp"
+#include "PrefixUnaryOperationNode.hpp"
 #include "StructNode.hpp"
+#include "Tokenizer.hpp"
+#include "TypeNodes.hpp"
 
 class SyntaxParser {
 public:
     explicit SyntaxParser(Tokenizer *tokenizer);
 
-    struct ParseResult {
+    template <typename T>
+    struct Result {
         bool status;
-        std::unique_ptr<SyntaxNode> node;
-        explicit ParseResult(bool status) : status(status), node() {}
-        ParseResult(bool status, SyntaxNode *node) : status(status), node(node) {}
+        std::unique_ptr<T> node;
+        explicit Result(bool status) : status(status), node() {}
+        Result(bool status, std::unique_ptr<T> &&node) : status(status), node(std::move(node)) {}
     };
 
-    ParseResult ParseExpr();
-    ParseResult ParseStmt();
+    std::unique_ptr<ExpressionNode> ParseExpr();
 
 private:
-    std::unique_ptr<SyntaxNode> ParseLeft(int priority);
-    std::unique_ptr<SyntaxNode> ParseFactor();
+    std::unique_ptr<ExpressionNode> ParseLeft(int priority);
+    std::unique_ptr<ExpressionNode> ParseFactor();
 
     bool Accept(Token::Type type, Token *out = nullptr);
     void Expect(Token::Type type, Token *out = nullptr);
@@ -46,16 +46,20 @@ private:
     Tokenizer *tokenizer_;
     Token current_token_;
 
-    [[nodiscard]] ParseResult ParseItem();
+    [[nodiscard]] Result<SyntaxNode> ParseStatement();
+
+    [[nodiscard]] Result<SyntaxNode> ParseItem();
     [[nodiscard]] std::unique_ptr<FunctionNode> ParseFunction(bool is_const);
     [[nodiscard]] std::unique_ptr<StructNode> ParseStruct();
     [[nodiscard]] std::unique_ptr<ConstantItemNode> ParseConstantItem();
     [[nodiscard]] std::unique_ptr<LetNode> ParseLetStatement();
 
-    ParseResult ParseExpressionStatement();
-    ParseResult ParseExpressionWithoutBlock();
-    
-    [[nodiscard]] ParseResult ParseExpressionWithBlock();
+    [[nodiscard]] Result<ExpressionNode> ParseExpression();
+    [[nodiscard]] Result<ExpressionNode> ParseExpressionStatement();
+
+    [[nodiscard]] Result<ExpressionNode> ParseExpressionWithoutBlock();
+
+    [[nodiscard]] Result<ExpressionNode> ParseExpressionWithBlock();
     [[nodiscard]] std::unique_ptr<BlockNode> ParseBlockExpression();
     [[nodiscard]] std::unique_ptr<InfiniteLoopNode> ParseInfiniteLoopExpression();
     [[nodiscard]] std::unique_ptr<PredicateLoopNode> ParsePredicateLoopExpression();
@@ -67,5 +71,6 @@ private:
 
     bool except_struct_expression_ = false;
 
-    const static std::array<std::unordered_set<Token::Type>, 2> kPriority;
+    const static std::unordered_set<Token::Type> kUnaryOperator;
+    const static std::array<std::unordered_set<Token::Type>, 9> kPriority;
 };

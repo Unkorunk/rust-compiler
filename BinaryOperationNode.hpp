@@ -1,23 +1,20 @@
 #pragma once
 
-#include <memory>
-
-#include "SyntaxNode.hpp"
-#include "SyntaxTreeVisitor.hpp"
+#include "ExpressionNode.hpp"
 #include "Token.hpp"
 
-class BinaryOperationNode : public SyntaxNode {
+class BinaryOperationNode : public ExpressionNode {
 public:
-    BinaryOperationNode(Token &&token, SyntaxNode *left, SyntaxNode *right);
+    BinaryOperationNode(Token &&token, std::unique_ptr<ExpressionNode> &&left, std::unique_ptr<ExpressionNode> &&right);
 
     const Token *GetToken() const;
 
-    const SyntaxNode *GetLeft() const;
-    const SyntaxNode *GetRight() const;
+    const ExpressionNode *GetLeft() const;
+    const ExpressionNode *GetRight() const;
 
     void Visit(SyntaxTreeVisitor *visitor) const override;
 
 private:
     Token token_;
-    std::unique_ptr<SyntaxNode> left_, right_;
+    std::unique_ptr<ExpressionNode> left_, right_;
 };

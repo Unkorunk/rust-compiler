@@ -123,12 +123,10 @@ void TestParser(const std::string &test_suit_name, const std::string &test_name)
     Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
     std::ostringstream oss;
     SyntaxParser parser(&tokenizer);
-    auto syntaxTree = parser.ParseExpr();
+    std::unique_ptr<ExpressionNode> expression = parser.ParseExpr();
 
     MyVisitor visitor(&oss);
-    if (syntaxTree.status) {
-        visitor.Visit(syntaxTree.node.get());
-    }
+    visitor.Visit(expression.get());
 
     std::string input = oss.str();
     input = input.substr(0, input.size() - 1);

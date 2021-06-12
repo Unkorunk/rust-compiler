@@ -1,17 +1,18 @@
 #include "BinaryOperationNode.hpp"
 
-BinaryOperationNode::BinaryOperationNode(Token &&token, SyntaxNode *left, SyntaxNode *right)
-    : token_(std::move(token)), left_(left), right_(right) {}
+BinaryOperationNode::BinaryOperationNode(
+    Token &&token, std::unique_ptr<ExpressionNode> &&left, std::unique_ptr<ExpressionNode> &&right)
+    : token_(std::move(token)), left_(std::move(left)), right_(std::move(right)) {}
 
 const Token *BinaryOperationNode::GetToken() const {
     return &token_;
 }
 
-const SyntaxNode *BinaryOperationNode::GetLeft() const {
+const ExpressionNode *BinaryOperationNode::GetLeft() const {
     return left_.get();
 }
 
-const SyntaxNode *BinaryOperationNode::GetRight() const {
+const ExpressionNode *BinaryOperationNode::GetRight() const {
     return right_.get();
 }
 

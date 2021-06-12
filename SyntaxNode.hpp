@@ -11,7 +11,7 @@ class SyntaxNode {
 public:
     virtual void Visit(SyntaxTreeVisitor *visitor) const = 0;
 
-    void AddError(SyntaxNode *syntaxNode);
+    void AddError(std::unique_ptr<SyntaxNode> &&syntaxNode);
 
 private:
     std::vector<std::unique_ptr<SyntaxNode>> errors_;

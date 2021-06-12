@@ -12,3 +12,19 @@ FunctionNode::FunctionNode(
 void FunctionNode::Visit(SyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
+
+const IdentifierNode *FunctionNode::GetIdentifier() const {
+    return identifier_.get();
+}
+
+const TypeNode *FunctionNode::GetReturnType() const {
+    return return_type_.get();
+}
+
+const BlockNode *FunctionNode::GetBlock() const {
+    return block_.get();
+}
+
+bool FunctionNode::IsConst() const {
+    return is_const_;
+}

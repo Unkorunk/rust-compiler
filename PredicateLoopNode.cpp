@@ -1,9 +1,13 @@
 
 #include "PredicateLoopNode.hpp"
 
-PredicateLoopNode::PredicateLoopNode(std::unique_ptr<SyntaxNode> &&expr_node, std::unique_ptr<BlockNode> &&block_node)
-    : expr_node_(std::move(expr_node)), block_node_(std::move(block_node)) {}
+PredicateLoopNode::PredicateLoopNode(std::unique_ptr<ExpressionNode> &&expression, std::unique_ptr<BlockNode> &&block)
+    : expression_(std::move(expression)), block_(std::move(block)) {}
 
 void PredicateLoopNode::Visit(SyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
+}
+
+const ExpressionNode *PredicateLoopNode::GetExpression() const {
+    return expression_.get();
 }

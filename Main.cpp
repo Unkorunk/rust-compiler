@@ -115,12 +115,10 @@ int main(int argc, char **argv) {
     }
 
     SyntaxParser parser(&tokenizer);
-    auto syntaxTree = parser.ParseExpr();
+    std::unique_ptr<ExpressionNode> expression = parser.ParseExpr();
 
     MyVisitor visitor;
-    if (syntaxTree.status) {
-        visitor.Visit(syntaxTree.node.get());
-    }
+    visitor.Visit(expression.get());
 
     ifs.close();
 

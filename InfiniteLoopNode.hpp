@@ -1,14 +1,15 @@
 #pragma once
 
-#include "SyntaxNode.hpp"
-#include "SyntaxTreeVisitor.hpp"
+#include "BlockNode.hpp"
 
-class InfiniteLoopNode : public SyntaxNode {
+class InfiniteLoopNode : public ExpressionNode {
 public:
-    InfiniteLoopNode(std::unique_ptr<BlockNode> &&block_node);
+    InfiniteLoopNode(std::unique_ptr<BlockNode> &&block);
 
     void Visit(SyntaxTreeVisitor *visitor) const override;
 
+    const BlockNode *GetBlock() const;
+
 private:
-    std::unique_ptr<BlockNode> block_node;
+    std::unique_ptr<BlockNode> block_;
 };

@@ -41,7 +41,8 @@ add_library(rust-compiler-parser
         BlockNode.hpp BlockNode.cpp
         ConstantItemNode.hpp ConstantItemNode.cpp
         StructNode.hpp StructNode.cpp
-        FunctionNode.hpp FunctionNode.cpp)
+        FunctionNode.hpp FunctionNode.cpp
+        ExpressionNode.hpp)
 
 target_link_libraries(rust-compiler-parser rust-compiler-tokenizer)
 

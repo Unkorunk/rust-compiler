@@ -8,12 +8,12 @@ class IdentifierNode : public SyntaxNode {
 public:
     explicit IdentifierNode(Token &&token) : token_(std::move(token)) {}
 
-    const Token *GetToken() const {
-        return &token_;
-    }
-
     void Visit(SyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
+    }
+
+    const Token *GetToken() const {
+        return &token_;
     }
 
 private:
