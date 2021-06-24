@@ -6,6 +6,9 @@ class IdentifierNode;
 class LiteralNode;
 class ErrorNode;
 
+class ParamFunctionNode;
+class ParamStructNode;
+
 class LetNode;
 class FunctionNode;
 class StructNode;
@@ -16,6 +19,10 @@ class TupleTypeNode;
 class ReferenceTypeNode;
 class ArrayTypeNode;
 class IdentifierTypeNode;
+
+class TupleIndexFieldNode;
+class IdentifierFieldNode;
+class RefMutIdentifierFieldNode;
 
 class LiteralPatternNode;
 class IdentifierPatternNode;
@@ -42,19 +49,24 @@ class SyntaxTreeVisitor {
     friend class LiteralNode;
     friend class ErrorNode;
 
+    friend class ParamFunctionNode;
+    friend class ParamStructNode;
+
     friend class LetNode;
     friend class FunctionNode;
     friend class StructNode;
     friend class ConstantItemNode;
 
-    friend class TypeNode;
     friend class ParenthesizedTypeNode;
     friend class TupleTypeNode;
     friend class ReferenceTypeNode;
     friend class ArrayTypeNode;
     friend class IdentifierTypeNode;
 
-    friend class PatternNode;
+    friend class TupleIndexFieldNode;
+    friend class IdentifierFieldNode;
+    friend class RefMutIdentifierFieldNode;
+
     friend class LiteralPatternNode;
     friend class IdentifierPatternNode;
     friend class WildcardPatternNode;
@@ -65,7 +77,6 @@ class SyntaxTreeVisitor {
     friend class TuplePatternNode;
     friend class GroupedPatternNode;
 
-    friend class ExpressionNode;
     friend class IdentifierExpressionNode;
     friend class LiteralExpressionNode;
     friend class BinaryOperationNode;
@@ -78,6 +89,10 @@ class SyntaxTreeVisitor {
 
 public:
     virtual void Visit(const SyntaxNode *syntaxNode) {
+        if (syntaxNode == nullptr) {
+            return;
+        }
+
         syntaxNode->Visit(this);
         for (auto &error : syntaxNode->errors_) {
             error->Visit(this);
@@ -89,19 +104,24 @@ protected:
     virtual void PostVisit(const LiteralNode *literalNode) {}
     virtual void PostVisit(const ErrorNode *errorNode) {}
 
+    virtual void PostVisit(const ParamFunctionNode *paramFunctionNode) {}
+    virtual void PostVisit(const ParamStructNode *paramStructNode) {}
+
     virtual void PostVisit(const LetNode *letNode) {}
     virtual void PostVisit(const FunctionNode *functionNode) {}
     virtual void PostVisit(const StructNode *structNode) {}
     virtual void PostVisit(const ConstantItemNode *constantItemNode) {}
 
-    virtual void PostVisit(const TypeNode *typeNode) {}
-    virtual void PostVisit(class ParenthesizedTypeNode *parenthesizedTypeNode) {}
-    virtual void PostVisit(class TupleTypeNode *tupleTypeNode) {}
-    virtual void PostVisit(class ReferenceTypeNode *referenceTypeNode) {}
-    virtual void PostVisit(class ArrayTypeNode *arrayTypeNode) {}
-    virtual void PostVisit(class IdentifierTypeNode *identifierTypeNode) {}
+    virtual void PostVisit(const ParenthesizedTypeNode *parenthesizedTypeNode) {}
+    virtual void PostVisit(const TupleTypeNode *tupleTypeNode) {}
+    virtual void PostVisit(const ReferenceTypeNode *referenceTypeNode) {}
+    virtual void PostVisit(const ArrayTypeNode *arrayTypeNode) {}
+    virtual void PostVisit(const IdentifierTypeNode *identifierTypeNode) {}
 
-    virtual void PostVisit(const PatternNode *patternNode) {}
+    virtual void PostVisit(const TupleIndexFieldNode *tupleIndexFieldNode) {}
+    virtual void PostVisit(const IdentifierFieldNode *identifierFieldNode) {}
+    virtual void PostVisit(const RefMutIdentifierFieldNode *refMutIdentifierFieldNode) {}
+
     virtual void PostVisit(const LiteralPatternNode *literalPatternNode) {}
     virtual void PostVisit(const IdentifierPatternNode *identifierPatternNode) {}
     virtual void PostVisit(const WildcardPatternNode *wildcardPatternNode) {}
@@ -112,7 +132,6 @@ protected:
     virtual void PostVisit(const TuplePatternNode *tuplePatternNode) {}
     virtual void PostVisit(const GroupedPatternNode *groupedPatternNode) {}
 
-    virtual void PostVisit(const ExpressionNode *expressionNode) {}
     virtual void PostVisit(const IdentifierExpressionNode *identifierExpressionNode) {}
     virtual void PostVisit(const LiteralExpressionNode *literalExpressionNode) {}
     virtual void PostVisit(const BinaryOperationNode *binaryOperationNode) {}

@@ -41,48 +41,48 @@ bool ReferencePatternNode::IsMut() const {
     return is_mut_;
 }
 
-StructPatternNode::TupleIndexField::TupleIndexField(
+TupleIndexFieldNode::TupleIndexFieldNode(
     std::unique_ptr<LiteralNode> &&literal, std::unique_ptr<PatternNode> &&pattern)
     : literal_(std::move(literal)), pattern_(std::move(pattern)) {}
 
-const LiteralNode *StructPatternNode::TupleIndexField::GetLiteral() const {
+const LiteralNode *TupleIndexFieldNode::GetLiteral() const {
     return literal_.get();
 }
 
-const PatternNode *StructPatternNode::TupleIndexField::GetPattern() const {
+const PatternNode *TupleIndexFieldNode::GetPattern() const {
     return pattern_.get();
 }
 
-StructPatternNode::IdentifierField::IdentifierField(
+IdentifierFieldNode::IdentifierFieldNode(
     std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<PatternNode> &&pattern)
     : identifier_(std::move(identifier)), pattern_(std::move(pattern)) {}
 
-const IdentifierNode *StructPatternNode::IdentifierField::GetIdentifier() const {
+const IdentifierNode *IdentifierFieldNode::GetIdentifier() const {
     return identifier_.get();
 }
 
-const PatternNode *StructPatternNode::IdentifierField::GetPattern() const {
+const PatternNode *IdentifierFieldNode::GetPattern() const {
     return pattern_.get();
 }
 
-StructPatternNode::RefMutIdentifierField::RefMutIdentifierField(
+RefMutIdentifierFieldNode::RefMutIdentifierFieldNode(
     bool is_ref, bool is_mut, std::unique_ptr<IdentifierNode> &&identifier)
     : is_ref_(is_ref), is_mut_(is_mut), identifier_(std::move(identifier)) {}
 
-const IdentifierNode *StructPatternNode::RefMutIdentifierField::GetIdentifier() const {
+const IdentifierNode *RefMutIdentifierFieldNode::GetIdentifier() const {
     return identifier_.get();
 }
 
-bool StructPatternNode::RefMutIdentifierField::IsRef() {
+bool RefMutIdentifierFieldNode::IsRef() const {
     return is_ref_;
 }
 
-bool StructPatternNode::RefMutIdentifierField::IsMut() {
+bool RefMutIdentifierFieldNode::IsMut() const {
     return is_mut_;
 }
 
 StructPatternNode::StructPatternNode(
-    std::unique_ptr<IdentifierNode> &&identifier, bool is_etc, std::vector<std::unique_ptr<Field>> &&fields)
+    std::unique_ptr<IdentifierNode> &&identifier, bool is_etc, std::vector<std::unique_ptr<FieldNode>> &&fields)
     : identifier_(std::move(identifier)), is_etc_(is_etc), fields_(std::move(fields)) {}
 
 const IdentifierNode *StructPatternNode::GetIdentifier() const {
@@ -91,6 +91,16 @@ const IdentifierNode *StructPatternNode::GetIdentifier() const {
 
 bool StructPatternNode::IsEtc() {
     return is_etc_;
+}
+
+std::vector<const FieldNode *> StructPatternNode::GetFields() const {
+    std::vector<const FieldNode *> fields;
+
+    for (const auto &field : fields_) {
+        fields.push_back(field.get());
+    }
+
+    return fields;
 }
 
 TupleStructPatternNode::TupleStructPatternNode(

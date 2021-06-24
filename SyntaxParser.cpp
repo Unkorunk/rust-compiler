@@ -1,6 +1,8 @@
 #include "SyntaxParser.hpp"
 
-SyntaxParser::SyntaxParser(Tokenizer *tokenizer) : tokenizer_(tokenizer) {}
+SyntaxParser::SyntaxParser(Tokenizer *tokenizer) : tokenizer_(tokenizer) {
+    current_token_ = tokenizer_->Next();
+}
 
 std::unique_ptr<ExpressionNode> SyntaxParser::ParseExpr() {
     if (!tokenizer_->HasNext()) {
@@ -8,6 +10,20 @@ std::unique_ptr<ExpressionNode> SyntaxParser::ParseExpr() {
     }
 
     return ParseLeft(0);
+}
+
+std::vector<std::unique_ptr<SyntaxNode>> SyntaxParser::ParseStatements() {
+    std::vector<std::unique_ptr<SyntaxNode>> statements;
+
+    Result<SyntaxNode> statement_result = ParseStatement();
+    if (statement_result.status) {
+        while (statement_result.status) {
+            statements.push_back(std::move(statement_result.node));
+            statement_result = ParseStatement();
+        }
+    }
+
+    return statements;
 }
 
 std::unique_ptr<ExpressionNode> SyntaxParser::ParseLeft(int priority) {
@@ -103,7 +119,7 @@ SyntaxParser::Result<SyntaxNode> SyntaxParser::ParseStatement() {
 
     Result<SyntaxNode> item = ParseItem();
     if (item.status) {
-        return Result<SyntaxNode>(true);
+        return Result<SyntaxNode>(true, std::move(item.node));
     }
 
     Result<ExpressionNode> expression = ParseExpressionStatement();
@@ -111,7 +127,7 @@ SyntaxParser::Result<SyntaxNode> SyntaxParser::ParseStatement() {
         return Result<SyntaxNode>(true, std::move(expression.node));
     }
 
-    throw std::exception();  // todo
+    return Result<SyntaxNode>(false);
 }
 
 // clang-format off
@@ -160,7 +176,7 @@ std::unique_ptr<FunctionNode> SyntaxParser::ParseFunction(bool is_const) {
     Expect(Token::Type::kIdentifier, &identifier);
     Expect(Token::Type::kOpenRoundBr);
 
-    std::vector<FunctionNode::Param> params;
+    std::vector<ParamFunctionNode> params;
 
     while (!Accept(Token::Type::kCloseRoundBr)) {
         std::unique_ptr<PatternNode> pattern = ParsePattern();
@@ -170,6 +186,7 @@ std::unique_ptr<FunctionNode> SyntaxParser::ParseFunction(bool is_const) {
         params.emplace_back(std::move(pattern), std::move(type));
 
         if (!Accept(Token::Type::kComma)) {
+            Expect(Token::Type::kCloseRoundBr);
             break;
         }
     }
@@ -195,7 +212,7 @@ std::unique_ptr<StructNode> SyntaxParser::ParseStruct() {
     Token struct_identifier_token;
     Expect(Token::Type::kIdentifier, &struct_identifier_token);
 
-    std::vector<StructNode::Param> params;
+    std::vector<ParamStructNode> params;
 
     if (Accept(Token::Type::kOpenRoundBr)) {
         while (!Accept(Token::Type::kCloseRoundBr)) {
@@ -203,6 +220,7 @@ std::unique_ptr<StructNode> SyntaxParser::ParseStruct() {
             params.emplace_back(std::unique_ptr<IdentifierNode>(), std::move(type_node));
 
             if (!Accept(Token::Type::kComma)) {
+                Expect(Token::Type::kCloseRoundBr);
                 break;
             }
         }
@@ -323,7 +341,7 @@ std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
         return std::make_unique<RestPatternNode>();
     } else if (Accept(Token::Type::kIdentifier, &identifier)) {
         if (Accept(Token::Type::kOpenCurlyBr)) {
-            std::vector<std::unique_ptr<StructPatternNode::Field>> fields;
+            std::vector<std::unique_ptr<FieldNode>> fields;
             bool is_etc = false;
             while (!Accept(Token::Type::kCloseCurlyBr)) {
                 bool is_ref = Accept(Token::Type::kRef);
@@ -333,15 +351,15 @@ std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
                 if (Accept(Token::Type::kLiteral, &literal)) {
                     Expect(Token::Type::kColon);
                     std::unique_ptr<PatternNode> pattern = ParsePattern();
-                    fields.push_back(std::make_unique<StructPatternNode::TupleIndexField>(
+                    fields.push_back(std::make_unique<TupleIndexFieldNode>(
                         std::make_unique<LiteralNode>(std::move(literal)), std::move(pattern)));
                 } else if (Accept(Token::Type::kIdentifier, &param_identifier)) {
                     if (Accept(Token::Type::kColon)) {
                         std::unique_ptr<PatternNode> pattern = ParsePattern();
-                        fields.push_back(std::make_unique<StructPatternNode::IdentifierField>(
+                        fields.push_back(std::make_unique<IdentifierFieldNode>(
                             std::make_unique<IdentifierNode>(std::move(param_identifier)), std::move(pattern)));
                     } else {
-                        fields.push_back(std::make_unique<StructPatternNode::RefMutIdentifierField>(
+                        fields.push_back(std::make_unique<RefMutIdentifierFieldNode>(
                             is_ref, is_mut, std::make_unique<IdentifierNode>(std::move(param_identifier))));
                     }
                 } else if (Accept(Token::Type::kDotDot)) {
@@ -350,6 +368,7 @@ std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
                 }
 
                 if (!Accept(Token::Type::kComma)) {
+                    Expect(Token::Type::kCloseCurlyBr);
                     break;
                 }
             }
@@ -359,7 +378,9 @@ std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
             std::vector<std::unique_ptr<PatternNode>> patterns;
             while (!Accept(Token::Type::kCloseRoundBr)) {
                 patterns.push_back(ParsePattern());
+
                 if (!Accept(Token::Type::kComma)) {
+                    Expect(Token::Type::kCloseRoundBr);
                     break;
                 }
             }
@@ -383,7 +404,9 @@ std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
             patterns.push_back(std::move(pattern));
             while (!Accept(Token::Type::kCloseRoundBr)) {
                 patterns.push_back(ParsePattern());
+
                 if (!Accept(Token::Type::kComma)) {
+                    Expect(Token::Type::kCloseRoundBr);
                     break;
                 }
             }
@@ -451,6 +474,7 @@ std::unique_ptr<TypeNode> SyntaxParser::ParseType() {
                 types.push_back(ParseType());
 
                 if (!Accept(Token::Type::kComma)) {
+                    Expect(Token::Type::kCloseRoundBr);
                     break;
                 }
             }

@@ -81,57 +81,69 @@ private:
     std::unique_ptr<PatternNode> pattern_;
 };
 
+class FieldNode : public SyntaxNode {
+public:
+    virtual ~FieldNode() = default;
+
+protected:
+    FieldNode() = default;
+};
+
+class TupleIndexFieldNode : public FieldNode {
+public:
+    TupleIndexFieldNode(std::unique_ptr<LiteralNode> &&literal, std::unique_ptr<PatternNode> &&pattern);
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const LiteralNode *GetLiteral() const;
+    const PatternNode *GetPattern() const;
+
+private:
+    std::unique_ptr<LiteralNode> literal_;
+    std::unique_ptr<PatternNode> pattern_;
+};
+
+class IdentifierFieldNode : public FieldNode {
+public:
+    IdentifierFieldNode(std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<PatternNode> &&pattern);
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const IdentifierNode *GetIdentifier() const;
+    const PatternNode *GetPattern() const;
+
+private:
+    std::unique_ptr<IdentifierNode> identifier_;
+    std::unique_ptr<PatternNode> pattern_;
+};
+
+class RefMutIdentifierFieldNode : public FieldNode {
+public:
+    RefMutIdentifierFieldNode(bool is_ref, bool is_mut, std::unique_ptr<IdentifierNode> &&identifier);
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const IdentifierNode *GetIdentifier() const;
+
+    bool IsRef() const;
+    bool IsMut() const;
+
+private:
+    bool is_ref_;
+    bool is_mut_;
+    std::unique_ptr<IdentifierNode> identifier_;
+};
+
 class StructPatternNode : public PatternNode {
 public:
-    class Field {
-    public:
-        virtual ~Field() = default;
-
-    protected:
-        Field() = default;
-    };
-
-    class TupleIndexField : public Field {
-    public:
-        TupleIndexField(std::unique_ptr<LiteralNode> &&literal, std::unique_ptr<PatternNode> &&pattern);
-
-        const LiteralNode *GetLiteral() const;
-        const PatternNode *GetPattern() const;
-
-    private:
-        std::unique_ptr<LiteralNode> literal_;
-        std::unique_ptr<PatternNode> pattern_;
-    };
-
-    class IdentifierField : public Field {
-    public:
-        IdentifierField(std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<PatternNode> &&pattern);
-
-        const IdentifierNode *GetIdentifier() const;
-        const PatternNode *GetPattern() const;
-
-    private:
-        std::unique_ptr<IdentifierNode> identifier_;
-        std::unique_ptr<PatternNode> pattern_;
-    };
-
-    class RefMutIdentifierField : public Field {
-    public:
-        RefMutIdentifierField(bool is_ref, bool is_mut, std::unique_ptr<IdentifierNode> &&identifier);
-
-        const IdentifierNode *GetIdentifier() const;
-
-        bool IsRef();
-        bool IsMut();
-
-    private:
-        bool is_ref_;
-        bool is_mut_;
-        std::unique_ptr<IdentifierNode> identifier_;
-    };
-
     StructPatternNode(
-        std::unique_ptr<IdentifierNode> &&identifier, bool is_etc, std::vector<std::unique_ptr<Field>> &&fields);
+        std::unique_ptr<IdentifierNode> &&identifier, bool is_etc, std::vector<std::unique_ptr<FieldNode>> &&fields);
 
     void Visit(SyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -141,10 +153,12 @@ public:
 
     bool IsEtc();
 
+    std::vector<const FieldNode *> GetFields() const;
+
 private:
     std::unique_ptr<IdentifierNode> identifier_;
     bool is_etc_;
-    std::vector<std::unique_ptr<Field>> fields_;
+    std::vector<std::unique_ptr<FieldNode>> fields_;
 };
 
 class TupleStructPatternNode : public PatternNode {
@@ -158,6 +172,16 @@ public:
 
     const IdentifierNode *GetIdentifier() const;
 
+    std::vector<const PatternNode *> GetPatterns() const {
+        std::vector<const PatternNode *> patterns;
+
+        for (const auto &pattern : patterns_) {
+            patterns.push_back(pattern.get());
+        }
+
+        return patterns;
+    }
+
 private:
     std::unique_ptr<IdentifierNode> identifier_;
     std::vector<std::unique_ptr<PatternNode>> patterns_;
@@ -169,6 +193,16 @@ public:
 
     void Visit(SyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
+    }
+
+    std::vector<const PatternNode *> GetPatterns() const {
+        std::vector<const PatternNode *> patterns;
+
+        for (const auto &pattern : patterns_) {
+            patterns.push_back(pattern.get());
+        }
+
+        return patterns;
     }
 
 private:

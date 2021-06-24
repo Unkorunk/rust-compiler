@@ -10,6 +10,7 @@ public:
     void Visit(SyntaxTreeVisitor *visitor) const override;
 
     const ExpressionNode *GetExpression() const;
+    const BlockNode *GetBlock() const;
 
 private:
     std::unique_ptr<ExpressionNode> expression_;

@@ -11,3 +11,7 @@ void PredicateLoopNode::Visit(SyntaxTreeVisitor *visitor) const {
 const ExpressionNode *PredicateLoopNode::GetExpression() const {
     return expression_.get();
 }
+
+const BlockNode *PredicateLoopNode::GetBlock() const {
+    return block_.get();
+}

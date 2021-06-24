@@ -36,6 +36,8 @@ public:
 
     std::unique_ptr<ExpressionNode> ParseExpr();
 
+    std::vector<std::unique_ptr<SyntaxNode>> ParseStatements();
+
 private:
     std::unique_ptr<ExpressionNode> ParseLeft(int priority);
     std::unique_ptr<ExpressionNode> ParseFactor();

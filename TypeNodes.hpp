@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IdentifierNode.hpp"
 #include "ExpressionNode.hpp"
+#include "IdentifierNode.hpp"
 
 class TypeNode : public SyntaxNode {
 public:
@@ -19,6 +19,10 @@ public:
         visitor->PostVisit(this);
     }
 
+    const TypeNode *GetType() const {
+        return type_.get();
+    }
+
 private:
     std::unique_ptr<TypeNode> type_;
 };
@@ -32,6 +36,16 @@ public:
         visitor->PostVisit(this);
     }
 
+    std::vector<const TypeNode *> GetTypes() const {
+        std::vector<const TypeNode *> types;
+
+        for (const auto &type : types_) {
+            types.push_back(type.get());
+        }
+
+        return types;
+    }
+
 private:
     std::vector<std::unique_ptr<TypeNode>> types_;
 };
@@ -42,6 +56,14 @@ public:
 
     void Visit(SyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
+    }
+
+    bool IsMut() const {
+        return is_mut_;
+    }
+
+    const TypeNode *GetType() const {
+        return type_.get();
     }
 
 private:
@@ -57,6 +79,14 @@ public:
         visitor->PostVisit(this);
     }
 
+    const TypeNode *GetType() const {
+        return type_.get();
+    }
+
+    const ExpressionNode *GetExpression() const {
+        return expression_.get();
+    }
+
 private:
     std::unique_ptr<TypeNode> type_;
     std::unique_ptr<ExpressionNode> expression_;
@@ -68,6 +98,10 @@ public:
 
     void Visit(SyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
+    }
+
+    const IdentifierNode *GetIdentifier() const {
+        return identifier_.get();
     }
 
 private:

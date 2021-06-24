@@ -2,22 +2,29 @@
 
 #include "TypeNodes.hpp"
 
-class StructNode final : public SyntaxNode {
+class ParamStructNode final : public SyntaxNode {
 public:
-    struct Param {
-    public:
-        Param(std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<TypeNode> &&type);
-
-    private:
-        std::unique_ptr<IdentifierNode> identifier_;
-        std::unique_ptr<TypeNode> type_;
-    };
-
-    StructNode(std::unique_ptr<IdentifierNode> &&identifier, std::vector<Param> &&params);
+    ParamStructNode(std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<TypeNode> &&type);
 
     void Visit(SyntaxTreeVisitor *visitor) const override;
 
+    const IdentifierNode *GetIdentifier() const;
+    const TypeNode *GetType() const;
+
 private:
     std::unique_ptr<IdentifierNode> identifier_;
-    std::vector<Param> params_;
+    std::unique_ptr<TypeNode> type_;
+};
+
+class StructNode final : public SyntaxNode {
+public:
+    StructNode(std::unique_ptr<IdentifierNode> &&identifier, std::vector<ParamStructNode> &&params);
+
+    void Visit(SyntaxTreeVisitor *visitor) const override;
+
+    std::vector<const ParamStructNode *> GetParams() const;
+
+private:
+    std::unique_ptr<IdentifierNode> identifier_;
+    std::vector<ParamStructNode> params_;
 };
