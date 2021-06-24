@@ -3,6 +3,7 @@
 #include <array>
 #include <memory>
 #include <unordered_set>
+#include <queue>
 
 #include "BinaryOperationNode.hpp"
 #include "BlockNode.hpp"
@@ -20,6 +21,7 @@
 #include "PrefixUnaryOperationNode.hpp"
 #include "StructNode.hpp"
 #include "Tokenizer.hpp"
+
 #include "TypeNodes.hpp"
 
 class SyntaxParser {
@@ -34,16 +36,31 @@ public:
         Result(bool status, std::unique_ptr<T> &&node) : status(status), node(std::move(node)) {}
     };
 
-    std::unique_ptr<ExpressionNode> ParseExpr();
-
     std::vector<std::unique_ptr<SyntaxNode>> ParseStatements();
 
 private:
-    std::unique_ptr<ExpressionNode> ParseLeft(int priority);
-    std::unique_ptr<ExpressionNode> ParseFactor();
+    Token NextToken();
+    Token GetToken();
 
     bool Accept(Token::Type type, Token *out = nullptr);
     void Expect(Token::Type type, Token *out = nullptr);
+
+    template <typename IterType>
+    bool Accept(IterType begin, IterType end, Token *out = nullptr) {
+        for (; begin != end; begin++) {
+            if (Accept(*begin, out)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool is_transaction_ = false;
+    void BeginTransaction();
+    void RollbackTransaction();
+    void CommitTransaction();
+    std::queue<Token> transaction_buff_;
+    std::queue<Token> post_transaction_buff_;
 
     Tokenizer *tokenizer_;
     Token current_token_;
@@ -60,6 +77,8 @@ private:
     [[nodiscard]] Result<ExpressionNode> ParseExpressionStatement();
 
     [[nodiscard]] Result<ExpressionNode> ParseExpressionWithoutBlock();
+    [[nodiscard]] Result<ExpressionNode> ParseLeft(int priority);
+    [[nodiscard]] Result<ExpressionNode> ParsePrefix();
 
     [[nodiscard]] Result<ExpressionNode> ParseExpressionWithBlock();
     [[nodiscard]] std::unique_ptr<BlockNode> ParseBlockExpression();
@@ -74,5 +93,5 @@ private:
     bool except_struct_expression_ = false;
 
     const static std::unordered_set<Token::Type> kUnaryOperator;
-    const static std::array<std::unordered_set<Token::Type>, 9> kPriority;
+    const static std::array<std::unordered_set<Token::Type>, 10> kPriority;
 };

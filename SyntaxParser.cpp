@@ -1,15 +1,7 @@
 #include "SyntaxParser.hpp"
 
 SyntaxParser::SyntaxParser(Tokenizer *tokenizer) : tokenizer_(tokenizer) {
-    current_token_ = tokenizer_->Next();
-}
-
-std::unique_ptr<ExpressionNode> SyntaxParser::ParseExpr() {
-    if (!tokenizer_->HasNext()) {
-        return std::unique_ptr<ExpressionNode>();
-    }
-
-    return ParseLeft(0);
+    current_token_ = NextToken();
 }
 
 std::vector<std::unique_ptr<SyntaxNode>> SyntaxParser::ParseStatements() {
@@ -26,63 +18,33 @@ std::vector<std::unique_ptr<SyntaxNode>> SyntaxParser::ParseStatements() {
     return statements;
 }
 
-std::unique_ptr<ExpressionNode> SyntaxParser::ParseLeft(int priority) {
-    if (priority == kPriority.size()) {
-        return ParseFactor();
+Token SyntaxParser::NextToken() {
+    if (!post_transaction_buff_.empty()) {
+        Token result = post_transaction_buff_.front();
+        post_transaction_buff_.pop();
+
+        if (is_transaction_) {
+            transaction_buff_.push(result);
+        }
+
+        return result;
     }
 
-    auto left = ParseLeft(priority + 1);
-    auto token = tokenizer_->Get();
-    while (kPriority.at(priority).count(token.GetType()) != 0) {
-        tokenizer_->Next();
-        auto right = ParseLeft(priority + 1);
-        left = std::make_unique<BinaryOperationNode>(std::move(token), std::move(left), std::move(right));
-        token = tokenizer_->Get();
+    Token result = tokenizer_->Next();
+
+    if (is_transaction_) {
+        transaction_buff_.push(result);
     }
 
-    return left;
+    return result;
 }
 
-std::unique_ptr<ExpressionNode> SyntaxParser::ParseFactor() {
-    auto token = tokenizer_->Next();
-
-    if (token.GetType() == Token::Type::kIdentifier) {
-        return std::make_unique<IdentifierExpressionNode>(std::make_unique<IdentifierNode>(std::move(token)));
+Token SyntaxParser::GetToken() {
+    if (!post_transaction_buff_.empty()) {
+        return post_transaction_buff_.front();
     }
 
-    if (token.GetType() == Token::Type::kLiteral) {
-        return std::make_unique<LiteralExpressionNode>(std::make_unique<LiteralNode>(std::move(token)));
-    }
-
-    if (token.GetType() == Token::Type::kOpenRoundBr) {
-        auto node = ParseLeft(0);
-
-        token = tokenizer_->Get();
-        if (token.GetType() != Token::Type::kCloseRoundBr) {
-            node->AddError(std::make_unique<ErrorNode>("Expected )", token.GetPosition()));
-        }
-        tokenizer_->Next();
-
-        return node;
-    }
-
-    if (kUnaryOperator.count(token.GetType()) != 0) {
-        auto right = ParseFactor();
-        return std::make_unique<PrefixUnaryOperationNode>(std::move(token), std::move(right));
-    } else if (token.GetType() == Token::Type::kAnd) {
-        auto right = ParseFactor();
-
-        Token next_token = tokenizer_->Get();
-        if (next_token.GetType() == Token::Type::kMut) {
-            tokenizer_->Next();
-            // todo unary `&mut`
-        } else {
-            return std::make_unique<PrefixUnaryOperationNode>(std::move(token), std::move(right));
-        }
-    }
-
-    // return std::make_unique<ErrorNode>("Unexpected token", token.GetPosition());
-    throw std::exception();  // todo
+    return tokenizer_->Get();
 }
 
 bool SyntaxParser::Accept(Token::Type type, Token *out) {
@@ -91,7 +53,7 @@ bool SyntaxParser::Accept(Token::Type type, Token *out) {
     }
 
     if (current_token_.GetType() == type) {
-        current_token_ = tokenizer_->Next();
+        current_token_ = NextToken();
         return true;
     }
 
@@ -102,6 +64,27 @@ void SyntaxParser::Expect(Token::Type type, Token *out) {
     if (!Accept(type, out)) {
         throw std::exception();
     }
+}
+
+void SyntaxParser::BeginTransaction() {
+    is_transaction_ = true;
+}
+
+void SyntaxParser::RollbackTransaction() {
+    is_transaction_ = false;
+    while (!transaction_buff_.empty()) {
+        post_transaction_buff_.push(transaction_buff_.front());
+        transaction_buff_.pop();
+    }
+
+    // if (!post_transaction_buff_.empty()) {
+    //    current_token_ = post_transaction_buff_.front();
+    //}
+}
+
+void SyntaxParser::CommitTransaction() {
+    is_transaction_ = false;
+    transaction_buff_.swap(std::queue<Token>());
 }
 
 // clang-format off
@@ -612,7 +595,91 @@ ReturnExpression              : `return` Expression?
 */
 // clang-format on
 SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseExpressionWithoutBlock() {
-    return Result<ExpressionNode>(false);  // todo
+    BeginTransaction();
+
+    auto result = ParseLeft(0);
+    if (result.status) {
+        CommitTransaction();
+    } else {
+        RollbackTransaction();
+    }
+
+    return result;
+}
+
+SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseLeft(int priority) {
+    if (priority == kPriority.size()) {
+        return ParsePrefix();
+    }
+
+    auto left = ParseLeft(priority + 1);
+    if (!left.status) {
+        return Result<ExpressionNode>(false);
+    }
+
+    Token out;
+    while (Accept(kPriority.at(priority).begin(), kPriority.at(priority).end(), &out)) {
+        auto right = ParseLeft(priority + 1);
+        if (!right.status) {
+            return Result<ExpressionNode>(false);
+        }
+
+        left = Result<ExpressionNode>(
+            true, std::make_unique<BinaryOperationNode>(std::move(out), std::move(left.node), std::move(right.node)));
+    }
+
+    return left;
+}
+
+SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrefix() {
+    Token out;
+
+    if (Accept(Token::Type::kIdentifier, &out)) {
+        return Result<ExpressionNode>(
+            true, std::make_unique<IdentifierExpressionNode>(std::make_unique<IdentifierNode>(std::move(out))));
+    }
+
+    if (Accept(Token::Type::kLiteral, &out)) {
+        return Result<ExpressionNode>(
+            true, std::make_unique<LiteralExpressionNode>(std::make_unique<LiteralNode>(std::move(out))));
+    }
+
+    if (Accept(Token::Type::kOpenRoundBr)) {
+        auto result = ParseLeft(0);
+        if (!result.status) {
+            return Result<ExpressionNode>(false);
+        }
+
+        Expect(Token::Type::kCloseRoundBr);
+
+        return result;
+    }
+
+    if (Accept(kUnaryOperator.begin(), kUnaryOperator.end(), &out)) {
+        auto right = ParsePrefix();
+        if (!right.status) {
+            return Result<ExpressionNode>(false);
+        }
+
+        return Result<ExpressionNode>(
+            true, std::make_unique<PrefixUnaryOperationNode>(std::move(out), std::move(right.node)));
+    } else if (Accept(Token::Type::kAnd, &out)) {
+        auto right = ParsePrefix();
+        if (!right.status) {
+            return Result<ExpressionNode>(false);
+        }
+
+        if (Accept(Token::Type::kMut)) {
+            // todo unary `&mut`
+            throw std::exception();
+        } else {
+            return Result<ExpressionNode>(
+                true, std::make_unique<PrefixUnaryOperationNode>(std::move(out), std::move(right.node)));
+        }
+    }
+
+    // return std::make_unique<ErrorNode>("Unexpected token", token.GetPosition());
+    return Result<ExpressionNode>(false);
 }
 
 // clang-format off
@@ -738,9 +805,11 @@ std::unique_ptr<IfNode> SyntaxParser::ParseIfExpression() {
 const std::unordered_set<Token::Type> SyntaxParser::kUnaryOperator{
     Token::Type::kMinus, Token::Type::kStar, Token::Type::kNot};
 
-const std::array<std::unordered_set<Token::Type>, 9> SyntaxParser::kPriority{
+const std::array<std::unordered_set<Token::Type>, 10> SyntaxParser::kPriority{
     std::unordered_set{Token::Type::kOrOr},
     std::unordered_set{Token::Type::kAndAnd},
+    std::unordered_set{
+        Token::Type::kEqEq, Token::Type::kNe, Token::Type::kLt, Token::Type::kGt, Token::Type::kLe, Token::Type::kGe},
     std::unordered_set{Token::Type::kOr},
     std::unordered_set{Token::Type::kCaret},
     std::unordered_set{Token::Type::kAnd},
