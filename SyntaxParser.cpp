@@ -744,6 +744,38 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
     } else if (Accept(Token::Type::kLiteral, &out)) {
         return Result<ExpressionNode>(
             true, std::make_unique<LiteralExpressionNode>(std::make_unique<LiteralNode>(std::move(out))));
+    } else if (Accept(Token::Type::kOpenSquareBr)) {
+        auto result = ParseExpression();
+        if (!result.status) {
+            throw std::exception();
+        }
+
+        if (Accept(Token::Type::kSemi)) {
+            auto second_expression = ParseExpression();
+            if (!result.status) {
+                throw std::exception();
+            }
+            Expect(Token::Type::kCloseSquareBr);
+        } else {
+            std::vector<std::unique_ptr<ExpressionNode>> expressions;
+            expressions.push_back(std::move(result.node));
+
+            if (Accept(Token::Type::kComma)) {
+                while (!Accept(Token::Type::kCloseSquareBr)) {
+                    result = ParseExpression();
+                    if (!result.status) {
+                        throw std::exception();
+                    }
+
+                    expressions.push_back(std::move(result.node));
+
+                    if (!Accept(Token::Type::kComma)) {
+                        Expect(Token::Type::kCloseSquareBr);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     return Result<ExpressionNode>(false);
