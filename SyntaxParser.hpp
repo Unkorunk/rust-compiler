@@ -2,8 +2,8 @@
 
 #include <array>
 #include <memory>
-#include <unordered_set>
 #include <queue>
+#include <unordered_set>
 
 #include "BinaryOperationNode.hpp"
 #include "BlockNode.hpp"
@@ -21,8 +21,118 @@
 #include "PrefixUnaryOperationNode.hpp"
 #include "StructNode.hpp"
 #include "Tokenizer.hpp"
-
 #include "TypeNodes.hpp"
+
+class BreakNode : public ExpressionNode {
+public:
+    explicit BreakNode(std::unique_ptr<ExpressionNode> &&expression) : expression_(std::move(expression)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const ExpressionNode *GetExpression() const {
+        return expression_.get();
+    }
+
+private:
+    std::unique_ptr<ExpressionNode> expression_;
+};
+
+class ReturnNode : public ExpressionNode {
+public:
+    explicit ReturnNode(std::unique_ptr<ExpressionNode> &&expression) : expression_(std::move(expression)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const ExpressionNode *GetExpression() const {
+        return expression_.get();
+    }
+
+private:
+    std::unique_ptr<ExpressionNode> expression_;
+};
+
+class ContinueNode : public ExpressionNode {
+public:
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+};
+
+class CallNode : public ExpressionNode {
+public:
+    CallNode(std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
+        : identifier_(std::move(identifier)), arguments_(std::move(arguments)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const ExpressionNode *GetIdentifier() const {
+        return identifier_.get();
+    }
+
+    std::vector<const ExpressionNode *> GetArguments() const {
+        std::vector<const ExpressionNode *> arguments;
+
+        for (const auto &argument : arguments_) {
+            arguments.push_back(argument.get());
+        }
+
+        return arguments;
+    }
+
+private:
+    std::unique_ptr<ExpressionNode> identifier_;
+    std::vector<std::unique_ptr<ExpressionNode>> arguments_;
+};
+
+class IndexNode : public ExpressionNode {
+public:
+    IndexNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
+        : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const ExpressionNode *GetIdentifier() const {
+        return identifier_.get();
+    }
+
+    const ExpressionNode *GetExpression() const {
+        return expression_.get();
+    }
+
+private:
+    std::unique_ptr<ExpressionNode> identifier_;
+    std::unique_ptr<ExpressionNode> expression_;
+};
+
+class MemberAccessNode : public ExpressionNode {
+public:
+    MemberAccessNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
+        : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const ExpressionNode *GetIdentifier() const {
+        return identifier_.get();
+    }
+
+    const ExpressionNode *GetExpression() const {
+        return expression_.get();
+    }
+
+private:
+    std::unique_ptr<ExpressionNode> identifier_;
+    std::unique_ptr<ExpressionNode> expression_;
+};
 
 class SyntaxParser {
 public:
@@ -79,6 +189,8 @@ private:
     [[nodiscard]] Result<ExpressionNode> ParseExpressionWithoutBlock();
     [[nodiscard]] Result<ExpressionNode> ParseLeft(int priority);
     [[nodiscard]] Result<ExpressionNode> ParsePrefix();
+    [[nodiscard]] Result<ExpressionNode> ParsePostfix();
+    [[nodiscard]] Result<ExpressionNode> ParsePrimary();
 
     [[nodiscard]] Result<ExpressionNode> ParseExpressionWithBlock();
     [[nodiscard]] std::unique_ptr<BlockNode> ParseBlockExpression();
@@ -94,4 +206,5 @@ private:
 
     const static std::unordered_set<Token::Type> kUnaryOperator;
     const static std::array<std::unordered_set<Token::Type>, 10> kPriority;
+    const static std::unordered_set<Token::Type> kPostfix;
 };

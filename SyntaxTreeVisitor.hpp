@@ -43,6 +43,12 @@ class PredicateLoopNode;
 class IteratorLoopNode;
 class IfNode;
 class BlockNode;
+class BreakNode;
+class ContinueNode;
+class ReturnNode;
+class CallNode;
+class IndexNode;
+class MemberAccessNode;
 
 class SyntaxTreeVisitor {
     friend class IdentifierNode;
@@ -86,6 +92,12 @@ class SyntaxTreeVisitor {
     friend class IteratorLoopNode;
     friend class IfNode;
     friend class BlockNode;
+    friend class BreakNode;
+    friend class ContinueNode;
+    friend class ReturnNode;
+    friend class CallNode;
+    friend class IndexNode;
+    friend class MemberAccessNode;
 
 public:
     virtual void Visit(const SyntaxNode *syntaxNode) {
@@ -141,4 +153,10 @@ protected:
     virtual void PostVisit(const IteratorLoopNode *iteratorLoopNode) {}
     virtual void PostVisit(const IfNode *ifNode) {}
     virtual void PostVisit(const BlockNode *blockNode) {}
+    virtual void PostVisit(const BreakNode *breakNode) {}
+    virtual void PostVisit(const ContinueNode *continueNode) {}
+    virtual void PostVisit(const ReturnNode *returnNode) {}
+    virtual void PostVisit(const CallNode *callNode) {}
+    virtual void PostVisit(const IndexNode *indexNode) {}
+    virtual void PostVisit(const MemberAccessNode *memberAccessNode) {}
 };

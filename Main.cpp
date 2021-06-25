@@ -431,6 +431,75 @@ protected:
 
         indent -= 2;
     }
+
+    void PostVisit(const BreakNode *breakNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "break" << std::endl;
+
+        Visit(breakNode->GetExpression());
+
+        indent -= 2;
+    }
+
+    void PostVisit(const ContinueNode *continueNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "continue" << std::endl;
+
+        indent -= 2;
+    }
+
+    void PostVisit(const ReturnNode *returnNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "return" << std::endl;
+
+        Visit(returnNode->GetExpression());
+
+        indent -= 2;
+    }
+
+    void PostVisit(const CallNode *callNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "call" << std::endl;
+
+        Visit(callNode->GetIdentifier());
+        for (const ExpressionNode *argument : callNode->GetArguments()) {
+            Visit(argument);
+        }
+
+        indent -= 2;
+    }
+
+    void PostVisit(const IndexNode *indexNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "index" << std::endl;
+
+        Visit(indexNode->GetIdentifier());
+        Visit(indexNode->GetExpression());
+
+        indent -= 2;
+    }
+
+    void PostVisit(const MemberAccessNode *memberAccessNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "member access" << std::endl;
+
+        Visit(memberAccessNode->GetIdentifier());
+        Visit(memberAccessNode->GetExpression());
+
+        indent -= 2;
+    }
 };
 
 int main(int argc, char **argv) {
