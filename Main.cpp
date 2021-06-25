@@ -500,6 +500,20 @@ protected:
 
         indent -= 2;
     }
+    void PostVisit(const ArrayExpressionNode *arrayExpressionNode) override {
+        indent += 2;
+
+        PrintIndent();
+        if (arrayExpressionNode->IsSemiMode()) {
+            std::cout << "; ";
+        }
+        std::cout << "array expression" << std::endl;
+        for (const ExpressionNode *expreesion : arrayExpressionNode->GetExpressions()) {
+            Visit(expreesion);
+        }
+
+        indent -= 2;
+    }
 };
 
 int main(int argc, char **argv) {

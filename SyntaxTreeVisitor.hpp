@@ -49,6 +49,7 @@ class ReturnNode;
 class CallNode;
 class IndexNode;
 class MemberAccessNode;
+class ArrayExpressionNode;
 
 class SyntaxTreeVisitor {
     friend class IdentifierNode;
@@ -98,6 +99,7 @@ class SyntaxTreeVisitor {
     friend class CallNode;
     friend class IndexNode;
     friend class MemberAccessNode;
+    friend class ArrayExpressionNode;
 
 public:
     virtual void Visit(const SyntaxNode *syntaxNode) {
@@ -159,4 +161,5 @@ protected:
     virtual void PostVisit(const CallNode *callNode) {}
     virtual void PostVisit(const IndexNode *indexNode) {}
     virtual void PostVisit(const MemberAccessNode *memberAccessNode) {}
+    virtual void PostVisit(const ArrayExpressionNode *arrayExpressionNode) {}
 };

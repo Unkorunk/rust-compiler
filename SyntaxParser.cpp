@@ -750,16 +750,20 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
             throw std::exception();
         }
 
+        std::vector<std::unique_ptr<ExpressionNode>> expressions;
+        expressions.push_back(std::move(result.node));
+
+        bool is_semi_mode = false;
+
         if (Accept(Token::Type::kSemi)) {
+            is_semi_mode = true;
             auto second_expression = ParseExpression();
             if (!result.status) {
                 throw std::exception();
             }
+            expressions.push_back(std::move(second_expression.node));
             Expect(Token::Type::kCloseSquareBr);
         } else {
-            std::vector<std::unique_ptr<ExpressionNode>> expressions;
-            expressions.push_back(std::move(result.node));
-
             if (Accept(Token::Type::kComma)) {
                 while (!Accept(Token::Type::kCloseSquareBr)) {
                     result = ParseExpression();
@@ -776,6 +780,9 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
                 }
             }
         }
+
+        return Result<ExpressionNode>(
+            true, std::make_unique<ArrayExpressionNode>(std::move(expressions), is_semi_mode));
     }
 
     return Result<ExpressionNode>(false);

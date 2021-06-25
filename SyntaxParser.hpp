@@ -134,6 +134,34 @@ private:
     std::unique_ptr<ExpressionNode> expression_;
 };
 
+class ArrayExpressionNode : public ExpressionNode {
+public:
+    explicit ArrayExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions, bool is_semi_mode)
+        : expressions_(std::move(expressions)), is_semi_mode_(is_semi_mode) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    std::vector<const ExpressionNode *> GetExpressions() const {
+        std::vector<const ExpressionNode *> expressions;
+
+        for (const auto &expression : expressions_) {
+            expressions.push_back(expression.get());
+        }
+
+        return expressions;
+    }
+
+    bool IsSemiMode() const {
+        return is_semi_mode_;
+    }
+
+private:
+    std::vector<std::unique_ptr<ExpressionNode>> expressions_;
+    bool is_semi_mode_;
+};
+
 class SyntaxParser {
 public:
     explicit SyntaxParser(Tokenizer *tokenizer);
