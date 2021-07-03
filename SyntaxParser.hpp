@@ -212,7 +212,7 @@ private:
     [[nodiscard]] std::unique_ptr<LetNode> ParseLetStatement();
 
     [[nodiscard]] Result<ExpressionNode> ParseExpression();
-    [[nodiscard]] Result<ExpressionNode> ParseExpressionStatement();
+    [[nodiscard]] Result<ExpressionNode> ParseExpressionStatement(Result<ExpressionNode> &expression_without_block);
 
     [[nodiscard]] Result<ExpressionNode> ParseExpressionWithoutBlock();
     [[nodiscard]] Result<ExpressionNode> ParseLeft(int priority);

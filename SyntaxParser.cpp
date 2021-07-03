@@ -105,9 +105,15 @@ SyntaxParser::Result<SyntaxNode> SyntaxParser::ParseStatement() {
         return Result<SyntaxNode>(true, std::move(item.node));
     }
 
-    Result<ExpressionNode> expression = ParseExpressionStatement();
+    Result<ExpressionNode> expression_without_block(false);
+    Result<ExpressionNode> expression = ParseExpressionStatement(expression_without_block);
+
     if (expression.status) {
         return Result<SyntaxNode>(true, std::move(expression.node));
+    }
+
+    if (expression_without_block.status) {
+        return Result<SyntaxNode>(true, std::move(expression_without_block.node));
     }
 
     return Result<SyntaxNode>(false);
@@ -497,7 +503,8 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseExpression() {
 ExpressionStatement           : ExpressionWithoutBlock `;` | ExpressionWithBlock `;`?
 */
 // clang-format on
-SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseExpressionStatement() {
+SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseExpressionStatement(
+    Result<ExpressionNode> &expression_without_block) {
     auto result = ParseExpressionWithBlock();
     if (result.status) {
         Accept(Token::Type::kSemi);
@@ -506,8 +513,10 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseExpressionStatement() {
 
     result = ParseExpressionWithoutBlock();
     if (result.status) {
-        Expect(Token::Type::kSemi);
-        return result;
+        if (Accept(Token::Type::kSemi)) {
+            return result;
+        }
+        expression_without_block = std::move(result);
     }
 
     return Result<ExpressionNode>(false);
