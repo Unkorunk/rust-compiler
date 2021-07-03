@@ -23,7 +23,7 @@
 #include "Tokenizer.hpp"
 #include "TypeNodes.hpp"
 
-class BreakNode : public ExpressionNode {
+class BreakNode final : public ExpressionNode {
 public:
     explicit BreakNode(std::unique_ptr<ExpressionNode> &&expression) : expression_(std::move(expression)) {}
 
@@ -39,7 +39,7 @@ private:
     std::unique_ptr<ExpressionNode> expression_;
 };
 
-class ReturnNode : public ExpressionNode {
+class ReturnNode final : public ExpressionNode {
 public:
     explicit ReturnNode(std::unique_ptr<ExpressionNode> &&expression) : expression_(std::move(expression)) {}
 
@@ -62,7 +62,7 @@ public:
     }
 };
 
-class CallNode : public ExpressionNode {
+class CallNode final : public ExpressionNode {
 public:
     CallNode(std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
         : identifier_(std::move(identifier)), arguments_(std::move(arguments)) {}
@@ -90,7 +90,7 @@ private:
     std::vector<std::unique_ptr<ExpressionNode>> arguments_;
 };
 
-class IndexNode : public ExpressionNode {
+class IndexNode final : public ExpressionNode {
 public:
     IndexNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
         : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
@@ -112,7 +112,7 @@ private:
     std::unique_ptr<ExpressionNode> expression_;
 };
 
-class MemberAccessNode : public ExpressionNode {
+class MemberAccessNode final : public ExpressionNode {
 public:
     MemberAccessNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
         : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
@@ -134,7 +134,7 @@ private:
     std::unique_ptr<ExpressionNode> expression_;
 };
 
-class ArrayExpressionNode : public ExpressionNode {
+class ArrayExpressionNode final : public ExpressionNode {
 public:
     explicit ArrayExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions, bool is_semi_mode)
         : expressions_(std::move(expressions)), is_semi_mode_(is_semi_mode) {}
@@ -160,6 +160,113 @@ public:
 private:
     std::vector<std::unique_ptr<ExpressionNode>> expressions_;
     bool is_semi_mode_;
+};
+
+class FieldInitStructExpressionNode : public SyntaxNode {
+public:
+    virtual ~FieldInitStructExpressionNode() = default;
+
+protected:
+    FieldInitStructExpressionNode() = default;
+};
+
+class ShorthandFieldInitStructExpressionNode final : public FieldInitStructExpressionNode {
+public:
+    ShorthandFieldInitStructExpressionNode(std::unique_ptr<IdentifierNode> &&identifier)
+        : identifier_(std::move(identifier)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const IdentifierNode *GetIdentifier() const {
+        return identifier_.get();
+    }
+
+private:
+    std::unique_ptr<IdentifierNode> identifier_;
+};
+
+class TupleIndexFieldInitStructExpressionNode final : public FieldInitStructExpressionNode {
+public:
+    TupleIndexFieldInitStructExpressionNode(
+        std::unique_ptr<LiteralNode> &&literal, std::unique_ptr<ExpressionNode> &&expression)
+        : literal_(std::move(literal)), expression_(std::move(expression)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const LiteralNode *GetLiteral() const {
+        return literal_.get();
+    }
+
+    const ExpressionNode *GetExpression() const {
+        return expression_.get();
+    }
+
+private:
+    std::unique_ptr<LiteralNode> literal_;
+    std::unique_ptr<ExpressionNode> expression_;
+};
+
+class IdentifierFieldInitStructExpressionNode final : public FieldInitStructExpressionNode {
+public:
+    IdentifierFieldInitStructExpressionNode(
+        std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
+        : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const IdentifierNode *GetIdentifier() const {
+        return identifier_.get();
+    }
+
+    const ExpressionNode *GetExpression() const {
+        return expression_.get();
+    }
+
+private:
+    std::unique_ptr<IdentifierNode> identifier_;
+    std::unique_ptr<ExpressionNode> expression_;
+};
+
+class InitStructExpressionNode final : public ExpressionNode {
+public:
+    InitStructExpressionNode(
+        std::unique_ptr<ExpressionNode> &&identifier,
+        std::vector<std::unique_ptr<FieldInitStructExpressionNode>> &&fields,
+        std::unique_ptr<ExpressionNode> &&dot_dot_expression)
+        : identifier_(std::move(identifier)), fields_(std::move(fields)),
+          dot_dot_expression_(std::move(dot_dot_expression)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    const ExpressionNode *GetIdentifier() const {
+        return identifier_.get();
+    }
+
+    std::vector<const FieldInitStructExpressionNode *> GetFields() const {
+        std::vector<const FieldInitStructExpressionNode *> fields;
+        fields.reserve(fields_.size());
+        for (const auto &field : fields_) {
+            fields.push_back(field.get());
+        }
+        return fields;
+    }
+
+    const ExpressionNode *GetDotDotExpression() const {
+        return dot_dot_expression_.get();
+    }
+
+private:
+    std::unique_ptr<ExpressionNode> identifier_;
+    std::vector<std::unique_ptr<FieldInitStructExpressionNode>> fields_;
+    std::unique_ptr<ExpressionNode> dot_dot_expression_;
 };
 
 class SyntaxParser {

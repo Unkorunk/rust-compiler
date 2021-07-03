@@ -588,13 +588,13 @@ TupleElements                 : ( Expression `,` )+ Expression?
 TupleIndexingExpression       : Expression `.` TUPLE_INDEX
 
 StructExpression              : StructExprStruct | StructExprTuple | IDENTIFIER
-StructExprStruct              : IDENTIFIER { (StructExprFields | StructBase)? }
+StructExprStruct              : IDENTIFIER `{` (StructExprFields | StructBase)? `}`
 StructExprFields              : StructExprField (`,` StructExprField)* (`,` StructBase | `,`?)
-StructExprField               : IDENTIFIER | (IDENTIFIER | TUPLE_INDEX) : Expression
+StructExprField               : IDENTIFIER | (IDENTIFIER | TUPLE_INDEX) `:` Expression
 StructBase                    : `..` Expression
 StructExprTuple               : IDENTIFIER `(` ( Expression (`,` Expression)* `,`? )? `)`
 
-CallExpression                : Expression ( CallParams? )
+CallExpression                : Expression `(` CallParams? `)`
 CallParams                    : Expression ( `,` Expression )* `,`?
 
 FieldExpression               : Expression `.` IDENTIFIER
@@ -719,6 +719,66 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
 
             operand = Result<ExpressionNode>(
                 true, std::make_unique<IndexNode>(std::move(operand.node), std::move(expression.node)));
+        } else if (!except_struct_expression_ && Accept(Token::Type::kOpenCurlyBr)) {
+            std::vector<std::unique_ptr<FieldInitStructExpressionNode>> fields;
+            std::unique_ptr<ExpressionNode> dot_dot_expression;
+
+            if (Accept(Token::Type::kDotDot)) {
+                auto result = ParseExpression();
+                if (!result.status) {
+                    throw std::exception();
+                }
+
+                dot_dot_expression = std::move(result.node);
+            } else {
+                while (true) {
+                    Token identifier, literal;
+                    if (Accept(Token::Type::kIdentifier, &identifier)) {
+                        if (Accept(Token::Type::kColon)) {
+                            auto result = ParseExpression();
+                            if (!result.status) {
+                                throw std::exception();
+                            }
+
+                            fields.push_back(std::make_unique<IdentifierFieldInitStructExpressionNode>(
+                                std::make_unique<IdentifierNode>(std::move(identifier)), std::move(result.node)));
+                        } else {
+                            fields.push_back(std::make_unique<ShorthandFieldInitStructExpressionNode>(
+                                std::make_unique<IdentifierNode>(std::move(identifier))));
+                        }
+                    } else if (Accept(Token::Type::kLiteral, &literal)) {
+                        Expect(Token::Type::kColon);
+                        auto result = ParseExpression();
+                        if (!result.status) {
+                            throw std::exception();
+                        }
+                        fields.push_back(std::make_unique<TupleIndexFieldInitStructExpressionNode>(
+                            std::make_unique<LiteralNode>(std::move(literal)), std::move(result.node)));
+                    } else {
+                        break;
+                    }
+
+                    if (!Accept(Token::Type::kComma)) {
+                        break;
+                    }
+
+                    if (Accept(Token::Type::kDotDot)) {
+                        auto result = ParseExpression();
+                        if (!result.status) {
+                            throw std::exception();
+                        }
+
+                        dot_dot_expression = std::move(result.node);
+                        break;
+                    }
+                }
+            }
+
+            Expect(Token::Type::kCloseCurlyBr);
+
+            operand = Result<ExpressionNode>(
+                true, std::make_unique<InitStructExpressionNode>(
+                          std::move(operand.node), std::move(fields), std::move(dot_dot_expression)));
         } else {
             break;
         }
@@ -869,6 +929,7 @@ std::unique_ptr<InfiniteLoopNode> SyntaxParser::ParseInfiniteLoopExpression() {
 // `while` already process
 std::unique_ptr<PredicateLoopNode> SyntaxParser::ParsePredicateLoopExpression() {
     bool old_except_struct_expression = except_struct_expression_;
+    except_struct_expression_ = true;
     std::unique_ptr<ExpressionNode> expr_node = ParseExpression().node;
     except_struct_expression_ = old_except_struct_expression;
 
@@ -884,6 +945,7 @@ std::unique_ptr<IteratorLoopNode> SyntaxParser::ParseIteratorLoopExpression() {
     Expect(Token::Type::kIn);
 
     bool old_except_struct_expression = except_struct_expression_;
+    except_struct_expression_ = true;
     std::unique_ptr<ExpressionNode> expr_node = ParseExpression().node;
     except_struct_expression_ = old_except_struct_expression;
 
@@ -896,6 +958,7 @@ std::unique_ptr<IteratorLoopNode> SyntaxParser::ParseIteratorLoopExpression() {
 // `if` already process
 std::unique_ptr<IfNode> SyntaxParser::ParseIfExpression() {
     bool old_except_struct_expression = except_struct_expression_;
+    except_struct_expression_ = true;
     std::unique_ptr<ExpressionNode> expression = ParseExpression().node;
     except_struct_expression_ = old_except_struct_expression;
 

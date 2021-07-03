@@ -50,6 +50,10 @@ class CallNode;
 class IndexNode;
 class MemberAccessNode;
 class ArrayExpressionNode;
+class InitStructExpressionNode;
+class ShorthandFieldInitStructExpressionNode;
+class TupleIndexFieldInitStructExpressionNode;
+class IdentifierFieldInitStructExpressionNode;
 
 class SyntaxTreeVisitor {
     friend class IdentifierNode;
@@ -100,6 +104,11 @@ class SyntaxTreeVisitor {
     friend class IndexNode;
     friend class MemberAccessNode;
     friend class ArrayExpressionNode;
+    friend class InitStructExpressionNode;
+    friend class FieldInitStructExpressionNode;
+    friend class ShorthandFieldInitStructExpressionNode;
+    friend class TupleIndexFieldInitStructExpressionNode;
+    friend class IdentifierFieldInitStructExpressionNode;
 
 public:
     virtual void Visit(const SyntaxNode *syntaxNode) {
@@ -162,4 +171,8 @@ protected:
     virtual void PostVisit(const IndexNode *indexNode) {}
     virtual void PostVisit(const MemberAccessNode *memberAccessNode) {}
     virtual void PostVisit(const ArrayExpressionNode *arrayExpressionNode) {}
+    virtual void PostVisit(const InitStructExpressionNode *initStructExpressionNode) {}
+    virtual void PostVisit(const ShorthandFieldInitStructExpressionNode *shorthandFieldInitStructExpressionNode) {}
+    virtual void PostVisit(const TupleIndexFieldInitStructExpressionNode *tupleIndexFieldInitStructExpressionNode) {}
+    virtual void PostVisit(const IdentifierFieldInitStructExpressionNode *identifierFieldInitStructExpressionNode) {}
 };

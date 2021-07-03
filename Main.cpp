@@ -52,7 +52,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "param function" << std::endl;
+        std::cout << "ParamFunctionNode" << std::endl;
 
         Visit(paramFunctionNode->GetPattern());
         Visit(paramFunctionNode->GetType());
@@ -64,7 +64,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "param struct" << std::endl;
+        std::cout << "ParamStructNode" << std::endl;
 
         Visit(paramStructNode->GetIdentifier());
         Visit(paramStructNode->GetType());
@@ -76,7 +76,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "let" << std::endl;
+        std::cout << "LetNode" << std::endl;
 
         Visit(letNode->GetPattern());
         Visit(letNode->GetType());
@@ -92,7 +92,7 @@ protected:
         if (functionNode->IsConst()) {
             std::cout << "const ";
         }
-        std::cout << "function" << std::endl;
+        std::cout << "FunctionNode" << std::endl;
 
         Visit(functionNode->GetIdentifier());
         Visit(functionNode->GetReturnType());
@@ -109,7 +109,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "struct" << std::endl;
+        std::cout << "StructNode" << std::endl;
 
         for (const ParamStructNode *param : structNode->GetParams()) {
             Visit(param);
@@ -122,7 +122,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "constant item" << std::endl;
+        std::cout << "ConstantItemNode" << std::endl;
 
         Visit(constantItemNode->GetIdentifier());
         Visit(constantItemNode->GetType());
@@ -135,7 +135,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "parenthesized type" << std::endl;
+        std::cout << "ParenthesizedTypeNode" << std::endl;
 
         Visit(parenthesizedTypeNode->GetType());
 
@@ -146,7 +146,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "tuple type" << std::endl;
+        std::cout << "TupleTypeNode" << std::endl;
 
         for (const TypeNode *type : tupleTypeNode->GetTypes()) {
             Visit(type);
@@ -162,7 +162,7 @@ protected:
         if (referenceTypeNode->IsMut()) {
             std::cout << "mut ";
         }
-        std::cout << "reference type" << std::endl;
+        std::cout << "ReferenceTypeNode" << std::endl;
 
         Visit(referenceTypeNode->GetType());
 
@@ -173,7 +173,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "array type" << std::endl;
+        std::cout << "ArrayTypeNode" << std::endl;
 
         Visit(arrayTypeNode->GetType());
         Visit(arrayTypeNode->GetExpression());
@@ -189,7 +189,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "tuple index field" << std::endl;
+        std::cout << "TupleIndexFieldNode" << std::endl;
 
         Visit(tupleIndexFieldNode->GetLiteral());
         Visit(tupleIndexFieldNode->GetPattern());
@@ -201,7 +201,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "identifier field" << std::endl;
+        std::cout << "IdentifierFieldNode" << std::endl;
 
         Visit(identifierFieldNode->GetIdentifier());
         Visit(identifierFieldNode->GetPattern());
@@ -219,7 +219,7 @@ protected:
         if (refMutIdentifierFieldNode->IsMut()) {
             std::cout << "mut ";
         }
-        std::cout << "identifier field" << std::endl;
+        std::cout << "RefMutIdentifierFieldNode" << std::endl;
 
         Visit(refMutIdentifierFieldNode->GetIdentifier());
 
@@ -234,7 +234,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "identifier pattern" << std::endl;
+        std::cout << "IdentifierPatternNode" << std::endl;
 
         Visit(identifierPatternNode->GetIdentifier());
         Visit(identifierPatternNode->GetPattern());
@@ -246,7 +246,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "wildcard pattern" << std::endl;
+        std::cout << "WildcardPatternNode" << std::endl;
 
         indent -= 2;
     }
@@ -255,7 +255,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "rest pattern" << std::endl;
+        std::cout << "RestPatternNode" << std::endl;
 
         indent -= 2;
     }
@@ -272,7 +272,7 @@ protected:
         } else {
             std::cout << "&& ";
         }
-        std::cout << "reference pattern" << std::endl;
+        std::cout << "ReferencePatternNode" << std::endl;
 
         Visit(referencePatternNode->GetPattern());
 
@@ -283,7 +283,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "struct pattern" << std::endl;
+        std::cout << "StructPatternNode" << std::endl;
 
         Visit(structPatternNode->GetIdentifier());
         for (const FieldNode *field : structPatternNode->GetFields()) {
@@ -297,7 +297,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "tuple struct pattern" << std::endl;
+        std::cout << "TupleStructPatternNode" << std::endl;
 
         Visit(tupleStructPatternNode->GetIdentifier());
         for (const PatternNode *pattern : tupleStructPatternNode->GetPatterns()) {
@@ -311,7 +311,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "tuple pattern" << std::endl;
+        std::cout << "TuplePatternNode" << std::endl;
 
         for (const PatternNode *pattern : tuplePatternNode->GetPatterns()) {
             Visit(pattern);
@@ -324,7 +324,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "grouped pattern" << std::endl;
+        std::cout << "GroupedPatternNode" << std::endl;
 
         Visit(groupedPatternNode->GetPattern());
 
@@ -345,7 +345,7 @@ protected:
         const auto tokenType = token->GetType();
 
         PrintIndent();
-        std::cout << Token::TypeToString(tokenType) << " binary operation" << std::endl;
+        std::cout << Token::TypeToString(tokenType) << " BinaryOperationNode" << std::endl;
 
         Visit(binaryOperationNode->GetLeft());
         Visit(binaryOperationNode->GetRight());
@@ -360,7 +360,7 @@ protected:
         const auto tokenType = token->GetType();
 
         PrintIndent();
-        std::cout << Token::TypeToString(tokenType) << " prefix unary operation" << std::endl;
+        std::cout << Token::TypeToString(tokenType) << " PrefixUnaryOperationNode" << std::endl;
 
         Visit(prefixUnaryOperationNode->GetRight());
 
@@ -371,7 +371,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "infinite loop" << std::endl;
+        std::cout << "InfiniteLoopNode" << std::endl;
 
         Visit(infiniteLoopNode->GetBlock());
 
@@ -382,7 +382,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "predicate loop" << std::endl;
+        std::cout << "PredicateLoopNode" << std::endl;
 
         Visit(predicateLoopNode->GetExpression());
         Visit(predicateLoopNode->GetBlock());
@@ -394,7 +394,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "iterator loop" << std::endl;
+        std::cout << "IteratorLoopNode" << std::endl;
 
         Visit(iteratorLoopNode->GetPattern());
         Visit(iteratorLoopNode->GetExpression());
@@ -407,7 +407,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "if" << std::endl;
+        std::cout << "IfNode" << std::endl;
 
         Visit(ifNode->GetExpression());
         Visit(ifNode->GetIfBlock());
@@ -421,7 +421,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "block" << std::endl;
+        std::cout << "BlockNode" << std::endl;
 
         for (const SyntaxNode *statement : blockNode->GetStatements()) {
             Visit(statement);
@@ -436,7 +436,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "break" << std::endl;
+        std::cout << "BreakNode" << std::endl;
 
         Visit(breakNode->GetExpression());
 
@@ -447,7 +447,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "continue" << std::endl;
+        std::cout << "ContinueNode" << std::endl;
 
         indent -= 2;
     }
@@ -456,7 +456,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "return" << std::endl;
+        std::cout << "ReturnNode" << std::endl;
 
         Visit(returnNode->GetExpression());
 
@@ -467,7 +467,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "call" << std::endl;
+        std::cout << "CallNode" << std::endl;
 
         Visit(callNode->GetIdentifier());
         for (const ExpressionNode *argument : callNode->GetArguments()) {
@@ -481,7 +481,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "index" << std::endl;
+        std::cout << "IndexNode" << std::endl;
 
         Visit(indexNode->GetIdentifier());
         Visit(indexNode->GetExpression());
@@ -493,7 +493,7 @@ protected:
         indent += 2;
 
         PrintIndent();
-        std::cout << "member access" << std::endl;
+        std::cout << "MemberAccessNode" << std::endl;
 
         Visit(memberAccessNode->GetIdentifier());
         Visit(memberAccessNode->GetExpression());
@@ -507,10 +507,60 @@ protected:
         if (arrayExpressionNode->IsSemiMode()) {
             std::cout << "; ";
         }
-        std::cout << "array expression" << std::endl;
+        std::cout << "ArrayExpressionNode" << std::endl;
         for (const ExpressionNode *expreesion : arrayExpressionNode->GetExpressions()) {
             Visit(expreesion);
         }
+
+        indent -= 2;
+    }
+
+    void PostVisit(const InitStructExpressionNode *initStructExpressionNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "InitStructExpressionNode" << std::endl;
+
+        Visit(initStructExpressionNode->GetIdentifier());
+        Visit(initStructExpressionNode->GetDotDotExpression());
+        for (const FieldInitStructExpressionNode *field : initStructExpressionNode->GetFields()) {
+            Visit(field);
+        }
+
+        indent -= 2;
+    }
+
+    void PostVisit(const ShorthandFieldInitStructExpressionNode *shorthandFieldInitStructExpressionNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "ShorthandFieldInitStructExpressionNode" << std::endl;
+
+        Visit(shorthandFieldInitStructExpressionNode->GetIdentifier());
+
+        indent -= 2;
+    }
+
+    void PostVisit(const TupleIndexFieldInitStructExpressionNode *tupleIndexFieldInitStructExpressionNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "TupleIndexFieldInitStructExpressionNode" << std::endl;
+
+        Visit(tupleIndexFieldInitStructExpressionNode->GetLiteral());
+        Visit(tupleIndexFieldInitStructExpressionNode->GetExpression());
+
+        indent -= 2;
+    }
+
+    void PostVisit(const IdentifierFieldInitStructExpressionNode *identifierFieldInitStructExpressionNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "IdentifierFieldInitStructExpressionNode" << std::endl;
+
+        Visit(identifierFieldInitStructExpressionNode->GetIdentifier());
+        Visit(identifierFieldInitStructExpressionNode->GetExpression());
 
         indent -= 2;
     }
