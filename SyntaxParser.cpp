@@ -708,8 +708,8 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
                 }
             }
 
-            operand =
-                Result<ExpressionNode>(true, std::make_unique<CallOrInitTupleNode>(std::move(operand.node), std::move(arguments)));
+            operand = Result<ExpressionNode>(
+                true, std::make_unique<CallOrInitTupleNode>(std::move(operand.node), std::move(arguments)));
         } else if (Accept(Token::Type::kOpenSquareBr)) {
             auto expression = ParseExpression();
             if (!expression.status) {
@@ -804,9 +804,42 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
     }
 
     if (Accept(Token::Type::kOpenRoundBr)) {
-        auto expr = ParseExpression();
-        Expect(Token::Type::kCloseRoundBr);
-        return expr;
+        /*
+TupleExpression               : `(` TupleElements? `)`
+TupleElements                 : ( Expression `,` )+ Expression?
+         */
+
+        auto result = ParseExpression();
+        if (!result.status) {
+            Expect(Token::Type::kCloseRoundBr);
+            return Result<ExpressionNode>(
+                true, std::make_unique<TupleExpressionNode>(std::vector<std::unique_ptr<ExpressionNode>>()));
+        }
+
+        if (Accept(Token::Type::kComma)) {
+            std::vector<std::unique_ptr<ExpressionNode>> expressions;
+            expressions.push_back(std::move(result.node));
+
+            while (!Accept(Token::Type::kCloseRoundBr)) {
+                result = ParseExpression();
+                if (!result.status) {
+                    throw std::exception();
+                }
+
+                expressions.push_back(std::move(result.node));
+
+                if (!Accept(Token::Type::kComma)) {
+                    Expect(Token::Type::kCloseRoundBr);
+                    break;
+                }
+            }
+
+            return Result<ExpressionNode>(true, std::make_unique<TupleExpressionNode>(std::move(expressions)));
+        } else {
+            Expect(Token::Type::kCloseRoundBr);
+        }
+
+        return result;
     } else if (Accept(Token::Type::kIdentifier, &out)) {
         return Result<ExpressionNode>(
             true, std::make_unique<IdentifierExpressionNode>(std::make_unique<IdentifierNode>(std::move(out))));

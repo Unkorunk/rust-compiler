@@ -136,7 +136,7 @@ private:
 
 class ArrayExpressionNode final : public ExpressionNode {
 public:
-    explicit ArrayExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions, bool is_semi_mode)
+    ArrayExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions, bool is_semi_mode)
         : expressions_(std::move(expressions)), is_semi_mode_(is_semi_mode) {}
 
     void Visit(SyntaxTreeVisitor *visitor) const override {
@@ -267,6 +267,29 @@ private:
     std::unique_ptr<ExpressionNode> identifier_;
     std::vector<std::unique_ptr<FieldInitStructExpressionNode>> fields_;
     std::unique_ptr<ExpressionNode> dot_dot_expression_;
+};
+
+class TupleExpressionNode final : public ExpressionNode {
+public:
+    explicit TupleExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions)
+        : expressions_(std::move(expressions)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    std::vector<const ExpressionNode *> GetExpressions() const {
+        std::vector<const ExpressionNode *> expressions;
+
+        for (const auto &expression : expressions_) {
+            expressions.push_back(expression.get());
+        }
+
+        return expressions;
+    }
+
+private:
+    std::vector<std::unique_ptr<ExpressionNode>> expressions_;
 };
 
 class SyntaxParser {

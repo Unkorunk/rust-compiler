@@ -564,6 +564,18 @@ protected:
 
         indent -= 2;
     }
+
+    void PostVisit(const TupleExpressionNode *tupleExpressionNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "TupleExpressionNode" << std::endl;
+        for (const ExpressionNode *expreesion : tupleExpressionNode->GetExpressions()) {
+            Visit(expreesion);
+        }
+
+        indent -= 2;
+    }
 };
 
 int main(int argc, char **argv) {

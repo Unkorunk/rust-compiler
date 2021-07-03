@@ -54,6 +54,7 @@ class InitStructExpressionNode;
 class ShorthandFieldInitStructExpressionNode;
 class TupleIndexFieldInitStructExpressionNode;
 class IdentifierFieldInitStructExpressionNode;
+class TupleExpressionNode;
 
 class SyntaxTreeVisitor {
     friend class IdentifierNode;
@@ -109,6 +110,7 @@ class SyntaxTreeVisitor {
     friend class ShorthandFieldInitStructExpressionNode;
     friend class TupleIndexFieldInitStructExpressionNode;
     friend class IdentifierFieldInitStructExpressionNode;
+    friend class TupleExpressionNode;
 
 public:
     virtual void Visit(const SyntaxNode *syntaxNode) {
@@ -175,4 +177,5 @@ protected:
     virtual void PostVisit(const ShorthandFieldInitStructExpressionNode *shorthandFieldInitStructExpressionNode) {}
     virtual void PostVisit(const TupleIndexFieldInitStructExpressionNode *tupleIndexFieldInitStructExpressionNode) {}
     virtual void PostVisit(const IdentifierFieldInitStructExpressionNode *identifierFieldInitStructExpressionNode) {}
+    virtual void PostVisit(const TupleExpressionNode *tupleExpressionNode) {}
 };
