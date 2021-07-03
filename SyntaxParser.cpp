@@ -658,8 +658,9 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrefix() {
         }
 
         if (Accept(Token::Type::kMut)) {
-            // todo unary `&mut`
-            throw std::exception();
+            return Result<ExpressionNode>(
+                true, std::make_unique<PrefixUnaryOperationNode>(
+                          PrefixUnaryOperationNode::Exception::kAndMut, std::move(right.node)));
         } else {
             return Result<ExpressionNode>(
                 true, std::make_unique<PrefixUnaryOperationNode>(std::move(out), std::move(right.node)));
