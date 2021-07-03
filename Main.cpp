@@ -463,11 +463,11 @@ protected:
         indent -= 2;
     }
 
-    void PostVisit(const CallNode *callNode) override {
+    void PostVisit(const CallOrInitTupleNode *callNode) override {
         indent += 2;
 
         PrintIndent();
-        std::cout << "CallNode" << std::endl;
+        std::cout << "CallOrInitTupleNode" << std::endl;
 
         Visit(callNode->GetIdentifier());
         for (const ExpressionNode *argument : callNode->GetArguments()) {

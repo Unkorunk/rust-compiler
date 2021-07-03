@@ -709,7 +709,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
             }
 
             operand =
-                Result<ExpressionNode>(true, std::make_unique<CallNode>(std::move(operand.node), std::move(arguments)));
+                Result<ExpressionNode>(true, std::make_unique<CallOrInitTupleNode>(std::move(operand.node), std::move(arguments)));
         } else if (Accept(Token::Type::kOpenSquareBr)) {
             auto expression = ParseExpression();
             if (!expression.status) {

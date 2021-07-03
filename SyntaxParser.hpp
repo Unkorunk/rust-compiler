@@ -62,9 +62,9 @@ public:
     }
 };
 
-class CallNode final : public ExpressionNode {
+class CallOrInitTupleNode final : public ExpressionNode {
 public:
-    CallNode(std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
+    CallOrInitTupleNode(std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
         : identifier_(std::move(identifier)), arguments_(std::move(arguments)) {}
 
     void Visit(SyntaxTreeVisitor *visitor) const override {

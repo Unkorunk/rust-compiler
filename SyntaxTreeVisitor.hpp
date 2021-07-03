@@ -46,7 +46,7 @@ class BlockNode;
 class BreakNode;
 class ContinueNode;
 class ReturnNode;
-class CallNode;
+class CallOrInitTupleNode;
 class IndexNode;
 class MemberAccessNode;
 class ArrayExpressionNode;
@@ -100,7 +100,7 @@ class SyntaxTreeVisitor {
     friend class BreakNode;
     friend class ContinueNode;
     friend class ReturnNode;
-    friend class CallNode;
+    friend class CallOrInitTupleNode;
     friend class IndexNode;
     friend class MemberAccessNode;
     friend class ArrayExpressionNode;
@@ -167,7 +167,7 @@ protected:
     virtual void PostVisit(const BreakNode *breakNode) {}
     virtual void PostVisit(const ContinueNode *continueNode) {}
     virtual void PostVisit(const ReturnNode *returnNode) {}
-    virtual void PostVisit(const CallNode *callNode) {}
+    virtual void PostVisit(const CallOrInitTupleNode *callNode) {}
     virtual void PostVisit(const IndexNode *indexNode) {}
     virtual void PostVisit(const MemberAccessNode *memberAccessNode) {}
     virtual void PostVisit(const ArrayExpressionNode *arrayExpressionNode) {}
