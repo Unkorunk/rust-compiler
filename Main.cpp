@@ -576,13 +576,37 @@ protected:
 
         indent -= 2;
     }
+
+    void PostVisit(const SyntaxTree *syntaxTree) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << "SyntaxTree" << std::endl;
+        for (const SyntaxNode *node : syntaxTree->GetNodes()) {
+            Visit(node);
+        }
+
+        indent -= 2;
+    }
+
+    void PostVisit(const AssignmentNode *assignmentNode) override {
+        indent += 2;
+
+        PrintIndent();
+        std::cout << Token::TypeToString(assignmentNode->GetOperation().GetType()) << " AssignmentNode" << std::endl;
+
+        Visit(assignmentNode->GetIdentifier());
+        Visit(assignmentNode->GetExpression());
+
+        indent -= 2;
+    }
 };
 
 int main(int argc, char **argv) {
     bool print_tokenizer = false;
 
     std::string filename = "main.txt";
-    bool filename_found = true;
+    // bool filename_found = true;
 
     // for (int k = 1; k < argc; k++) {
     //    std::string arg(argv[k]);
@@ -617,12 +641,10 @@ int main(int argc, char **argv) {
     }
 
     SyntaxParser parser(&tokenizer);
-    std::vector<std::unique_ptr<SyntaxNode>> statements = parser.ParseStatements();
+    std::unique_ptr<SyntaxTree> syntax_tree = parser.ParseStatements();
 
     MyVisitor visitor;
-    for (const auto &statement : statements) {
-        visitor.Visit(statement.get());
-    }
+    visitor.Visit(syntax_tree.get());
 
     ifs.close();
 

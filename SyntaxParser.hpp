@@ -23,6 +23,27 @@
 #include "Tokenizer.hpp"
 #include "TypeNodes.hpp"
 
+class SyntaxTree final : public SyntaxNode {
+public:
+    explicit SyntaxTree(std::vector<std::unique_ptr<SyntaxNode>> &&nodes) : nodes_(std::move(nodes)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    std::vector<const SyntaxNode *> GetNodes() const {
+        std::vector<const SyntaxNode *> nodes;
+        nodes.reserve(nodes_.size());
+        for (const auto &node : nodes_) {
+            nodes.push_back(node.get());
+        }
+        return nodes;
+    }
+
+private:
+    std::vector<std::unique_ptr<SyntaxNode>> nodes_;
+};
+
 class BreakNode final : public ExpressionNode {
 public:
     explicit BreakNode(std::unique_ptr<ExpressionNode> &&expression) : expression_(std::move(expression)) {}
@@ -64,7 +85,8 @@ public:
 
 class CallOrInitTupleNode final : public ExpressionNode {
 public:
-    CallOrInitTupleNode(std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
+    CallOrInitTupleNode(
+        std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
         : identifier_(std::move(identifier)), arguments_(std::move(arguments)) {}
 
     void Visit(SyntaxTreeVisitor *visitor) const override {
@@ -292,6 +314,34 @@ private:
     std::vector<std::unique_ptr<ExpressionNode>> expressions_;
 };
 
+class AssignmentNode final : public ExpressionNode {
+public:
+    AssignmentNode(
+        Token &&operation, std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
+        : operation_(std::move(operation)), identifier_(std::move(identifier)), expression_(std::move(expression)) {}
+
+    void Visit(SyntaxTreeVisitor *visitor) const override {
+        visitor->PostVisit(this);
+    }
+
+    Token GetOperation() const {
+        return operation_;
+    }
+
+    const ExpressionNode *GetIdentifier() const {
+        return identifier_.get();
+    }
+
+    const ExpressionNode *GetExpression() const {
+        return expression_.get();
+    }
+
+private:
+    Token operation_;
+    std::unique_ptr<ExpressionNode> identifier_;
+    std::unique_ptr<ExpressionNode> expression_;
+};
+
 class SyntaxParser {
 public:
     explicit SyntaxParser(Tokenizer *tokenizer);
@@ -304,7 +354,7 @@ public:
         Result(bool status, std::unique_ptr<T> &&node) : status(status), node(std::move(node)) {}
     };
 
-    std::vector<std::unique_ptr<SyntaxNode>> ParseStatements();
+    std::unique_ptr<SyntaxTree> ParseStatements();
 
 private:
     Token NextToken();
@@ -364,5 +414,5 @@ private:
 
     const static std::unordered_set<Token::Type> kUnaryOperator;
     const static std::array<std::unordered_set<Token::Type>, 10> kPriority;
-    const static std::unordered_set<Token::Type> kPostfix;
+    const static std::unordered_set<Token::Type> kAssignmentOperations;
 };

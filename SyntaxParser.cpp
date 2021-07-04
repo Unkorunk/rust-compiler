@@ -4,7 +4,7 @@ SyntaxParser::SyntaxParser(Tokenizer *tokenizer) : tokenizer_(tokenizer) {
     current_token_ = NextToken();
 }
 
-std::vector<std::unique_ptr<SyntaxNode>> SyntaxParser::ParseStatements() {
+std::unique_ptr<SyntaxTree> SyntaxParser::ParseStatements() {
     std::vector<std::unique_ptr<SyntaxNode>> statements;
 
     Result<SyntaxNode> statement_result = ParseStatement();
@@ -15,7 +15,7 @@ std::vector<std::unique_ptr<SyntaxNode>> SyntaxParser::ParseStatements() {
         }
     }
 
-    return statements;
+    return std::make_unique<SyntaxTree>(std::move(statements));
 }
 
 Token SyntaxParser::NextToken() {
@@ -780,6 +780,15 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
             operand = Result<ExpressionNode>(
                 true, std::make_unique<InitStructExpressionNode>(
                           std::move(operand.node), std::move(fields), std::move(dot_dot_expression)));
+        } else if (Accept(kAssignmentOperations.begin(), kAssignmentOperations.end(), &out)) {
+            auto result = ParseExpression();
+            if (!result.status) {
+                throw std::exception();
+            }
+
+            operand = Result<ExpressionNode>(
+                true,
+                std::make_unique<AssignmentNode>(std::move(out), std::move(operand.node), std::move(result.node)));
         } else {
             break;
         }
@@ -805,11 +814,6 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
     }
 
     if (Accept(Token::Type::kOpenRoundBr)) {
-        /*
-TupleExpression               : `(` TupleElements? `)`
-TupleElements                 : ( Expression `,` )+ Expression?
-         */
-
         auto result = ParseExpression();
         if (!result.status) {
             Expect(Token::Type::kCloseRoundBr);
@@ -1030,5 +1034,7 @@ const std::array<std::unordered_set<Token::Type>, 10> SyntaxParser::kPriority{
     std::unordered_set{Token::Type::kStar, Token::Type::kSlash, Token::Type::kPercent},
     std::unordered_set{Token::Type::kAs}};
 
-const std::unordered_set<Token::Type> SyntaxParser::kPostfix{
-    Token::Type::kDot, Token::Type::kOpenRoundBr, Token::Type::kCloseRoundBr};
+const std::unordered_set<Token::Type> SyntaxParser::kAssignmentOperations{
+    Token::Type::kEq,      Token::Type::kPlusEq,    Token::Type::kMinusEq, Token::Type::kStarEq,
+    Token::Type::kSlashEq, Token::Type::kPercentEq, Token::Type::kCaretEq, Token::Type::kAndEq,
+    Token::Type::kOrEq,    Token::Type::kShlEq,     Token::Type::kShrEq};
