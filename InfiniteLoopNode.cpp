@@ -2,7 +2,7 @@
 
 InfiniteLoopNode::InfiniteLoopNode(std::unique_ptr<BlockNode> &&block) : block_(std::move(block)) {}
 
-void InfiniteLoopNode::Visit(SyntaxTreeVisitor *visitor) const {
+void InfiniteLoopNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 

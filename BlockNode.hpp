@@ -7,7 +7,7 @@ public:
     BlockNode(
         std::vector<std::unique_ptr<SyntaxNode>> &&statements, std::unique_ptr<ExpressionNode> &&return_expression);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override;
+    void Visit(ISyntaxTreeVisitor *visitor) const override;
 
     std::vector<const SyntaxNode *> GetStatements() const;
     const ExpressionNode *GetReturnExpression() const;

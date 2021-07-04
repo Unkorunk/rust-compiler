@@ -18,7 +18,7 @@ public:
     const Token *GetToken() const;
     const ExpressionNode *GetRight() const;
 
-    void Visit(SyntaxTreeVisitor *visitor) const override;
+    void Visit(ISyntaxTreeVisitor *visitor) const override;
 
 private:
     bool is_exception_ = false;

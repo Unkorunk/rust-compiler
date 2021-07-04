@@ -9,7 +9,7 @@ public:
         std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<TypeNode> &&type,
         std::unique_ptr<ExpressionNode> &&expr);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override;
+    void Visit(ISyntaxTreeVisitor *visitor) const override;
 
     const IdentifierNode *GetIdentifier() const;
     const TypeNode *GetType() const;

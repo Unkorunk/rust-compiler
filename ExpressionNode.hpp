@@ -16,7 +16,7 @@ public:
     explicit IdentifierExpressionNode(std::unique_ptr<IdentifierNode> &&identifier)
         : identifier_(std::move(identifier)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -32,7 +32,7 @@ class LiteralExpressionNode : public ExpressionNode {
 public:
     explicit LiteralExpressionNode(std::unique_ptr<LiteralNode> &&literal) : literal_(std::move(literal)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 

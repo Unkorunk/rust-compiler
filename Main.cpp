@@ -1,11 +1,11 @@
 #include <fstream>
 #include <iostream>
 
+#include "SpecificSyntaxTreeVisitor.hpp"
 #include "SyntaxParser.hpp"
-#include "SyntaxTreeVisitor.hpp"
 #include "Tokenizer.hpp"
 
-class MyVisitor : public SyntaxTreeVisitor {
+class MyVisitor : public SpecificSyntaxTreeVisitor {
 protected:
     int indent = 0;
     void PrintIndent() const {
@@ -14,589 +14,529 @@ protected:
         }
     }
 
-    void PostVisit(const IdentifierNode *identifierNode) override {
+    void PostVisit(const IdentifierNode *node) override {
         indent += 2;
 
-        const auto token = identifierNode->GetToken();
-        const auto tokenValue = token->GetTokenValue();
-
         PrintIndent();
-        std::cout << tokenValue.ToString() << std::endl;
+        std::cout << node->GetToken()->GetTokenValue().ToString() << std::endl;
+
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const LiteralNode *literalNode) override {
+    void PostVisit(const LiteralNode *node) override {
         indent += 2;
 
-        const auto token = literalNode->GetToken();
-        const auto tokenValue = token->GetTokenValue();
-
         PrintIndent();
-        std::cout << tokenValue.ToString() << std::endl;
+        std::cout << node->GetToken()->GetTokenValue().ToString() << std::endl;
+
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const ErrorNode *errorNode) override {
-        indent++;
-
-        PrintIndent();
-        std::cout << errorNode->GetError() << " " << errorNode->GetPosition().start_line << " "
-                  << errorNode->GetPosition().start_column << std::endl;
-
-        indent--;
-    }
-
-    void PostVisit(const ParamFunctionNode *paramFunctionNode) override {
+    void PostVisit(const ParamFunctionNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "ParamFunctionNode" << std::endl;
 
-        Visit(paramFunctionNode->GetPattern());
-        Visit(paramFunctionNode->GetType());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const ParamStructNode *paramStructNode) override {
+    void PostVisit(const ParamStructNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "ParamStructNode" << std::endl;
 
-        Visit(paramStructNode->GetIdentifier());
-        Visit(paramStructNode->GetType());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const LetNode *letNode) override {
+    void PostVisit(const LetNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "LetNode" << std::endl;
 
-        Visit(letNode->GetPattern());
-        Visit(letNode->GetType());
-        Visit(letNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const FunctionNode *functionNode) override {
+    void PostVisit(const FunctionNode *node) override {
         indent += 2;
 
         PrintIndent();
-        if (functionNode->IsConst()) {
+        if (node->IsConst()) {
             std::cout << "const ";
         }
         std::cout << "FunctionNode" << std::endl;
 
-        Visit(functionNode->GetIdentifier());
-        Visit(functionNode->GetReturnType());
-        Visit(functionNode->GetBlock());
-
-        for (const ParamFunctionNode *param : functionNode->GetParams()) {
-            Visit(param);
-        }
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const StructNode *structNode) override {
+    void PostVisit(const StructNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "StructNode" << std::endl;
 
-        for (const ParamStructNode *param : structNode->GetParams()) {
-            Visit(param);
-        }
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const ConstantItemNode *constantItemNode) override {
+    void PostVisit(const ConstantItemNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "ConstantItemNode" << std::endl;
 
-        Visit(constantItemNode->GetIdentifier());
-        Visit(constantItemNode->GetType());
-        Visit(constantItemNode->GetExpr());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const ParenthesizedTypeNode *parenthesizedTypeNode) override {
+    void PostVisit(const ParenthesizedTypeNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "ParenthesizedTypeNode" << std::endl;
 
-        Visit(parenthesizedTypeNode->GetType());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const TupleTypeNode *tupleTypeNode) override {
+    void PostVisit(const TupleTypeNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "TupleTypeNode" << std::endl;
 
-        for (const TypeNode *type : tupleTypeNode->GetTypes()) {
-            Visit(type);
-        }
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const ReferenceTypeNode *referenceTypeNode) override {
+    void PostVisit(const ReferenceTypeNode *node) override {
         indent += 2;
 
         PrintIndent();
-        if (referenceTypeNode->IsMut()) {
+        if (node->IsMut()) {
             std::cout << "mut ";
         }
         std::cout << "ReferenceTypeNode" << std::endl;
 
-        Visit(referenceTypeNode->GetType());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const ArrayTypeNode *arrayTypeNode) override {
+    void PostVisit(const ArrayTypeNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "ArrayTypeNode" << std::endl;
 
-        Visit(arrayTypeNode->GetType());
-        Visit(arrayTypeNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const IdentifierTypeNode *identifierTypeNode) override {
-        Visit(identifierTypeNode->GetIdentifier());
+    void PostVisit(const IdentifierTypeNode *node) override {
+        SpecificSyntaxTreeVisitor::PostVisit(node);
     }
 
-    void PostVisit(const TupleIndexFieldNode *tupleIndexFieldNode) override {
+    void PostVisit(const TupleIndexFieldNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "TupleIndexFieldNode" << std::endl;
 
-        Visit(tupleIndexFieldNode->GetLiteral());
-        Visit(tupleIndexFieldNode->GetPattern());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const IdentifierFieldNode *identifierFieldNode) override {
+    void PostVisit(const IdentifierFieldNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "IdentifierFieldNode" << std::endl;
 
-        Visit(identifierFieldNode->GetIdentifier());
-        Visit(identifierFieldNode->GetPattern());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const RefMutIdentifierFieldNode *refMutIdentifierFieldNode) override {
+    void PostVisit(const RefMutIdentifierFieldNode *node) override {
         indent += 2;
 
         PrintIndent();
-        if (refMutIdentifierFieldNode->IsRef()) {
+        if (node->IsRef()) {
             std::cout << "ref ";
         }
-        if (refMutIdentifierFieldNode->IsMut()) {
+        if (node->IsMut()) {
             std::cout << "mut ";
         }
         std::cout << "RefMutIdentifierFieldNode" << std::endl;
 
-        Visit(refMutIdentifierFieldNode->GetIdentifier());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const LiteralPatternNode *literalPatternNode) override {
-        Visit(literalPatternNode->GetLiteral());
+    void PostVisit(const LiteralPatternNode *node) override {
+        SpecificSyntaxTreeVisitor::PostVisit(node);
     }
 
-    void PostVisit(const IdentifierPatternNode *identifierPatternNode) override {
+    void PostVisit(const IdentifierPatternNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "IdentifierPatternNode" << std::endl;
 
-        Visit(identifierPatternNode->GetIdentifier());
-        Visit(identifierPatternNode->GetPattern());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const WildcardPatternNode *wildcardPatternNode) override {
+    void PostVisit(const WildcardPatternNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "WildcardPatternNode" << std::endl;
 
+        SpecificSyntaxTreeVisitor::PostVisit(node);
+
         indent -= 2;
     }
 
-    void PostVisit(const RestPatternNode *restPatternNode) override {
+    void PostVisit(const RestPatternNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "RestPatternNode" << std::endl;
 
+        SpecificSyntaxTreeVisitor::PostVisit(node);
+
         indent -= 2;
     }
 
-    void PostVisit(const ReferencePatternNode *referencePatternNode) override {
+    void PostVisit(const ReferencePatternNode *node) override {
         indent += 2;
 
         PrintIndent();
-        if (referencePatternNode->IsMut()) {
+        if (node->IsMut()) {
             std::cout << "mut ";
         }
-        if (referencePatternNode->IsSingleRef()) {
+        if (node->IsSingleRef()) {
             std::cout << "& ";
         } else {
             std::cout << "&& ";
         }
         std::cout << "ReferencePatternNode" << std::endl;
 
-        Visit(referencePatternNode->GetPattern());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const StructPatternNode *structPatternNode) override {
+    void PostVisit(const StructPatternNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "StructPatternNode" << std::endl;
 
-        Visit(structPatternNode->GetIdentifier());
-        for (const FieldNode *field : structPatternNode->GetFields()) {
-            Visit(field);
-        }
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const TupleStructPatternNode *tupleStructPatternNode) override {
+    void PostVisit(const TupleStructPatternNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "TupleStructPatternNode" << std::endl;
 
-        Visit(tupleStructPatternNode->GetIdentifier());
-        for (const PatternNode *pattern : tupleStructPatternNode->GetPatterns()) {
-            Visit(pattern);
-        }
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const TuplePatternNode *tuplePatternNode) override {
+    void PostVisit(const TuplePatternNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "TuplePatternNode" << std::endl;
 
-        for (const PatternNode *pattern : tuplePatternNode->GetPatterns()) {
-            Visit(pattern);
-        }
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const GroupedPatternNode *groupedPatternNode) override {
+    void PostVisit(const GroupedPatternNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "GroupedPatternNode" << std::endl;
 
-        Visit(groupedPatternNode->GetPattern());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const IdentifierExpressionNode *identifierExpressionNode) override {
-        Visit(identifierExpressionNode->GetIdentifier());
+    void PostVisit(const IdentifierExpressionNode *node) override {
+        SpecificSyntaxTreeVisitor::PostVisit(node);
     }
 
-    void PostVisit(const LiteralExpressionNode *literalExpressionNode) override {
-        Visit(literalExpressionNode->GetLiteral());
+    void PostVisit(const LiteralExpressionNode *node) override {
+        SpecificSyntaxTreeVisitor::PostVisit(node);
     }
 
-    void PostVisit(const BinaryOperationNode *binaryOperationNode) override {
+    void PostVisit(const BinaryOperationNode *node) override {
         indent += 2;
-        const auto token = binaryOperationNode->GetToken();
+        const auto token = node->GetToken();
         const auto tokenType = token->GetType();
 
         PrintIndent();
         std::cout << Token::TypeToString(tokenType) << " BinaryOperationNode" << std::endl;
 
-        Visit(binaryOperationNode->GetLeft());
-        Visit(binaryOperationNode->GetRight());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const PrefixUnaryOperationNode *prefixUnaryOperationNode) override {
+    void PostVisit(const PrefixUnaryOperationNode *node) override {
         indent += 2;
 
-        const auto token = prefixUnaryOperationNode->GetToken();
+        const auto token = node->GetToken();
         const auto tokenType = token->GetType();
 
         PrintIndent();
         std::cout << Token::TypeToString(tokenType) << " PrefixUnaryOperationNode" << std::endl;
 
-        Visit(prefixUnaryOperationNode->GetRight());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const InfiniteLoopNode *infiniteLoopNode) override {
+    void PostVisit(const InfiniteLoopNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "InfiniteLoopNode" << std::endl;
 
-        Visit(infiniteLoopNode->GetBlock());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const PredicateLoopNode *predicateLoopNode) override {
+    void PostVisit(const PredicateLoopNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "PredicateLoopNode" << std::endl;
 
-        Visit(predicateLoopNode->GetExpression());
-        Visit(predicateLoopNode->GetBlock());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const IteratorLoopNode *iteratorLoopNode) override {
+    void PostVisit(const IteratorLoopNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "IteratorLoopNode" << std::endl;
 
-        Visit(iteratorLoopNode->GetPattern());
-        Visit(iteratorLoopNode->GetExpression());
-        Visit(iteratorLoopNode->GetBlock());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const IfNode *ifNode) override {
+    void PostVisit(const IfNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "IfNode" << std::endl;
 
-        Visit(ifNode->GetExpression());
-        Visit(ifNode->GetIfBlock());
-        Visit(ifNode->GetElseBlock());
-        Visit(ifNode->GetElseIf());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const BlockNode *blockNode) override {
+    void PostVisit(const BlockNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "BlockNode" << std::endl;
 
-        for (const SyntaxNode *statement : blockNode->GetStatements()) {
-            Visit(statement);
-        }
-
-        Visit(blockNode->GetReturnExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const BreakNode *breakNode) override {
+    void PostVisit(const BreakNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "BreakNode" << std::endl;
 
-        Visit(breakNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const ContinueNode *continueNode) override {
+    void PostVisit(const ContinueNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "ContinueNode" << std::endl;
 
+        SpecificSyntaxTreeVisitor::PostVisit(node);
+
         indent -= 2;
     }
 
-    void PostVisit(const ReturnNode *returnNode) override {
+    void PostVisit(const ReturnNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "ReturnNode" << std::endl;
 
-        Visit(returnNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const CallOrInitTupleNode *callNode) override {
+    void PostVisit(const CallOrInitTupleNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "CallOrInitTupleNode" << std::endl;
 
-        Visit(callNode->GetIdentifier());
-        for (const ExpressionNode *argument : callNode->GetArguments()) {
-            Visit(argument);
-        }
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const IndexNode *indexNode) override {
+    void PostVisit(const IndexNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "IndexNode" << std::endl;
 
-        Visit(indexNode->GetIdentifier());
-        Visit(indexNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const MemberAccessNode *memberAccessNode) override {
+    void PostVisit(const MemberAccessNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "MemberAccessNode" << std::endl;
 
-        Visit(memberAccessNode->GetIdentifier());
-        Visit(memberAccessNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
-    void PostVisit(const ArrayExpressionNode *arrayExpressionNode) override {
+    void PostVisit(const ArrayExpressionNode *node) override {
         indent += 2;
 
         PrintIndent();
-        if (arrayExpressionNode->IsSemiMode()) {
+        if (node->IsSemiMode()) {
             std::cout << "; ";
         }
         std::cout << "ArrayExpressionNode" << std::endl;
-        for (const ExpressionNode *expreesion : arrayExpressionNode->GetExpressions()) {
-            Visit(expreesion);
-        }
+
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const InitStructExpressionNode *initStructExpressionNode) override {
+    void PostVisit(const InitStructExpressionNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "InitStructExpressionNode" << std::endl;
 
-        Visit(initStructExpressionNode->GetIdentifier());
-        Visit(initStructExpressionNode->GetDotDotExpression());
-        for (const FieldInitStructExpressionNode *field : initStructExpressionNode->GetFields()) {
-            Visit(field);
-        }
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const ShorthandFieldInitStructExpressionNode *shorthandFieldInitStructExpressionNode) override {
+    void PostVisit(const ShorthandFieldInitStructExpressionNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "ShorthandFieldInitStructExpressionNode" << std::endl;
 
-        Visit(shorthandFieldInitStructExpressionNode->GetIdentifier());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const TupleIndexFieldInitStructExpressionNode *tupleIndexFieldInitStructExpressionNode) override {
+    void PostVisit(const TupleIndexFieldInitStructExpressionNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "TupleIndexFieldInitStructExpressionNode" << std::endl;
 
-        Visit(tupleIndexFieldInitStructExpressionNode->GetLiteral());
-        Visit(tupleIndexFieldInitStructExpressionNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const IdentifierFieldInitStructExpressionNode *identifierFieldInitStructExpressionNode) override {
+    void PostVisit(const IdentifierFieldInitStructExpressionNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "IdentifierFieldInitStructExpressionNode" << std::endl;
 
-        Visit(identifierFieldInitStructExpressionNode->GetIdentifier());
-        Visit(identifierFieldInitStructExpressionNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const TupleExpressionNode *tupleExpressionNode) override {
+    void PostVisit(const TupleExpressionNode *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "TupleExpressionNode" << std::endl;
-        for (const ExpressionNode *expreesion : tupleExpressionNode->GetExpressions()) {
-            Visit(expreesion);
-        }
+
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const SyntaxTree *syntaxTree) override {
+    void PostVisit(const SyntaxTree *node) override {
         indent += 2;
 
         PrintIndent();
         std::cout << "SyntaxTree" << std::endl;
-        for (const SyntaxNode *node : syntaxTree->GetNodes()) {
-            Visit(node);
-        }
+
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }
 
-    void PostVisit(const AssignmentNode *assignmentNode) override {
+    void PostVisit(const AssignmentNode *node) override {
         indent += 2;
 
         PrintIndent();
-        std::cout << Token::TypeToString(assignmentNode->GetOperation().GetType()) << " AssignmentNode" << std::endl;
+        std::cout << Token::TypeToString(node->GetOperation().GetType()) << " AssignmentNode" << std::endl;
 
-        Visit(assignmentNode->GetIdentifier());
-        Visit(assignmentNode->GetExpression());
+        SpecificSyntaxTreeVisitor::PostVisit(node);
 
         indent -= 2;
     }

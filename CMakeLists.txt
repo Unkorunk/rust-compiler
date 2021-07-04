@@ -29,9 +29,9 @@ add_library(rust-compiler-parser
         IdentifierNode.hpp
         LiteralNode.hpp
         SyntaxParser.hpp SyntaxParser.cpp
-        SyntaxTreeVisitor.hpp
-        ErrorNode.hpp ErrorNode.cpp
-        "TypeNodes.hpp" "TypeNodes.cpp"
+        ISyntaxTreeVisitor.hpp
+        SpecificSyntaxTreeVisitor.hpp
+        TypeNodes.hpp TypeNodes.cpp
         PatternNodes.hpp PatternNodes.cpp
         LetNode.hpp LetNode.cpp
         IfNode.hpp IfNode.cpp

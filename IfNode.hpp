@@ -9,7 +9,7 @@ public:
         std::unique_ptr<ExpressionNode> &&expression, std::unique_ptr<BlockNode> &&if_block,
         std::unique_ptr<BlockNode> &&else_block, std::unique_ptr<IfNode> &&else_if);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override;
+    void Visit(ISyntaxTreeVisitor *visitor) const override;
 
     const ExpressionNode *GetExpression() const;
     const BlockNode *GetIfBlock() const;

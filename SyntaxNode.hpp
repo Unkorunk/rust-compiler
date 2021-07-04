@@ -1,18 +1,11 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-
-class SyntaxTreeVisitor;
+class ISyntaxTreeVisitor;
 
 class SyntaxNode {
-    friend class SyntaxTreeVisitor;
-
 public:
-    virtual void Visit(SyntaxTreeVisitor *visitor) const = 0;
+    virtual void Visit(ISyntaxTreeVisitor *visitor) const = 0;
 
-    void AddError(std::unique_ptr<SyntaxNode> &&syntaxNode);
-
-private:
-    std::vector<std::unique_ptr<SyntaxNode>> errors_;
+protected:
+    SyntaxNode() = default;
 };

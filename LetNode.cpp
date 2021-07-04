@@ -5,7 +5,7 @@ LetNode::LetNode(
     std::unique_ptr<ExpressionNode> &&expression)
     : pattern_(std::move(pattern)), type_(std::move(type)), expression_(std::move(expression)) {}
 
-void LetNode::Visit(SyntaxTreeVisitor *visitor) const {
+void LetNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 

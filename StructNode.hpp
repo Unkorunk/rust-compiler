@@ -6,7 +6,7 @@ class ParamStructNode final : public SyntaxNode {
 public:
     ParamStructNode(std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<TypeNode> &&type);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override;
+    void Visit(ISyntaxTreeVisitor *visitor) const override;
 
     const IdentifierNode *GetIdentifier() const;
     const TypeNode *GetType() const;
@@ -20,7 +20,7 @@ class StructNode final : public SyntaxNode {
 public:
     StructNode(std::unique_ptr<IdentifierNode> &&identifier, std::vector<ParamStructNode> &&params);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override;
+    void Visit(ISyntaxTreeVisitor *visitor) const override;
 
     std::vector<const ParamStructNode *> GetParams() const;
 

@@ -3,7 +3,7 @@
 ParamFunctionNode::ParamFunctionNode(std::unique_ptr<PatternNode> &&pattern, std::unique_ptr<TypeNode> &&type)
     : pattern_(std::move(pattern)), type_(std::move(type)) {}
 
-void ParamFunctionNode::Visit(SyntaxTreeVisitor *visitor) const {
+void ParamFunctionNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 
@@ -21,7 +21,7 @@ FunctionNode::FunctionNode(
     : identifier_(std::move(identifier)), params_(std::move(params)), return_type_(std::move(return_type)),
       block_(std::move(block)), is_const_(is_const) {}
 
-void FunctionNode::Visit(SyntaxTreeVisitor *visitor) const {
+void FunctionNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 

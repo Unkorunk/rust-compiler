@@ -3,7 +3,7 @@
 ParamStructNode::ParamStructNode(std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<TypeNode> &&type)
     : identifier_(std::move(identifier)), type_(std::move(type)) {}
 
-void ParamStructNode::Visit(SyntaxTreeVisitor *visitor) const {
+void ParamStructNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 
@@ -18,7 +18,7 @@ const TypeNode *ParamStructNode::GetType() const {
 StructNode::StructNode(std::unique_ptr<IdentifierNode> &&identifier, std::vector<ParamStructNode> &&params)
     : identifier_(std::move(identifier)), params_(std::move(params)) {}
 
-void StructNode::Visit(SyntaxTreeVisitor *visitor) const {
+void StructNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 

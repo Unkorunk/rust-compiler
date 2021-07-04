@@ -7,7 +7,7 @@ IfNode::IfNode(
     : expression_(std::move(expression)), if_block_(std::move(if_block)), else_block_(std::move(else_block)),
       else_if_(std::move(else_if)) {}
 
-void IfNode::Visit(SyntaxTreeVisitor *visitor) const {
+void IfNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 

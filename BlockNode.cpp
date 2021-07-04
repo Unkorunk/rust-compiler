@@ -4,7 +4,7 @@ BlockNode::BlockNode(
     std::vector<std::unique_ptr<SyntaxNode>> &&statements, std::unique_ptr<ExpressionNode> &&return_expression)
     : statements_(std::move(statements)), return_expression_(std::move(return_expression)) {}
 
-void BlockNode::Visit(SyntaxTreeVisitor *visitor) const {
+void BlockNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 

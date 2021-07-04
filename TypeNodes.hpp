@@ -15,7 +15,7 @@ class ParenthesizedTypeNode final : public TypeNode {
 public:
     explicit ParenthesizedTypeNode(std::unique_ptr<TypeNode> &&type);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -32,7 +32,7 @@ public:
     TupleTypeNode() = default;
     explicit TupleTypeNode(std::vector<std::unique_ptr<TypeNode>> &&types);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -54,7 +54,7 @@ class ReferenceTypeNode final : public TypeNode {
 public:
     ReferenceTypeNode(bool is_mut, std::unique_ptr<TypeNode> &&type);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -75,7 +75,7 @@ class ArrayTypeNode final : public TypeNode {
 public:
     ArrayTypeNode(std::unique_ptr<TypeNode> &&type, std::unique_ptr<ExpressionNode> &&expression);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -96,7 +96,7 @@ class IdentifierTypeNode final : public TypeNode {
 public:
     explicit IdentifierTypeNode(std::unique_ptr<IdentifierNode> &&identifier);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 

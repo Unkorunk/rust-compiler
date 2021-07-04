@@ -5,7 +5,7 @@ ConstantItemNode::ConstantItemNode(
     std::unique_ptr<ExpressionNode> &&expr)
     : identifier_(std::move(identifier)), type_(std::move(type)), expr_(std::move(expr)) {}
 
-void ConstantItemNode::Visit(SyntaxTreeVisitor *visitor) const {
+void ConstantItemNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 

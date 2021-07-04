@@ -8,7 +8,6 @@
 #include "BinaryOperationNode.hpp"
 #include "BlockNode.hpp"
 #include "ConstantItemNode.hpp"
-#include "ErrorNode.hpp"
 #include "FunctionNode.hpp"
 #include "IdentifierNode.hpp"
 #include "IfNode.hpp"
@@ -27,7 +26,7 @@ class SyntaxTree final : public SyntaxNode {
 public:
     explicit SyntaxTree(std::vector<std::unique_ptr<SyntaxNode>> &&nodes) : nodes_(std::move(nodes)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -48,7 +47,7 @@ class BreakNode final : public ExpressionNode {
 public:
     explicit BreakNode(std::unique_ptr<ExpressionNode> &&expression) : expression_(std::move(expression)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -64,7 +63,7 @@ class ReturnNode final : public ExpressionNode {
 public:
     explicit ReturnNode(std::unique_ptr<ExpressionNode> &&expression) : expression_(std::move(expression)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -78,7 +77,7 @@ private:
 
 class ContinueNode : public ExpressionNode {
 public:
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 };
@@ -89,7 +88,7 @@ public:
         std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
         : identifier_(std::move(identifier)), arguments_(std::move(arguments)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -117,7 +116,7 @@ public:
     IndexNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
         : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -139,7 +138,7 @@ public:
     MemberAccessNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
         : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -161,7 +160,7 @@ public:
     ArrayExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions, bool is_semi_mode)
         : expressions_(std::move(expressions)), is_semi_mode_(is_semi_mode) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -197,7 +196,7 @@ public:
     ShorthandFieldInitStructExpressionNode(std::unique_ptr<IdentifierNode> &&identifier)
         : identifier_(std::move(identifier)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -215,7 +214,7 @@ public:
         std::unique_ptr<LiteralNode> &&literal, std::unique_ptr<ExpressionNode> &&expression)
         : literal_(std::move(literal)), expression_(std::move(expression)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -238,7 +237,7 @@ public:
         std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
         : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -264,7 +263,7 @@ public:
         : identifier_(std::move(identifier)), fields_(std::move(fields)),
           dot_dot_expression_(std::move(dot_dot_expression)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -296,7 +295,7 @@ public:
     explicit TupleExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions)
         : expressions_(std::move(expressions)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -320,7 +319,7 @@ public:
         Token &&operation, std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
         : operation_(std::move(operation)), identifier_(std::move(identifier)), expression_(std::move(expression)) {}
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 

@@ -9,7 +9,7 @@ public:
         std::unique_ptr<PatternNode> &&pattern, std::unique_ptr<ExpressionNode> &&expression,
         std::unique_ptr<BlockNode> &&block);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override;
+    void Visit(ISyntaxTreeVisitor *visitor) const override;
 
     const PatternNode *GetPattern() const;
     const ExpressionNode *GetExpression() const;

@@ -22,6 +22,6 @@ const ExpressionNode *PrefixUnaryOperationNode::GetRight() const {
     return right_.get();
 }
 
-void PrefixUnaryOperationNode::Visit(SyntaxTreeVisitor *visitor) const {
+void PrefixUnaryOperationNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }

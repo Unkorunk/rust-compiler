@@ -1,7 +1,7 @@
 #pragma once
 
 #include "SyntaxNode.hpp"
-#include "SyntaxTreeVisitor.hpp"
+#include "ISyntaxTreeVisitor.hpp"
 #include "Token.hpp"
 
 class LiteralNode : public SyntaxNode {
@@ -12,7 +12,7 @@ public:
         return &token_;
     }
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 

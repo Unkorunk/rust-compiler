@@ -16,6 +16,6 @@ const ExpressionNode *BinaryOperationNode::GetRight() const {
     return right_.get();
 }
 
-void BinaryOperationNode::Visit(SyntaxTreeVisitor *visitor) const {
+void BinaryOperationNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }

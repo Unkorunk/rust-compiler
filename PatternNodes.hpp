@@ -15,7 +15,7 @@ class LiteralPatternNode : public PatternNode {
 public:
     explicit LiteralPatternNode(std::unique_ptr<LiteralNode> &&literal);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -31,7 +31,7 @@ public:
         bool is_ref, bool is_mut, std::unique_ptr<IdentifierNode> &&identifier,
         std::unique_ptr<PatternNode> &&subpattern);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -50,14 +50,14 @@ private:
 
 class WildcardPatternNode : public PatternNode {
 public:
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 };
 
 class RestPatternNode : public PatternNode {
 public:
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 };
@@ -66,7 +66,7 @@ class ReferencePatternNode : public PatternNode {
 public:
     ReferencePatternNode(bool is_single_ref, bool is_mut, std::unique_ptr<PatternNode> &&pattern);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -93,7 +93,7 @@ class TupleIndexFieldNode : public FieldNode {
 public:
     TupleIndexFieldNode(std::unique_ptr<LiteralNode> &&literal, std::unique_ptr<PatternNode> &&pattern);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -109,7 +109,7 @@ class IdentifierFieldNode : public FieldNode {
 public:
     IdentifierFieldNode(std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<PatternNode> &&pattern);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -125,7 +125,7 @@ class RefMutIdentifierFieldNode : public FieldNode {
 public:
     RefMutIdentifierFieldNode(bool is_ref, bool is_mut, std::unique_ptr<IdentifierNode> &&identifier);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -145,7 +145,7 @@ public:
     StructPatternNode(
         std::unique_ptr<IdentifierNode> &&identifier, bool is_etc, std::vector<std::unique_ptr<FieldNode>> &&fields);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -166,7 +166,7 @@ public:
     TupleStructPatternNode(
         std::unique_ptr<IdentifierNode> &&identifier, std::vector<std::unique_ptr<PatternNode>> &&patterns);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -191,7 +191,7 @@ class TuplePatternNode : public PatternNode {
 public:
     explicit TuplePatternNode(std::vector<std::unique_ptr<PatternNode>> &&patterns);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 
@@ -213,7 +213,7 @@ class GroupedPatternNode : public PatternNode {
 public:
     explicit GroupedPatternNode(std::unique_ptr<PatternNode> &&pattern);
 
-    void Visit(SyntaxTreeVisitor *visitor) const override {
+    void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
     }
 

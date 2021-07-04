@@ -12,7 +12,7 @@ public:
     const ExpressionNode *GetLeft() const;
     const ExpressionNode *GetRight() const;
 
-    void Visit(SyntaxTreeVisitor *visitor) const override;
+    void Visit(ISyntaxTreeVisitor *visitor) const override;
 
 private:
     Token token_;

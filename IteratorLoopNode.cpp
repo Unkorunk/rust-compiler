@@ -5,7 +5,7 @@ IteratorLoopNode::IteratorLoopNode(
     std::unique_ptr<BlockNode> &&block)
     : pattern_(std::move(pattern)), expression_(std::move(expression)), block_(std::move(block)) {}
 
-void IteratorLoopNode::Visit(SyntaxTreeVisitor *visitor) const {
+void IteratorLoopNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 

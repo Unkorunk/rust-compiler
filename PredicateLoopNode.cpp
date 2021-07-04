@@ -4,7 +4,7 @@
 PredicateLoopNode::PredicateLoopNode(std::unique_ptr<ExpressionNode> &&expression, std::unique_ptr<BlockNode> &&block)
     : expression_(std::move(expression)), block_(std::move(block)) {}
 
-void PredicateLoopNode::Visit(SyntaxTreeVisitor *visitor) const {
+void PredicateLoopNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
 }
 
