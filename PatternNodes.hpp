@@ -1,7 +1,10 @@
 #pragma once
 
+#include <variant>
+
 #include "IdentifierNode.hpp"
 #include "LiteralNode.hpp"
+#include "Symbol.hpp"
 
 class PatternNode : public SyntaxNode {
 public:

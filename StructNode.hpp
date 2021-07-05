@@ -22,9 +22,14 @@ public:
 
     void Visit(ISyntaxTreeVisitor *visitor) const override;
 
+    const IdentifierNode *GetIdentifier() const;
+
     std::vector<const ParamStructNode *> GetParams() const;
+
+    bool IsTuple() const;
 
 private:
     std::unique_ptr<IdentifierNode> identifier_;
     std::vector<ParamStructNode> params_;
+    bool is_tuple_;
 };

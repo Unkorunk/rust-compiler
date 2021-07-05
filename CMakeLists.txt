@@ -42,7 +42,8 @@ add_library(rust-compiler-parser
         ConstantItemNode.hpp ConstantItemNode.cpp
         StructNode.hpp StructNode.cpp
         FunctionNode.hpp FunctionNode.cpp
-        ExpressionNode.hpp)
+        ExpressionNode.hpp
+        Symbol.hpp SymbolTable.hpp SemanticAnalyzer.hpp ISymbol.hpp)
 
 target_link_libraries(rust-compiler-parser rust-compiler-tokenizer)
 

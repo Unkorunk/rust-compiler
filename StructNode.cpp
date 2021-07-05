@@ -16,10 +16,24 @@ const TypeNode *ParamStructNode::GetType() const {
 }
 
 StructNode::StructNode(std::unique_ptr<IdentifierNode> &&identifier, std::vector<ParamStructNode> &&params)
-    : identifier_(std::move(identifier)), params_(std::move(params)) {}
+    : identifier_(std::move(identifier)), params_(std::move(params)), is_tuple_(false) {
+    if (!params_.empty()) {
+        is_tuple_ = params_.front().GetIdentifier() == nullptr;
+    }
+    for (const auto &param : params_) {
+        const bool is_tuple = param.GetIdentifier() == nullptr;
+        if (is_tuple != is_tuple_) {
+            throw std::exception();
+        }
+    }
+}
 
 void StructNode::Visit(ISyntaxTreeVisitor *visitor) const {
     visitor->PostVisit(this);
+}
+
+const IdentifierNode *StructNode::GetIdentifier() const {
+    return identifier_.get();
 }
 
 std::vector<const ParamStructNode *> StructNode::GetParams() const {
@@ -30,4 +44,8 @@ std::vector<const ParamStructNode *> StructNode::GetParams() const {
     }
 
     return params;
+}
+
+bool StructNode::IsTuple() const {
+    return is_tuple_;
 }

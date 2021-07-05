@@ -4,6 +4,7 @@
 #include "SpecificSyntaxTreeVisitor.hpp"
 #include "SyntaxParser.hpp"
 #include "Tokenizer.hpp"
+#include "SemanticAnalyzer.hpp"
 
 class MyVisitor : public SpecificSyntaxTreeVisitor {
 protected:
@@ -582,6 +583,9 @@ int main(int argc, char **argv) {
 
     SyntaxParser parser(&tokenizer);
     std::unique_ptr<SyntaxTree> syntax_tree = parser.ParseStatements();
+
+    semantic::SemanticAnalyzer analyzer;
+    analyzer.Analyze(syntax_tree.get());
 
     MyVisitor visitor;
     visitor.Visit(syntax_tree.get());

@@ -1,9 +1,12 @@
 #pragma once
 
+#include <variant>
+
 #include "ExpressionNode.hpp"
 #include "IdentifierNode.hpp"
+#include "Symbol.hpp"
 
-class TypeNode : public SyntaxNode {
+class TypeNode : public SyntaxNode, public ISymbolType {
 public:
     virtual ~TypeNode() = default;
 
@@ -103,6 +106,8 @@ public:
     const IdentifierNode *GetIdentifier() const {
         return identifier_.get();
     }
+
+    std::variant<const semantic::StructType *, const semantic::DefaultType *> type;
 
 private:
     std::unique_ptr<IdentifierNode> identifier_;
