@@ -20,11 +20,12 @@ StructNode::StructNode(std::unique_ptr<IdentifierNode> &&identifier, std::vector
     if (!params_.empty()) {
         is_tuple_ = params_.front().GetIdentifier() == nullptr;
     }
-    for (const auto &param : params_) {
+    for (auto &param : params_) {
         const bool is_tuple = param.GetIdentifier() == nullptr;
         if (is_tuple != is_tuple_) {
             throw std::exception();
         }
+        param.struct_node = this;
     }
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <sstream>
 #include <vector>
 
 class TokenValue {
@@ -21,7 +22,8 @@ public:
         kF64,
         kText,
         kByteString,
-        kEmpty
+        kEmpty,
+        kVoid
     };
 
     TokenValue() : type_(Type::kEmpty) {}
@@ -235,6 +237,52 @@ public:
         default:
             throw std::exception();
         }
+    }
+
+    Type GetType() const {
+        return type_;
+    }
+
+    bool IsInteger() const {
+        return 2 <= static_cast<int>(type_) && 9 >= static_cast<int>(type_);
+    }
+
+    bool IsUnsignedInteger() const {
+        return 2 <= static_cast<int>(type_) && 5 >= static_cast<int>(type_);
+    }
+
+    int64_t GetInt() const {
+        if (type_ == Type::kI8)
+            return i8_;
+        if (type_ == Type::kI16)
+            return i16_;
+        if (type_ == Type::kI32)
+            return i32_;
+        if (type_ == Type::kI64)
+            return i64_;
+        if (type_ == Type::kU8)
+            return i8_;
+        if (type_ == Type::kU16)
+            return i16_;
+        if (type_ == Type::kU32)
+            return i32_;
+        if (type_ == Type::kU64)
+            return i64_;
+
+        throw std::exception();  // todo
+    }
+
+    uint64_t GetUnsignedInt() const {
+        if (type_ == Type::kU8)
+            return i8_;
+        if (type_ == Type::kU16)
+            return i16_;
+        if (type_ == Type::kU32)
+            return i32_;
+        if (type_ == Type::kU64)
+            return i64_;
+
+        throw std::exception();  // todo
     }
 
 private:

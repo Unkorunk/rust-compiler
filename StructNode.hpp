@@ -1,6 +1,11 @@
 #pragma once
 
+#include <variant>
+
+#include "Symbol.hpp"
 #include "TypeNodes.hpp"
+
+class StructNode;
 
 class ParamStructNode final : public SyntaxNode {
 public:
@@ -10,6 +15,8 @@ public:
 
     const IdentifierNode *GetIdentifier() const;
     const TypeNode *GetType() const;
+
+    StructNode *struct_node = nullptr;
 
 private:
     std::unique_ptr<IdentifierNode> identifier_;
@@ -27,6 +34,8 @@ public:
     std::vector<const ParamStructNode *> GetParams() const;
 
     bool IsTuple() const;
+
+    std::variant<semantic::StructType *, semantic::TupleStructType *> type;
 
 private:
     std::unique_ptr<IdentifierNode> identifier_;

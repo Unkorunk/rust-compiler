@@ -107,7 +107,27 @@ public:
         return identifier_.get();
     }
 
-    std::variant<const semantic::StructType *, const semantic::DefaultType *> type;
+    std::variant<const semantic::SubsetStructType *, const semantic::DefaultType *> type;
+
+    bool Equals(const ISymbolType &other) const override {
+        if (auto node = dynamic_cast<const IdentifierTypeNode *>(&other); node != nullptr) {
+            return node == this;
+        }
+
+        if (auto node = dynamic_cast<const semantic::SubsetStructType *>(&other); node != nullptr) {
+            if (auto p = std::get_if<const semantic::SubsetStructType *>(&type)) {
+                return node->Equals(**p);
+            }
+        }
+
+        if (auto node = dynamic_cast<const semantic::DefaultType *>(&other); node != nullptr) {
+            if (auto p = std::get_if<const semantic::DefaultType *>(&type)) {
+                return node->Equals(**p);
+            }
+        }
+
+        return false;
+    }
 
 private:
     std::unique_ptr<IdentifierNode> identifier_;

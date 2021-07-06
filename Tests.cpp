@@ -5,10 +5,10 @@
 #include <string>
 
 #include "SyntaxParser.hpp"
-#include "ISyntaxTreeVisitor.hpp"
+#include "SpecificSyntaxTreeVisitor.hpp"
 #include "Tokenizer.hpp"
 
-class MyVisitor : public ISyntaxTreeVisitor {
+class MyVisitor : public SpecificSyntaxTreeVisitor {
     std::ostringstream *out_;
 
 public:
@@ -67,20 +67,9 @@ protected:
         PrintIndent();
         *out_ << Token::TypeToString(tokenType) << '\n';
 
-        Visit(binaryOperationNode->GetLeft());
-        Visit(binaryOperationNode->GetRight());
+        SpecificSyntaxTreeVisitor::PostVisit(binaryOperationNode);
 
         indent -= 2;
-    }
-
-    void PostVisit(const ErrorNode *errorNode) override {
-        indent++;
-
-        PrintIndent();
-        *out_ << errorNode->GetError() << " " << errorNode->GetPosition().start_line << " "
-              << errorNode->GetPosition().start_column << '\n';
-
-        indent--;
     }
 };
 

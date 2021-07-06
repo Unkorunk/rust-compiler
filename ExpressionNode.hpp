@@ -2,10 +2,13 @@
 
 #include "IdentifierNode.hpp"
 #include "LiteralNode.hpp"
+#include "ISymbol.hpp"
 
 class ExpressionNode : public SyntaxNode {
 public:
     virtual ~ExpressionNode() = default;
+
+    const ISymbolType *type_of_expression;
 
 protected:
     ExpressionNode() = default;
@@ -13,8 +16,7 @@ protected:
 
 class IdentifierExpressionNode : public ExpressionNode {
 public:
-    explicit IdentifierExpressionNode(std::unique_ptr<IdentifierNode> &&identifier)
-        : identifier_(std::move(identifier)) {}
+    explicit IdentifierExpressionNode(std::unique_ptr<IdentifierNode> &&identifier) : identifier_(std::move(identifier)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);

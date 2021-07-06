@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ExpressionNode.hpp"
+#include "Symbol.hpp"
 
 class BlockNode : public ExpressionNode {
 public:
@@ -11,6 +12,8 @@ public:
 
     std::vector<const SyntaxNode *> GetStatements() const;
     const ExpressionNode *GetReturnExpression() const;
+
+    semantic::BlockSymbol *symbol = nullptr;
 
 private:
     std::vector<std::unique_ptr<SyntaxNode>> statements_;

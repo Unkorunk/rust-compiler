@@ -2,7 +2,10 @@
 
 #include "BlockNode.hpp"
 #include "PatternNodes.hpp"
+#include "Symbol.hpp"
 #include "TypeNodes.hpp"
+
+class FunctionNode;
 
 class ParamFunctionNode final : public SyntaxNode {
 public:
@@ -12,6 +15,13 @@ public:
 
     const PatternNode *GetPattern() const;
     const TypeNode *GetType() const;
+
+    TypeNode *GetType()
+    {
+        return type_.get();
+    }
+
+    FunctionNode* function_node = nullptr;
 
 private:
     std::unique_ptr<PatternNode> pattern_;
@@ -32,6 +42,8 @@ public:
     std::vector<const ParamFunctionNode *> GetParams() const;
 
     bool IsConst() const;
+
+    semantic::FuncSymbol *symbol = nullptr;
 
 private:
     std::unique_ptr<IdentifierNode> identifier_;

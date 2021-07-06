@@ -19,6 +19,7 @@
 #include "PredicateLoopNode.hpp"
 #include "PrefixUnaryOperationNode.hpp"
 #include "StructNode.hpp"
+#include "SymbolTable.hpp"
 #include "Tokenizer.hpp"
 #include "TypeNodes.hpp"
 
@@ -38,6 +39,8 @@ public:
         }
         return nodes;
     }
+
+    std::unique_ptr<semantic::SymbolTable> symbol_table;
 
 private:
     std::vector<std::unique_ptr<SyntaxNode>> nodes_;
@@ -105,6 +108,8 @@ public:
 
         return arguments;
     }
+
+    std::variant<const semantic::FuncSymbol *, const semantic::TupleStructType *> type;
 
 private:
     std::unique_ptr<ExpressionNode> identifier_;

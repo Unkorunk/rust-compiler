@@ -7,6 +7,10 @@ class ISymbolType {
 public:
     virtual ~ISymbolType() = default;
 
+    virtual bool Equals(const ISymbolType &other) const {
+        return this == &other;
+    }
+
 protected:
     ISymbolType() = default;
 };
@@ -16,7 +20,7 @@ public:
     virtual ~ISymbol() = default;
 
     std::string identifier;
-    std::unique_ptr<ISymbolType> type;
+    ISymbolType* type = nullptr;
 
 protected:
     ISymbol() = default;

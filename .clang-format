@@ -3,7 +3,7 @@
     "BasedOnStyle": "Google",
     "Language": "Cpp",
     "UseTab": "Never",
-    "ColumnLimit": 120,
+    "ColumnLimit": 200,
     "IndentWidth": 4,
     "TabWidth": 4,
     "BreakBeforeBraces": "Custom",
