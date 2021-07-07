@@ -16,12 +16,11 @@ public:
     const PatternNode *GetPattern() const;
     const TypeNode *GetType() const;
 
-    TypeNode *GetType()
-    {
+    TypeNode *GetType() {
         return type_.get();
     }
 
-    FunctionNode* function_node = nullptr;
+    FunctionNode *function_node = nullptr;
 
 private:
     std::unique_ptr<PatternNode> pattern_;
@@ -30,9 +29,7 @@ private:
 
 class FunctionNode final : public SyntaxNode {
 public:
-    FunctionNode(
-        std::unique_ptr<IdentifierNode> &&identifier, std::vector<ParamFunctionNode> &&params,
-        std::unique_ptr<TypeNode> &&return_type, std::unique_ptr<BlockNode> &&block, bool is_const);
+    FunctionNode(std::unique_ptr<IdentifierNode> &&identifier, std::vector<ParamFunctionNode> &&params, std::unique_ptr<TypeNode> &&return_type, std::unique_ptr<BlockNode> &&block, bool is_const);
 
     void Visit(ISyntaxTreeVisitor *visitor) const override;
 
@@ -44,6 +41,7 @@ public:
     bool IsConst() const;
 
     semantic::FuncSymbol *symbol = nullptr;
+    std::vector<ReturnNode *> return_nodes;
 
 private:
     std::unique_ptr<IdentifierNode> identifier_;

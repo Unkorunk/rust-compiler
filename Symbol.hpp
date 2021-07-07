@@ -13,6 +13,14 @@ namespace semantic {
     public:
         DefaultType(TokenValue::Type type) : type(type) {}
         TokenValue::Type type;
+
+        bool Equals(const ISymbolType &other) const override {
+            if (auto type = dynamic_cast<const DefaultType *>(&other); type == nullptr) {
+                return other.Equals(*this);
+            }
+
+            return &other == this;
+        }
     };
 
     class FuncType final : public ISymbolType {
@@ -45,6 +53,14 @@ namespace semantic {
     class SubsetStructType : public ISymbolType {
     public:
         std::string identifier;
+
+        bool Equals(const ISymbolType &other) const override {
+            if (auto type = dynamic_cast<const SubsetStructType *>(&other); type == nullptr) {
+                return other.Equals(*this);
+            }
+
+            return &other == this;
+        }
     };
 
     class StructType final : public SubsetStructType {

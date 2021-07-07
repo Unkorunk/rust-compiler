@@ -13,6 +13,15 @@ struct overloaded : Ts... {
 template <class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
 
+template <typename T, typename G>
+T BrutalCast(G ptr) {
+    T tmp = dynamic_cast<T>(ptr);
+    if (tmp == nullptr) {
+        throw std::exception();  // todo
+    }
+    return tmp;
+}
+
 namespace semantic {
     const static std::map<std::string, DefaultType> kDefaultTypes{
         {"bool", DefaultType(TokenValue::Type::kBool)}, {"char", DefaultType(TokenValue::Type::kChar)}, {"u8", DefaultType(TokenValue::Type::kU8)},     {"u16", DefaultType(TokenValue::Type::kU16)},
@@ -21,9 +30,9 @@ namespace semantic {
         {"str", DefaultType(TokenValue::Type::kText)},  {"usize", DefaultType(TokenValue::Type::kU64)}, {"isize", DefaultType(TokenValue::Type::kI64)}, {"void", DefaultType(TokenValue::Type::kVoid)}};
 
     const static std::map<TokenValue::Type, std::string> kRawTypeToStr{
-        {TokenValue::Type::kBool, "bool"}, {TokenValue::Type::kU16, "u16"}, {TokenValue::Type::kI8, "i8"},    {TokenValue::Type::kI64, "i64"}, {TokenValue::Type::kChar, "char"},
-        {TokenValue::Type::kU32, "u32"},   {TokenValue::Type::kI16, "i16"}, {TokenValue::Type::kF32, "f32"},  {TokenValue::Type::kU8, "u8"},   {TokenValue::Type::kU64, "u64"},
-        {TokenValue::Type::kI32, "i32"},   {TokenValue::Type::kF64, "f64"}, {TokenValue::Type::kVoid, "void"}};
+        {TokenValue::Type::kBool, "bool"}, {TokenValue::Type::kU16, "u16"}, {TokenValue::Type::kI8, "i8"},     {TokenValue::Type::kI64, "i64"}, {TokenValue::Type::kChar, "char"},
+        {TokenValue::Type::kU32, "u32"},   {TokenValue::Type::kI16, "i16"}, {TokenValue::Type::kF32, "f32"},   {TokenValue::Type::kU8, "u8"},   {TokenValue::Type::kU64, "u64"},
+        {TokenValue::Type::kI32, "i32"},   {TokenValue::Type::kF64, "f64"}, {TokenValue::Type::kVoid, "void"}, {TokenValue::Type::kText, "str"}};
 
     class BaseStructVisitor final : public SpecificSyntaxTreeVisitor {
     public:
@@ -35,8 +44,75 @@ namespace semantic {
         }
 
     protected:
+        void PostVisit(const InfiniteLoopNode *const_node) override {
+            auto node = const_cast<InfiniteLoopNode *>(const_node);  // todo refactor
+
+            auto saved_break_nodes = current_break_nodes_;
+            current_break_nodes_ = &node->break_nodes;
+
+            SpecificSyntaxTreeVisitor::PostVisit(const_node);
+
+            current_break_nodes_ = saved_break_nodes;
+        }
+
+        void PostVisit(const PredicateLoopNode *const_node) override {
+            auto node = const_cast<PredicateLoopNode *>(const_node);  // todo refactor
+
+            auto saved_break_nodes = current_break_nodes_;
+            current_break_nodes_ = &node->break_nodes;
+
+            SpecificSyntaxTreeVisitor::PostVisit(const_node);
+
+            current_break_nodes_ = saved_break_nodes;
+        }
+
+        void PostVisit(const IteratorLoopNode *const_node) override {
+            auto node = const_cast<IteratorLoopNode *>(const_node);  // todo refactor
+
+            auto saved_break_nodes = current_break_nodes_;
+            current_break_nodes_ = &node->break_nodes;
+
+            SpecificSyntaxTreeVisitor::PostVisit(const_node);
+
+            current_break_nodes_ = saved_break_nodes;
+        }
+
+        void PostVisit(const BreakNode *const_node) override {
+            auto node = const_cast<BreakNode *>(const_node);  // todo refactor
+            if (current_break_nodes_ == nullptr) {
+                throw std::exception();  // todo
+            }
+
+            (*current_break_nodes_).push_back(node);
+
+            SpecificSyntaxTreeVisitor::PostVisit(const_node);
+        }
+
+        void PostVisit(const ContinueNode *const_node) override {
+            auto node = const_cast<ContinueNode *>(const_node);  // todo refactor
+            if (current_break_nodes_ == nullptr) {
+                throw std::exception();  // todo
+            }
+
+            SpecificSyntaxTreeVisitor::PostVisit(const_node);
+        }
+
+        void PostVisit(const ReturnNode *const_node) override {
+            auto node = const_cast<ReturnNode *>(const_node);  // todo refactor
+            if (current_return_nodes_ == nullptr) {
+                throw std::exception();  // todo
+            }
+
+            (*current_return_nodes_).push_back(node);
+
+            SpecificSyntaxTreeVisitor::PostVisit(const_node);
+        }
+
         void PostVisit(const FunctionNode *const_node) override {
             auto node = const_cast<FunctionNode *>(const_node);  // todo refactor
+
+            auto saved_return_nodes = current_return_nodes_;
+            current_return_nodes_ = &node->return_nodes;
 
             SymbolTable *saved_prev = current_;
 
@@ -53,6 +129,8 @@ namespace semantic {
             current_ = saved_prev;
 
             current_->Add(std::move(symbol));
+
+            current_return_nodes_ = saved_return_nodes;
         }
 
         void PostVisit(const BlockNode *const_node) override {
@@ -113,11 +191,23 @@ namespace semantic {
             node->symbol_table = std::make_unique<SymbolTable>();
             current_ = node->symbol_table.get();
 
+            auto func_type = std::make_unique<semantic::FuncType>();
+            func_type->argument_types.emplace_back("value", &semantic::kDefaultTypes.at("i32"));
+
+            auto func_symbol = std::make_unique<semantic::FuncSymbol>(node->symbol_table.get());
+            func_symbol->identifier = "print_i32";
+            func_symbol->type = func_type.get();
+            node->symbol_table->types.push_back(std::move(func_type));
+
+            node->symbol_table->Add(std::move(func_symbol));
+
             SpecificSyntaxTreeVisitor::PostVisit(node);
         }
 
     private:
         SymbolTable *current_ = nullptr;
+        std::vector<ReturnNode *> *current_return_nodes_ = nullptr;
+        std::vector<BreakNode *> *current_break_nodes_ = nullptr;
     };
 
     class StructFuncVisitor final : public SpecificSyntaxTreeVisitor {
@@ -234,7 +324,7 @@ namespace semantic {
                 }
 
                 for (size_t i = 0; i < arguments.size(); i++) {
-                    if (!tmp->argument_types[i].second->Equals(*arguments[i]->type_of_expression)) {  // todo finished here
+                    if (!tmp->argument_types[i].second->Equals(*arguments[i]->type_of_expression)) {
                         throw std::exception();
                     }
                 }
@@ -250,7 +340,7 @@ namespace semantic {
                 }
 
                 for (size_t i = 0; i < arguments.size(); i++) {
-                    if (!tmp->types[i]->Equals(*arguments[i]->type_of_expression)) {  // todo finished here
+                    if (!tmp->types[i]->Equals(*arguments[i]->type_of_expression)) {
                         throw std::exception();
                     }
                 }
@@ -297,7 +387,27 @@ namespace semantic {
 
             auto node = const_cast<BinaryOperationNode *>(const_node);  // todo refactor
 
-            // todo
+            if (!node->GetLeft()->type_of_expression->Equals(*node->GetRight()->type_of_expression)) {
+                throw std::exception();
+            }
+
+            auto check = [this](const ISymbolType *lhs, TokenValue::Type rhs) {
+                return lhs->Equals(kDefaultTypes.at(kRawTypeToStr.at(rhs)));
+            };
+
+            const ISymbolType *p1 = node->GetLeft()->type_of_expression;
+            if (p1 == nullptr || /*check(p1, TokenValue::Type::kByteString) || check(p1, TokenValue::Type::kEmpty) ||*/ check(p1, TokenValue::Type::kText) || check(p1, TokenValue::Type::kVoid)) {
+                throw std::exception();  // todo
+            }
+
+            if (kBoolOperations.count(node->GetToken()->GetType()) != 0) {
+                node->type_of_expression = &kDefaultTypes.at("bool");
+            } else {
+                if (check(p1, TokenValue::Type::kBool) || check(p1, TokenValue::Type::kChar)) {
+                    throw std::exception();  // todo
+                }
+                node->type_of_expression = node->GetLeft()->type_of_expression;
+            }
         }
 
         void PostVisit(const PrefixUnaryOperationNode *const_node) override {
@@ -305,7 +415,53 @@ namespace semantic {
 
             auto node = const_cast<PrefixUnaryOperationNode *>(const_node);  // todo refactor
 
-            // todo
+            auto process_get_ref = [&node](bool is_mut) {
+                auto type = std::make_unique<ReferenceTypeNode>(is_mut, node->GetRight()->type_of_expression);
+                node->type_of_expression = type.get();
+                node->symbol_table->types.push_back(std::move(type));
+            };
+
+            if (node->IsException()) {
+                switch (node->GetException()) {
+                case PrefixUnaryOperationNode::Exception::kAndMut:
+                    process_get_ref(true);
+                    break;
+                default:
+                    throw std::exception();  // todo
+                }
+            } else {
+                switch (node->GetToken()->GetType()) {
+                case Token::Type::kAnd:
+                    process_get_ref(false);
+                    break;
+                case Token::Type::kMinus: {
+                    const DefaultType *p1 = dynamic_cast<const DefaultType *>(node->GetRight()->type_of_expression);
+                    if (p1 == nullptr || p1->type == TokenValue::Type::kBool || p1->type == TokenValue::Type::kByteString || p1->type == TokenValue::Type::kChar ||
+                        p1->type == TokenValue::Type::kEmpty || p1->type == TokenValue::Type::kText || p1->type == TokenValue::Type::kVoid)
+                    {
+                        throw std::exception();  // todo
+                    }
+                    node->type_of_expression = const_node->GetRight()->type_of_expression;
+                    break;
+                }
+                case Token::Type::kStar: {
+                    const ReferenceTypeNode *p2 = dynamic_cast<const ReferenceTypeNode *>(node->GetRight()->type_of_expression);
+                    if (p2 == nullptr) {
+                        throw std::exception();  // todo
+                    }
+                    node->type_of_expression = p2->GetRawType();
+                    break;
+                }
+                case Token::Type::kNot:
+                    if (!node->GetRight()->type_of_expression->Equals(kDefaultTypes.at("bool"))) {
+                        throw std::exception();  // todo
+                    }
+                    node->type_of_expression = &kDefaultTypes.at("bool");
+                    break;
+                default:
+                    throw std::exception();  // todo
+                }
+            }
         }
 
         void PostVisit(const InfiniteLoopNode *const_node) override {
@@ -313,7 +469,19 @@ namespace semantic {
 
             auto node = const_cast<InfiniteLoopNode *>(const_node);  // todo refactor
 
-            node->type_of_expression = node->GetBlock()->type_of_expression;
+            if (!node->GetBlock()->type_of_expression->Equals(kDefaultTypes.at("void"))) {
+                throw std::exception();  // todo
+            }
+
+            if (!node->break_nodes.empty()) {
+                node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+            }
+
+            for (BreakNode *break_node : node->break_nodes) {
+                if (!break_node->GetExpression()->type_of_expression->Equals(*node->type_of_expression)) {
+                    throw std::exception();
+                }
+            }
         }
 
         void PostVisit(const PredicateLoopNode *const_node) override {
@@ -321,11 +489,23 @@ namespace semantic {
 
             auto node = const_cast<PredicateLoopNode *>(const_node);  // todo refactor
 
-            node->type_of_expression = node->GetBlock()->type_of_expression;
+            if (!node->GetBlock()->type_of_expression->Equals(kDefaultTypes.at("void"))) {
+                throw std::exception();  // todo
+            }
 
             auto default_type = BrutalCast<const DefaultType *>(node->GetExpression()->type_of_expression);
             if (default_type->type != TokenValue::Type::kBool) {
                 throw std::exception();  // todo
+            }
+
+            if (!node->break_nodes.empty()) {
+                node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+            }
+
+            for (BreakNode *break_node : node->break_nodes) {
+                if (!break_node->GetExpression()->type_of_expression->Equals(*node->type_of_expression)) {
+                    throw std::exception();
+                }
             }
         }
 
@@ -334,7 +514,19 @@ namespace semantic {
 
             auto node = const_cast<IteratorLoopNode *>(const_node);  // todo refactor
 
-            node->type_of_expression = node->GetBlock()->type_of_expression;
+            if (!node->GetBlock()->type_of_expression->Equals(kDefaultTypes.at("void"))) {
+                throw std::exception();  // todo
+            }
+
+            if (!node->break_nodes.empty()) {
+                node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+            }
+
+            for (BreakNode *break_node : node->break_nodes) {
+                if (!break_node->GetExpression()->type_of_expression->Equals(*node->type_of_expression)) {
+                    throw std::exception();
+                }
+            }
         }
 
         void PostVisit(const IfNode *const_node) override {
@@ -344,11 +536,11 @@ namespace semantic {
 
             node->type_of_expression = node->GetIfBlock()->type_of_expression;
 
-            if (node->GetElseBlock() != nullptr && node->GetElseBlock()->type_of_expression != node->type_of_expression) {
+            if (node->GetElseBlock() != nullptr && !node->GetElseBlock()->type_of_expression->Equals(*node->type_of_expression)) {
                 throw std::exception();  // todo
             }
 
-            if (node->GetElseIf() != nullptr && node->GetElseIf()->type_of_expression != node->type_of_expression) {
+            if (node->GetElseIf() != nullptr && !node->GetElseIf()->type_of_expression->Equals(*node->type_of_expression)) {
                 throw std::exception();  // todo
             }
 
@@ -362,8 +554,11 @@ namespace semantic {
             SpecificSyntaxTreeVisitor::PostVisit(const_node);
 
             auto node = const_cast<BlockNode *>(const_node);  // todo refactor
-
-            // todo
+            if (node->GetReturnExpression()) {
+                node->type_of_expression = node->GetReturnExpression()->type_of_expression;
+            } else {
+                node->type_of_expression = &kDefaultTypes.at("void");
+            }
         }
 
         void PostVisit(const BreakNode *const_node) override {
@@ -371,7 +566,7 @@ namespace semantic {
 
             auto node = const_cast<BreakNode *>(const_node);  // todo refactor
 
-            // todo
+            node->type_of_expression = &kDefaultTypes.at("void");
         }
 
         void PostVisit(const ContinueNode *const_node) override {
@@ -387,7 +582,7 @@ namespace semantic {
 
             auto node = const_cast<ReturnNode *>(const_node);  // todo refactor
 
-            // todo
+            node->type_of_expression = &kDefaultTypes.at("void");
         }
 
         void PostVisit(const MemberAccessNode *const_node) override {
@@ -477,33 +672,97 @@ namespace semantic {
         void PostVisit(const InitStructExpressionNode *const_node) override {
             SpecificSyntaxTreeVisitor::PostVisit(const_node);
 
-            auto node = const_cast<InitStructExpressionNode *>(const_node);  // todo refactor
+            const auto node = const_cast<InitStructExpressionNode *>(const_node);  // todo refactor
 
-            // todo
+            const auto identifier = GetIdentifier(const_node->GetIdentifier());
+            const auto symbol = BrutalCast<const StructSymbol *>(const_node->symbol_table->Find(identifier));
+            node->type_of_expression = BrutalCast<const SubsetStructType *>(symbol->type);
+
+            const auto struct_identifier = GetIdentifier(const_node->GetIdentifier());
+            const auto struct_symbol = BrutalCast<const StructSymbol *>(const_node->symbol_table->Find(struct_identifier));
+
+            if (auto p = dynamic_cast<const TupleStructType *>(struct_symbol->type); p != nullptr) {
+                if (node->tuple_identifiers.size() != p->types.size() || !node->struct_identifiers.empty()) {
+                    throw std::exception();
+                }
+            } else if (auto p = dynamic_cast<const StructType *>(struct_symbol->type); p != nullptr) {
+                if (node->struct_identifiers.size() != p->types.size() || !node->tuple_identifiers.empty()) {
+                    throw std::exception();
+                }
+            } else {
+                throw std::exception();  // todo
+            }
         }
 
         void PostVisit(const ShorthandFieldInitStructExpressionNode *const_node) override {
             SpecificSyntaxTreeVisitor::PostVisit(const_node);
 
-            auto node = const_cast<ShorthandFieldInitStructExpressionNode *>(const_node);  // todo refactor
+            const auto node = const_cast<ShorthandFieldInitStructExpressionNode *>(const_node);  // todo refactor
 
-            // todo
+            const auto field_identifier = GetIdentifier(const_node->GetIdentifier());
+            const auto field_symbol = BrutalCast<const LetSymbol *>(const_node->symbol_table->Find(field_identifier));
+            const auto field_type = field_symbol->type;
+
+            if (node->init_struct_expression_node->struct_identifiers.count(field_identifier) != 0) {
+                throw std::exception();
+            }
+            node->init_struct_expression_node->struct_identifiers.insert(field_identifier);
+
+            const auto struct_identifier = GetIdentifier(const_node->init_struct_expression_node->GetIdentifier());
+            const auto struct_symbol = BrutalCast<const StructSymbol *>(const_node->symbol_table->Find(struct_identifier));
+            const auto struct_type = BrutalCast<const StructType *>(struct_symbol->type);
+
+            auto it = struct_type->types.find(field_identifier);
+            if (it == struct_type->types.end() || !field_type->Equals(*it->second)) {
+                throw std::exception();  // todo
+            }
         }
 
         void PostVisit(const TupleIndexFieldInitStructExpressionNode *const_node) override {
             SpecificSyntaxTreeVisitor::PostVisit(const_node);
 
-            auto node = const_cast<TupleIndexFieldInitStructExpressionNode *>(const_node);  // todo refactor
+            const auto node = const_cast<TupleIndexFieldInitStructExpressionNode *>(const_node);  // todo refactor
 
-            // todo
+            if (!const_node->GetLiteral()->GetToken()->GetTokenValue().IsUnsignedInteger()) {
+                throw std::exception();
+            }
+
+            const auto field_idx = const_node->GetLiteral()->GetToken()->GetTokenValue().GetUnsignedInt();
+
+            if (node->init_struct_expression_node->tuple_identifiers.count(field_idx) != 0) {
+                throw std::exception();
+            }
+            node->init_struct_expression_node->tuple_identifiers.insert(field_idx);
+
+            const auto tuple_identifier = GetIdentifier(const_node->init_struct_expression_node->GetIdentifier());
+            const auto tuple_symbol = BrutalCast<const StructSymbol *>(const_node->symbol_table->Find(tuple_identifier));
+            const auto tuple_type = BrutalCast<const TupleStructType *>(tuple_symbol->type);
+
+            if (field_idx >= tuple_type->types.size() || !tuple_type->types[field_idx]->Equals(*const_node->GetExpression()->type_of_expression)) {
+                throw std::exception();
+            }
         }
 
         void PostVisit(const IdentifierFieldInitStructExpressionNode *const_node) override {
             SpecificSyntaxTreeVisitor::PostVisit(const_node);
 
-            auto node = const_cast<IdentifierFieldInitStructExpressionNode *>(const_node);  // todo refactor
+            const auto node = const_cast<IdentifierFieldInitStructExpressionNode *>(const_node);  // todo refactor
 
-            // todo
+            const auto field_identifier = GetIdentifier(const_node->GetIdentifier());
+
+            if (node->init_struct_expression_node->struct_identifiers.count(field_identifier) != 0) {
+                throw std::exception();
+            }
+            node->init_struct_expression_node->struct_identifiers.insert(field_identifier);
+
+            const auto struct_identifier = GetIdentifier(const_node->init_struct_expression_node->GetIdentifier());
+            const auto struct_symbol = BrutalCast<const StructSymbol *>(const_node->symbol_table->Find(struct_identifier));
+            const auto struct_type = BrutalCast<const StructType *>(struct_symbol->type);
+
+            auto it = struct_type->types.find(field_identifier);
+            if (it == struct_type->types.end() || !const_node->GetExpression()->type_of_expression->Equals(*it->second)) {
+                throw std::exception();  // todo
+            }
         }
 
         void PostVisit(const TupleExpressionNode *const_node) override {
@@ -573,15 +832,11 @@ namespace semantic {
             return node->GetToken()->GetTokenValue().ValueToString();
         }
 
-        template <typename T, typename G>
-        T BrutalCast(G ptr) {
-            T tmp = dynamic_cast<T>(ptr);
-            if (tmp == nullptr) {
-                throw std::exception();  // todo
-            }
-            return tmp;
-        }
+        const static std::unordered_set<Token::Type> kBoolOperations;
     };
+
+    const std::unordered_set<Token::Type> ExpressionVisitor::kBoolOperations{Token::Type::kOrOr, Token::Type::kAndAnd, Token::Type::kEqEq, Token::Type::kNe,
+                                                                             Token::Type::kLt,   Token::Type::kGt,     Token::Type::kLe,   Token::Type::kGe};
 
     class SemanticAnalyzer final {
     public:

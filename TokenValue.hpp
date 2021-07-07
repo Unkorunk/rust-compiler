@@ -50,86 +50,58 @@ public:
     TokenValue(const std::vector<uint8_t> &val) : byte_string_(val), type_(Type::kByteString) {}
 
     operator bool() const {
-        if (type_ != Type::kBool)
-            throw std::exception();
         return bool_;
     }
 
     operator char() const {
-        if (type_ != Type::kChar)
-            throw std::exception();
         return char_;
     }
 
     operator uint8_t() const {
-        if (type_ != Type::kU8)
-            throw std::exception();
         return u8_;
     }
 
     operator uint16_t() const {
-        if (type_ != Type::kU16)
-            throw std::exception();
         return u16_;
     }
 
     operator uint32_t() const {
-        if (type_ != Type::kU32)
-            throw std::exception();
         return u32_;
     }
 
     operator uint64_t() const {
-        if (type_ != Type::kU64)
-            throw std::exception();
         return u64_;
     }
 
     operator int8_t() const {
-        if (type_ != Type::kI8)
-            throw std::exception();
         return i8_;
     }
 
     operator int16_t() const {
-        if (type_ != Type::kI16)
-            throw std::exception();
         return i16_;
     }
 
     operator int32_t() const {
-        if (type_ != Type::kI32)
-            throw std::exception();
         return i32_;
     }
 
     operator int64_t() const {
-        if (type_ != Type::kI64)
-            throw std::exception();
         return i64_;
     }
 
     operator float() const {
-        if (type_ != Type::kF32)
-            throw std::exception();
         return f32_;
     }
 
     operator double() const {
-        if (type_ != Type::kF64)
-            throw std::exception();
         return f64_;
     }
 
     operator std::string() const {
-        if (type_ != Type::kText)
-            throw std::exception();
         return text_;
     }
 
     operator std::vector<uint8_t>() const {
-        if (type_ != Type::kByteString)
-            throw std::exception();
         return byte_string_;
     }
 

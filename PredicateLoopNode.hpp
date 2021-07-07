@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ExpressionNode.hpp"
 #include "BlockNode.hpp"
+#include "ExpressionNode.hpp"
 
 class PredicateLoopNode : public ExpressionNode {
 public:
@@ -11,6 +11,8 @@ public:
 
     const ExpressionNode *GetExpression() const;
     const BlockNode *GetBlock() const;
+
+    std::vector<BreakNode *> break_nodes;
 
 private:
     std::unique_ptr<ExpressionNode> expression_;

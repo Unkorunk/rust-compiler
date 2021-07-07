@@ -191,9 +191,7 @@ std::unique_ptr<FunctionNode> SyntaxParser::ParseFunction(bool is_const) {
         block_node = ParseBlockExpression();
     }
 
-    return std::make_unique<FunctionNode>(
-        std::make_unique<IdentifierNode>(std::move(identifier)), std::move(params), std::move(return_type_node),
-        std::move(block_node), is_const);
+    return std::make_unique<FunctionNode>(std::make_unique<IdentifierNode>(std::move(identifier)), std::move(params), std::move(return_type_node), std::move(block_node), is_const);
 }
 
 // `struct` already process
@@ -222,8 +220,7 @@ std::unique_ptr<StructNode> SyntaxParser::ParseStruct() {
                 Expect(Token::Type::kColon);
                 std::unique_ptr<TypeNode> param_type_node = ParseType();
 
-                params.emplace_back(
-                    std::make_unique<IdentifierNode>(std::move(param_identifier_token)), std::move(param_type_node));
+                params.emplace_back(std::make_unique<IdentifierNode>(std::move(param_identifier_token)), std::move(param_type_node));
             } else {
                 break;
             }
@@ -238,8 +235,7 @@ std::unique_ptr<StructNode> SyntaxParser::ParseStruct() {
         Expect(Token::Type::kSemi);  // StructStruct
     }
 
-    return std::make_unique<StructNode>(
-        std::make_unique<IdentifierNode>(std::move(struct_identifier_token)), std::move(params));
+    return std::make_unique<StructNode>(std::make_unique<IdentifierNode>(std::move(struct_identifier_token)), std::move(params));
 }
 
 // `const` already process
@@ -340,16 +336,13 @@ std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
                 if (Accept(Token::Type::kLiteral, &literal)) {
                     Expect(Token::Type::kColon);
                     std::unique_ptr<PatternNode> pattern = ParsePattern();
-                    fields.push_back(std::make_unique<TupleIndexFieldNode>(
-                        std::make_unique<LiteralNode>(std::move(literal)), std::move(pattern)));
+                    fields.push_back(std::make_unique<TupleIndexFieldNode>(std::make_unique<LiteralNode>(std::move(literal)), std::move(pattern)));
                 } else if (Accept(Token::Type::kIdentifier, &param_identifier)) {
                     if (Accept(Token::Type::kColon)) {
                         std::unique_ptr<PatternNode> pattern = ParsePattern();
-                        fields.push_back(std::make_unique<IdentifierFieldNode>(
-                            std::make_unique<IdentifierNode>(std::move(param_identifier)), std::move(pattern)));
+                        fields.push_back(std::make_unique<IdentifierFieldNode>(std::make_unique<IdentifierNode>(std::move(param_identifier)), std::move(pattern)));
                     } else {
-                        fields.push_back(std::make_unique<RefMutIdentifierFieldNode>(
-                            is_ref, is_mut, std::make_unique<IdentifierNode>(std::move(param_identifier))));
+                        fields.push_back(std::make_unique<RefMutIdentifierFieldNode>(is_ref, is_mut, std::make_unique<IdentifierNode>(std::move(param_identifier))));
                     }
                 } else if (Accept(Token::Type::kDotDot)) {
                     is_etc = true;
@@ -361,8 +354,7 @@ std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
                     break;
                 }
             }
-            return std::make_unique<StructPatternNode>(
-                std::make_unique<IdentifierNode>(std::move(identifier)), is_etc, std::move(fields));
+            return std::make_unique<StructPatternNode>(std::make_unique<IdentifierNode>(std::move(identifier)), is_etc, std::move(fields));
         } else if (Accept(Token::Type::kOpenRoundBr)) {
             std::vector<std::unique_ptr<PatternNode>> patterns;
             while (!Accept(Token::Type::kCloseRoundBr)) {
@@ -374,16 +366,14 @@ std::unique_ptr<PatternNode> SyntaxParser::ParsePattern() {
                 }
             }
 
-            return std::make_unique<TupleStructPatternNode>(
-                std::make_unique<IdentifierNode>(std::move(identifier)), std::move(patterns));
+            return std::make_unique<TupleStructPatternNode>(std::make_unique<IdentifierNode>(std::move(identifier)), std::move(patterns));
         } else {
             std::unique_ptr<PatternNode> subpattern;
             if (Accept(Token::Type::kAt)) {
                 subpattern = ParsePattern();
             }
 
-            return std::make_unique<IdentifierPatternNode>(
-                is_ref, is_mut, std::make_unique<IdentifierNode>(std::move(identifier)), std::move(subpattern));
+            return std::make_unique<IdentifierPatternNode>(is_ref, is_mut, std::make_unique<IdentifierNode>(std::move(identifier)), std::move(subpattern));
         }
     } else if (Accept(Token::Type::kOpenRoundBr)) {
         std::unique_ptr<PatternNode> pattern = ParsePattern();
@@ -503,8 +493,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseExpression() {
 ExpressionStatement           : ExpressionWithoutBlock `;` | ExpressionWithBlock `;`?
 */
 // clang-format on
-SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseExpressionStatement(
-    Result<ExpressionNode> &expression_without_block) {
+SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseExpressionStatement(Result<ExpressionNode> &expression_without_block) {
     auto result = ParseExpressionWithBlock();
     if (result.status) {
         Accept(Token::Type::kSemi);
@@ -633,8 +622,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParseLeft(int priority) {
             return Result<ExpressionNode>(false);
         }
 
-        left = Result<ExpressionNode>(
-            true, std::make_unique<BinaryOperationNode>(std::move(out), std::move(left.node), std::move(right.node)));
+        left = Result<ExpressionNode>(true, std::make_unique<BinaryOperationNode>(std::move(out), std::move(left.node), std::move(right.node)));
     }
 
     return left;
@@ -649,21 +637,20 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrefix() {
             return Result<ExpressionNode>(false);
         }
 
-        return Result<ExpressionNode>(
-            true, std::make_unique<PrefixUnaryOperationNode>(std::move(out), std::move(right.node)));
+        return Result<ExpressionNode>(true, std::make_unique<PrefixUnaryOperationNode>(std::move(out), std::move(right.node)));
     } else if (Accept(Token::Type::kAnd, &out)) {
-        auto right = ParsePrefix();
-        if (!right.status) {
-            return Result<ExpressionNode>(false);
-        }
-
         if (Accept(Token::Type::kMut)) {
-            return Result<ExpressionNode>(
-                true, std::make_unique<PrefixUnaryOperationNode>(
-                          PrefixUnaryOperationNode::Exception::kAndMut, std::move(right.node)));
+            auto right = ParsePrefix();
+            if (!right.status) {
+                return Result<ExpressionNode>(false);
+            }
+            return Result<ExpressionNode>(true, std::make_unique<PrefixUnaryOperationNode>(PrefixUnaryOperationNode::Exception::kAndMut, std::move(right.node)));
         } else {
-            return Result<ExpressionNode>(
-                true, std::make_unique<PrefixUnaryOperationNode>(std::move(out), std::move(right.node)));
+            auto right = ParsePrefix();
+            if (!right.status) {
+                return Result<ExpressionNode>(false);
+            }
+            return Result<ExpressionNode>(true, std::make_unique<PrefixUnaryOperationNode>(std::move(out), std::move(right.node)));
         }
     }
 
@@ -682,15 +669,11 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
         if (Accept(Token::Type::kDot)) {
             if (!Accept(Token::Type::kIdentifier, &out)) {
                 Expect(Token::Type::kLiteral, &out);
-                operand = Result<ExpressionNode>(
-                    true, std::make_unique<MemberAccessNode>(
-                              std::move(operand.node),
-                              std::make_unique<LiteralExpressionNode>(std::make_unique<LiteralNode>(std::move(out)))));
+                operand =
+                    Result<ExpressionNode>(true, std::make_unique<MemberAccessNode>(std::move(operand.node), std::make_unique<LiteralExpressionNode>(std::make_unique<LiteralNode>(std::move(out)))));
             } else {
                 operand = Result<ExpressionNode>(
-                    true, std::make_unique<MemberAccessNode>(
-                              std::move(operand.node), std::make_unique<IdentifierExpressionNode>(
-                                                           std::make_unique<IdentifierNode>(std::move(out)))));
+                    true, std::make_unique<MemberAccessNode>(std::move(operand.node), std::make_unique<IdentifierExpressionNode>(std::make_unique<IdentifierNode>(std::move(out)))));
             }
         } else if (Accept(Token::Type::kOpenRoundBr)) {
             std::vector<std::unique_ptr<ExpressionNode>> arguments;
@@ -709,8 +692,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
                 }
             }
 
-            operand = Result<ExpressionNode>(
-                true, std::make_unique<CallOrInitTupleNode>(std::move(operand.node), std::move(arguments)));
+            operand = Result<ExpressionNode>(true, std::make_unique<CallOrInitTupleNode>(std::move(operand.node), std::move(arguments)));
         } else if (Accept(Token::Type::kOpenSquareBr)) {
             auto expression = ParseExpression();
             if (!expression.status) {
@@ -718,8 +700,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
             }
             Expect(Token::Type::kCloseSquareBr);
 
-            operand = Result<ExpressionNode>(
-                true, std::make_unique<IndexNode>(std::move(operand.node), std::move(expression.node)));
+            operand = Result<ExpressionNode>(true, std::make_unique<IndexNode>(std::move(operand.node), std::move(expression.node)));
         } else if (!except_struct_expression_ && Accept(Token::Type::kOpenCurlyBr)) {
             std::vector<std::unique_ptr<FieldInitStructExpressionNode>> fields;
             std::unique_ptr<ExpressionNode> dot_dot_expression;
@@ -741,11 +722,9 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
                                 throw std::exception();
                             }
 
-                            fields.push_back(std::make_unique<IdentifierFieldInitStructExpressionNode>(
-                                std::make_unique<IdentifierNode>(std::move(identifier)), std::move(result.node)));
+                            fields.push_back(std::make_unique<IdentifierFieldInitStructExpressionNode>(std::make_unique<IdentifierNode>(std::move(identifier)), std::move(result.node)));
                         } else {
-                            fields.push_back(std::make_unique<ShorthandFieldInitStructExpressionNode>(
-                                std::make_unique<IdentifierNode>(std::move(identifier))));
+                            fields.push_back(std::make_unique<ShorthandFieldInitStructExpressionNode>(std::make_unique<IdentifierNode>(std::move(identifier))));
                         }
                     } else if (Accept(Token::Type::kLiteral, &literal)) {
                         Expect(Token::Type::kColon);
@@ -753,8 +732,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
                         if (!result.status) {
                             throw std::exception();
                         }
-                        fields.push_back(std::make_unique<TupleIndexFieldInitStructExpressionNode>(
-                            std::make_unique<LiteralNode>(std::move(literal)), std::move(result.node)));
+                        fields.push_back(std::make_unique<TupleIndexFieldInitStructExpressionNode>(std::make_unique<LiteralNode>(std::move(literal)), std::move(result.node)));
                     } else {
                         break;
                     }
@@ -777,18 +755,14 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePostfix() {
 
             Expect(Token::Type::kCloseCurlyBr);
 
-            operand = Result<ExpressionNode>(
-                true, std::make_unique<InitStructExpressionNode>(
-                          std::move(operand.node), std::move(fields), std::move(dot_dot_expression)));
+            operand = Result<ExpressionNode>(true, std::make_unique<InitStructExpressionNode>(std::move(operand.node), std::move(fields), std::move(dot_dot_expression)));
         } else if (Accept(kAssignmentOperations.begin(), kAssignmentOperations.end(), &out)) {
             auto result = ParseExpression();
             if (!result.status) {
                 throw std::exception();
             }
 
-            operand = Result<ExpressionNode>(
-                true,
-                std::make_unique<AssignmentNode>(std::move(out), std::move(operand.node), std::move(result.node)));
+            operand = Result<ExpressionNode>(true, std::make_unique<AssignmentNode>(std::move(out), std::move(operand.node), std::move(result.node)));
         } else {
             break;
         }
@@ -801,7 +775,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
     Token out;
 
     if (Accept(Token::Type::kBreak)) {
-        return Result<ExpressionNode>(true, std::make_unique<ReturnNode>(ParseExpression().node));
+        return Result<ExpressionNode>(true, std::make_unique<BreakNode>(ParseExpression().node));
     } else if (Accept(Token::Type::kContinue)) {
         return Result<ExpressionNode>(true, std::make_unique<ContinueNode>());
     } else if (Accept(Token::Type::kReturn)) {
@@ -817,8 +791,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
         auto result = ParseExpression();
         if (!result.status) {
             Expect(Token::Type::kCloseRoundBr);
-            return Result<ExpressionNode>(
-                true, std::make_unique<TupleExpressionNode>(std::vector<std::unique_ptr<ExpressionNode>>()));
+            return Result<ExpressionNode>(true, std::make_unique<TupleExpressionNode>(std::vector<std::unique_ptr<ExpressionNode>>()));
         }
 
         if (Accept(Token::Type::kComma)) {
@@ -846,11 +819,9 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
 
         return result;
     } else if (Accept(Token::Type::kIdentifier, &out)) {
-        return Result<ExpressionNode>(
-            true, std::make_unique<IdentifierExpressionNode>(std::make_unique<IdentifierNode>(std::move(out))));
+        return Result<ExpressionNode>(true, std::make_unique<IdentifierExpressionNode>(std::make_unique<IdentifierNode>(std::move(out))));
     } else if (Accept(Token::Type::kLiteral, &out)) {
-        return Result<ExpressionNode>(
-            true, std::make_unique<LiteralExpressionNode>(std::make_unique<LiteralNode>(std::move(out))));
+        return Result<ExpressionNode>(true, std::make_unique<LiteralExpressionNode>(std::make_unique<LiteralNode>(std::move(out))));
     } else if (Accept(Token::Type::kOpenSquareBr)) {
         auto result = ParseExpression();
         if (!result.status) {
@@ -888,8 +859,7 @@ SyntaxParser::Result<ExpressionNode> SyntaxParser::ParsePrimary() {
             }
         }
 
-        return Result<ExpressionNode>(
-            true, std::make_unique<ArrayExpressionNode>(std::move(expressions), is_semi_mode));
+        return Result<ExpressionNode>(true, std::make_unique<ArrayExpressionNode>(std::move(expressions), is_semi_mode));
     }
 
     return Result<ExpressionNode>(false);
@@ -1014,18 +984,15 @@ std::unique_ptr<IfNode> SyntaxParser::ParseIfExpression() {
         }
     }
 
-    return std::make_unique<IfNode>(
-        std::move(expression), std::move(if_block_node), std::move(else_block_node), std::move(else_if_node));
+    return std::make_unique<IfNode>(std::move(expression), std::move(if_block_node), std::move(else_block_node), std::move(else_if_node));
 }
 
-const std::unordered_set<Token::Type> SyntaxParser::kUnaryOperator{
-    Token::Type::kMinus, Token::Type::kStar, Token::Type::kNot};
+const std::unordered_set<Token::Type> SyntaxParser::kUnaryOperator{Token::Type::kMinus, Token::Type::kStar, Token::Type::kNot};
 
 const std::array<std::unordered_set<Token::Type>, 10> SyntaxParser::kPriority{
     std::unordered_set{Token::Type::kOrOr},
     std::unordered_set{Token::Type::kAndAnd},
-    std::unordered_set{
-        Token::Type::kEqEq, Token::Type::kNe, Token::Type::kLt, Token::Type::kGt, Token::Type::kLe, Token::Type::kGe},
+    std::unordered_set{Token::Type::kEqEq, Token::Type::kNe, Token::Type::kLt, Token::Type::kGt, Token::Type::kLe, Token::Type::kGe},
     std::unordered_set{Token::Type::kOr},
     std::unordered_set{Token::Type::kCaret},
     std::unordered_set{Token::Type::kAnd},
@@ -1034,7 +1001,6 @@ const std::array<std::unordered_set<Token::Type>, 10> SyntaxParser::kPriority{
     std::unordered_set{Token::Type::kStar, Token::Type::kSlash, Token::Type::kPercent},
     std::unordered_set{Token::Type::kAs}};
 
-const std::unordered_set<Token::Type> SyntaxParser::kAssignmentOperations{
-    Token::Type::kEq,      Token::Type::kPlusEq,    Token::Type::kMinusEq, Token::Type::kStarEq,
-    Token::Type::kSlashEq, Token::Type::kPercentEq, Token::Type::kCaretEq, Token::Type::kAndEq,
-    Token::Type::kOrEq,    Token::Type::kShlEq,     Token::Type::kShrEq};
+const std::unordered_set<Token::Type> SyntaxParser::kAssignmentOperations{Token::Type::kEq,      Token::Type::kPlusEq,    Token::Type::kMinusEq, Token::Type::kStarEq,
+                                                                          Token::Type::kSlashEq, Token::Type::kPercentEq, Token::Type::kCaretEq, Token::Type::kAndEq,
+                                                                          Token::Type::kOrEq,    Token::Type::kShlEq,     Token::Type::kShrEq};

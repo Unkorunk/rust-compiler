@@ -87,8 +87,7 @@ public:
 
 class CallOrInitTupleNode final : public ExpressionNode {
 public:
-    CallOrInitTupleNode(
-        std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
+    CallOrInitTupleNode(std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<ExpressionNode>> &&arguments)
         : identifier_(std::move(identifier)), arguments_(std::move(arguments)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
@@ -118,8 +117,7 @@ private:
 
 class IndexNode final : public ExpressionNode {
 public:
-    IndexNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
-        : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
+    IndexNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression) : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -140,8 +138,7 @@ private:
 
 class MemberAccessNode final : public ExpressionNode {
 public:
-    MemberAccessNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
-        : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
+    MemberAccessNode(std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression) : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -162,8 +159,7 @@ private:
 
 class ArrayExpressionNode final : public ExpressionNode {
 public:
-    ArrayExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions, bool is_semi_mode)
-        : expressions_(std::move(expressions)), is_semi_mode_(is_semi_mode) {}
+    ArrayExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions, bool is_semi_mode) : expressions_(std::move(expressions)), is_semi_mode_(is_semi_mode) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -188,9 +184,13 @@ private:
     bool is_semi_mode_;
 };
 
+class InitStructExpressionNode;
+
 class FieldInitStructExpressionNode : public SyntaxNode {
 public:
     virtual ~FieldInitStructExpressionNode() = default;
+
+    InitStructExpressionNode *init_struct_expression_node;
 
 protected:
     FieldInitStructExpressionNode() = default;
@@ -198,8 +198,7 @@ protected:
 
 class ShorthandFieldInitStructExpressionNode final : public FieldInitStructExpressionNode {
 public:
-    ShorthandFieldInitStructExpressionNode(std::unique_ptr<IdentifierNode> &&identifier)
-        : identifier_(std::move(identifier)) {}
+    ShorthandFieldInitStructExpressionNode(std::unique_ptr<IdentifierNode> &&identifier) : identifier_(std::move(identifier)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -215,9 +214,7 @@ private:
 
 class TupleIndexFieldInitStructExpressionNode final : public FieldInitStructExpressionNode {
 public:
-    TupleIndexFieldInitStructExpressionNode(
-        std::unique_ptr<LiteralNode> &&literal, std::unique_ptr<ExpressionNode> &&expression)
-        : literal_(std::move(literal)), expression_(std::move(expression)) {}
+    TupleIndexFieldInitStructExpressionNode(std::unique_ptr<LiteralNode> &&literal, std::unique_ptr<ExpressionNode> &&expression) : literal_(std::move(literal)), expression_(std::move(expression)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -238,8 +235,7 @@ private:
 
 class IdentifierFieldInitStructExpressionNode final : public FieldInitStructExpressionNode {
 public:
-    IdentifierFieldInitStructExpressionNode(
-        std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
+    IdentifierFieldInitStructExpressionNode(std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
         : identifier_(std::move(identifier)), expression_(std::move(expression)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
@@ -261,12 +257,12 @@ private:
 
 class InitStructExpressionNode final : public ExpressionNode {
 public:
-    InitStructExpressionNode(
-        std::unique_ptr<ExpressionNode> &&identifier,
-        std::vector<std::unique_ptr<FieldInitStructExpressionNode>> &&fields,
-        std::unique_ptr<ExpressionNode> &&dot_dot_expression)
-        : identifier_(std::move(identifier)), fields_(std::move(fields)),
-          dot_dot_expression_(std::move(dot_dot_expression)) {}
+    InitStructExpressionNode(std::unique_ptr<ExpressionNode> &&identifier, std::vector<std::unique_ptr<FieldInitStructExpressionNode>> &&fields, std::unique_ptr<ExpressionNode> &&dot_dot_expression)
+        : identifier_(std::move(identifier)), fields_(std::move(fields)), dot_dot_expression_(std::move(dot_dot_expression)) {
+        for (auto &field : fields_) {
+            field->init_struct_expression_node = this;
+        }
+    }
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -289,6 +285,9 @@ public:
         return dot_dot_expression_.get();
     }
 
+    std::unordered_set<std::string> struct_identifiers;
+    std::unordered_set<uint64_t> tuple_identifiers;
+
 private:
     std::unique_ptr<ExpressionNode> identifier_;
     std::vector<std::unique_ptr<FieldInitStructExpressionNode>> fields_;
@@ -297,8 +296,7 @@ private:
 
 class TupleExpressionNode final : public ExpressionNode {
 public:
-    explicit TupleExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions)
-        : expressions_(std::move(expressions)) {}
+    explicit TupleExpressionNode(std::vector<std::unique_ptr<ExpressionNode>> &&expressions) : expressions_(std::move(expressions)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -320,8 +318,7 @@ private:
 
 class AssignmentNode final : public ExpressionNode {
 public:
-    AssignmentNode(
-        Token &&operation, std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
+    AssignmentNode(Token &&operation, std::unique_ptr<ExpressionNode> &&identifier, std::unique_ptr<ExpressionNode> &&expression)
         : operation_(std::move(operation)), identifier_(std::move(identifier)), expression_(std::move(expression)) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {

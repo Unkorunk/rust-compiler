@@ -10,6 +10,8 @@ public:
 
     const BlockNode *GetBlock() const;
 
+    std::vector<BreakNode *> break_nodes;
+
 private:
     std::unique_ptr<BlockNode> block_;
 };

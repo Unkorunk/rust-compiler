@@ -1,10 +1,11 @@
 #include <fstream>
 #include <iostream>
 
+#include "SemanticAnalyzer.hpp"
 #include "SpecificSyntaxTreeVisitor.hpp"
 #include "SyntaxParser.hpp"
 #include "Tokenizer.hpp"
-#include "SemanticAnalyzer.hpp"
+#include "WasmGenerator.hpp"
 
 class MyVisitor : public SpecificSyntaxTreeVisitor {
 protected:
@@ -324,7 +325,18 @@ protected:
         const auto tokenType = token->GetType();
 
         PrintIndent();
-        std::cout << Token::TypeToString(tokenType) << " PrefixUnaryOperationNode" << std::endl;
+        if (node->IsException()) {
+            switch (node->GetException()) {
+            case PrefixUnaryOperationNode::Exception::kAndMut:
+                std::cout << "&mut";
+                break;
+            default:
+                throw std::exception();
+            }
+        } else {
+            std::cout << Token::TypeToString(tokenType);
+        }
+        std::cout << " PrefixUnaryOperationNode" << std::endl;
 
         SpecificSyntaxTreeVisitor::PostVisit(node);
 
@@ -584,11 +596,16 @@ int main(int argc, char **argv) {
     SyntaxParser parser(&tokenizer);
     std::unique_ptr<SyntaxTree> syntax_tree = parser.ParseStatements();
 
+    MyVisitor visitor;
+    visitor.Visit(syntax_tree.get());
+
     semantic::SemanticAnalyzer analyzer;
     analyzer.Analyze(syntax_tree.get());
 
-    MyVisitor visitor;
-    visitor.Visit(syntax_tree.get());
+    WasmGenerator generator;
+    generator.Visit(syntax_tree.get());
+    ByteArray::FileStream fs("result.wasm", std::ios::out | std::ios::binary);
+    fs << generator.GetResult();
 
     ifs.close();
 

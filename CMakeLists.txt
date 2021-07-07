@@ -43,7 +43,7 @@ add_library(rust-compiler-parser
         StructNode.hpp StructNode.cpp
         FunctionNode.hpp FunctionNode.cpp
         ExpressionNode.hpp
-        Symbol.hpp SymbolTable.hpp SemanticAnalyzer.hpp ISymbol.hpp)
+        Symbol.hpp SymbolTable.hpp SemanticAnalyzer.hpp ISymbol.hpp WasmGenerator.hpp)
 
 target_link_libraries(rust-compiler-parser rust-compiler-tokenizer)
 

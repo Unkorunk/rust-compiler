@@ -56,6 +56,7 @@ private:
 class ReferenceTypeNode final : public TypeNode {
 public:
     ReferenceTypeNode(bool is_mut, std::unique_ptr<TypeNode> &&type);
+    ReferenceTypeNode(bool is_mut, const ISymbolType *type) : is_mut_(is_mut), type2_(type) {}
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -66,12 +67,28 @@ public:
     }
 
     const TypeNode *GetType() const {
+        if (type2_ != nullptr) {
+            throw std::exception();
+        }
+
         return type_.get();
+    }
+
+    const ISymbolType *GetRawType() const {
+        return type2_ != nullptr ? type2_ : type_.get();
+    }
+
+    bool Equals(const ISymbolType &other) const override {
+        if (auto p = dynamic_cast<const ReferenceTypeNode *>(&other); p != nullptr) {
+            return p->GetRawType()->Equals(*GetRawType()) && p->is_mut_ == is_mut_;
+        }
+        return false;
     }
 
 private:
     bool is_mut_;
     std::unique_ptr<TypeNode> type_;
+    const ISymbolType *type2_ = nullptr;
 };
 
 class ArrayTypeNode final : public TypeNode {
@@ -110,8 +127,16 @@ public:
     std::variant<const semantic::SubsetStructType *, const semantic::DefaultType *> type;
 
     bool Equals(const ISymbolType &other) const override {
-        if (auto node = dynamic_cast<const IdentifierTypeNode *>(&other); node != nullptr) {
-            return node == this;
+        if (auto const_node = dynamic_cast<const IdentifierTypeNode *>(&other); const_node != nullptr) {
+            auto node = const_cast<IdentifierTypeNode *>(const_node);
+
+            if (auto p = std::get_if<const semantic::SubsetStructType *>(&node->type)) {
+                return this->Equals(**p);
+            }
+
+            if (auto p = std::get_if<const semantic::DefaultType *>(&node->type)) {
+                return this->Equals(**p);
+            }
         }
 
         if (auto node = dynamic_cast<const semantic::SubsetStructType *>(&other); node != nullptr) {
