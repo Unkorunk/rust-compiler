@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <iostream>
 
 class ISymbolType {
 public:
@@ -21,6 +22,11 @@ public:
 
     std::string identifier;
     ISymbolType* type = nullptr;
+
+    virtual void Print() const
+    {
+        std::cout << identifier;
+    } 
 
 protected:
     ISymbol() = default;

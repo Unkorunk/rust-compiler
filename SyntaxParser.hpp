@@ -337,6 +337,8 @@ public:
         return expression_.get();
     }
 
+    const semantic::LetSymbol *let_symbol = nullptr;
+
 private:
     Token operation_;
     std::unique_ptr<ExpressionNode> identifier_;
@@ -355,7 +357,7 @@ public:
         Result(bool status, std::unique_ptr<T> &&node) : status(status), node(std::move(node)) {}
     };
 
-    std::unique_ptr<SyntaxTree> ParseStatements();
+    std::unique_ptr<SyntaxTree> ParseItems();
 
 private:
     Token NextToken();

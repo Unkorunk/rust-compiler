@@ -30,9 +30,7 @@ private:
 
 class IdentifierPatternNode : public PatternNode {
 public:
-    IdentifierPatternNode(
-        bool is_ref, bool is_mut, std::unique_ptr<IdentifierNode> &&identifier,
-        std::unique_ptr<PatternNode> &&subpattern);
+    IdentifierPatternNode(bool is_ref, bool is_mut, std::unique_ptr<IdentifierNode> &&identifier, std::unique_ptr<PatternNode> &&subpattern);
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -43,6 +41,8 @@ public:
 
     bool IsRef() const;
     bool IsMut() const;
+
+    const semantic::LetSymbol *let_node = nullptr;
 
 private:
     bool is_ref_;
@@ -145,8 +145,7 @@ private:
 
 class StructPatternNode : public PatternNode {
 public:
-    StructPatternNode(
-        std::unique_ptr<IdentifierNode> &&identifier, bool is_etc, std::vector<std::unique_ptr<FieldNode>> &&fields);
+    StructPatternNode(std::unique_ptr<IdentifierNode> &&identifier, bool is_etc, std::vector<std::unique_ptr<FieldNode>> &&fields);
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);
@@ -166,8 +165,7 @@ private:
 
 class TupleStructPatternNode : public PatternNode {
 public:
-    TupleStructPatternNode(
-        std::unique_ptr<IdentifierNode> &&identifier, std::vector<std::unique_ptr<PatternNode>> &&patterns);
+    TupleStructPatternNode(std::unique_ptr<IdentifierNode> &&identifier, std::vector<std::unique_ptr<PatternNode>> &&patterns);
 
     void Visit(ISyntaxTreeVisitor *visitor) const override {
         visitor->PostVisit(this);

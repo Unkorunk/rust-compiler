@@ -1,9 +1,11 @@
 #pragma once
 
+#include "ImportExportTable.hpp"
 #include "SpecificSyntaxTreeVisitor.hpp"
 #include "Symbol.hpp"
 #include "SymbolTable.hpp"
 #include "SyntaxParser.hpp"
+#include "TypesHelper.hpp"
 
 template <class... Ts>
 struct overloaded : Ts... {
@@ -23,24 +25,18 @@ T BrutalCast(G ptr) {
 }
 
 namespace semantic {
-    const static std::map<std::string, DefaultType> kDefaultTypes{
-        {"bool", DefaultType(TokenValue::Type::kBool)}, {"char", DefaultType(TokenValue::Type::kChar)}, {"u8", DefaultType(TokenValue::Type::kU8)},     {"u16", DefaultType(TokenValue::Type::kU16)},
-        {"u32", DefaultType(TokenValue::Type::kU32)},   {"u64", DefaultType(TokenValue::Type::kU64)},   {"i8", DefaultType(TokenValue::Type::kI8)},     {"i16", DefaultType(TokenValue::Type::kI16)},
-        {"i32", DefaultType(TokenValue::Type::kI32)},   {"i64", DefaultType(TokenValue::Type::kI64)},   {"f32", DefaultType(TokenValue::Type::kF32)},   {"f64", DefaultType(TokenValue::Type::kF64)},
-        {"str", DefaultType(TokenValue::Type::kText)},  {"usize", DefaultType(TokenValue::Type::kU64)}, {"isize", DefaultType(TokenValue::Type::kI64)}, {"void", DefaultType(TokenValue::Type::kVoid)}};
-
-    const static std::map<TokenValue::Type, std::string> kRawTypeToStr{
-        {TokenValue::Type::kBool, "bool"}, {TokenValue::Type::kU16, "u16"}, {TokenValue::Type::kI8, "i8"},     {TokenValue::Type::kI64, "i64"}, {TokenValue::Type::kChar, "char"},
-        {TokenValue::Type::kU32, "u32"},   {TokenValue::Type::kI16, "i16"}, {TokenValue::Type::kF32, "f32"},   {TokenValue::Type::kU8, "u8"},   {TokenValue::Type::kU64, "u64"},
-        {TokenValue::Type::kI32, "i32"},   {TokenValue::Type::kF64, "f64"}, {TokenValue::Type::kVoid, "void"}, {TokenValue::Type::kText, "str"}};
-
-    class BaseStructVisitor final : public SpecificSyntaxTreeVisitor {
+    class BaseStructVisitor final : private SpecificSyntaxTreeVisitor {
     public:
         void Visit(const SyntaxNode *syntaxNode) override {
             SpecificSyntaxTreeVisitor::Visit(syntaxNode);
             if (syntaxNode != nullptr) {
                 const_cast<SyntaxNode *>(syntaxNode)->symbol_table = current_;  // todo refactor
             }
+        }
+
+        void Visit(const SyntaxNode *syntaxNode, const ImportExportTable *iet) {
+            iet_ = iet;
+            Visit(syntaxNode);
         }
 
     protected:
@@ -191,15 +187,29 @@ namespace semantic {
             node->symbol_table = std::make_unique<SymbolTable>();
             current_ = node->symbol_table.get();
 
-            auto func_type = std::make_unique<semantic::FuncType>();
-            func_type->argument_types.emplace_back("value", &semantic::kDefaultTypes.at("i32"));
+            for (int import_idx = 0; import_idx < iet_->imports.size(); import_idx++) {
+                const auto &it = iet_->imports[import_idx];
+                auto func_type = std::make_unique<FuncType>();
 
-            auto func_symbol = std::make_unique<semantic::FuncSymbol>(node->symbol_table.get());
-            func_symbol->identifier = "print_i32";
-            func_symbol->type = func_type.get();
-            node->symbol_table->types.push_back(std::move(func_type));
+                if (!it.type.ret.empty()) {
+                    if (it.type.ret.size() != 1) {
+                        throw std::exception();  // todo
+                    }
+                    func_type->return_type = &TypesHelper::ConvertToDefaultType(it.type.ret.front());
+                }
 
-            node->symbol_table->Add(std::move(func_symbol));
+                for (size_t i = 0; i < it.type.params.size(); i++) {
+                    func_type->argument_types.emplace_back("arg" + std::to_string(i), &TypesHelper::ConvertToDefaultType(it.type.params[i]));
+                }
+
+                auto func_symbol = std::make_unique<FuncSymbol>(node->symbol_table.get());
+                func_symbol->identifier = it.associate;
+                func_symbol->type = func_type.get();
+                func_symbol->func_iet = import_idx;
+                node->symbol_table->types.push_back(std::move(func_type));
+
+                node->symbol_table->Add(std::move(func_symbol));
+            }
 
             SpecificSyntaxTreeVisitor::PostVisit(node);
         }
@@ -208,17 +218,25 @@ namespace semantic {
         SymbolTable *current_ = nullptr;
         std::vector<ReturnNode *> *current_return_nodes_ = nullptr;
         std::vector<BreakNode *> *current_break_nodes_ = nullptr;
+        const ImportExportTable *iet_ = nullptr;
+        bool nested_func_ = false;
     };
 
-    class StructFuncVisitor final : public SpecificSyntaxTreeVisitor {
+    class StructFuncVisitor final : private SpecificSyntaxTreeVisitor {
+    public:
+        void Visit(const SyntaxNode *syntaxNode, const ImportExportTable *iet) {
+            iet_ = iet;
+            SpecificSyntaxTreeVisitor::Visit(syntaxNode);
+        }
+
     protected:
         void PostVisit(const IdentifierTypeNode *const_node) override {
             auto node = const_cast<IdentifierTypeNode *>(const_node);  // TODO refactor
 
             const auto identifier = node->GetIdentifier()->GetToken()->GetTokenValue().ValueToString();
 
-            const auto it = kDefaultTypes.find(identifier);
-            if (it != kDefaultTypes.end()) {
+            const auto it = TypesHelper::kDefaultTypes.find(identifier);
+            if (it != TypesHelper::kDefaultTypes.end()) {
                 node->type = &it->second;
             } else {
                 if (auto symbol = dynamic_cast<const StructSymbol *>(node->symbol_table->Find(identifier)); symbol != nullptr) {
@@ -246,6 +264,7 @@ namespace semantic {
             auto let_symbol = std::make_unique<LetSymbol>();
             let_symbol->identifier = identifier;
             let_symbol->type = const_cast<TypeNode *>(node->GetType());  // todo refactor
+            const_cast<IdentifierPatternNode *>(pattern)->let_node = let_symbol.get();
             node->symbol_table->Add(std::move(let_symbol));
 
             SpecificSyntaxTreeVisitor::PostVisit(node);
@@ -271,7 +290,47 @@ namespace semantic {
 
             func_type_->return_type = node->GetReturnType();
 
+            const auto saved_nested_func = nested_func_;
+            nested_func_ = true;
+
             SpecificSyntaxTreeVisitor::PostVisit(node);
+
+            nested_func_ = saved_nested_func;
+
+            if (!nested_func_) {
+                for (int export_idx = 0; export_idx < iet_->exports.size(); export_idx++) {
+                    const auto &it = iet_->exports[export_idx];
+
+                    if (it.associate == symbol->identifier) {
+                        if (it.type.ret.size() > 2) {
+                            throw std::exception();  // todo
+                        }
+
+                        if (it.type.ret.empty() && func_type_->return_type == nullptr ||
+                            it.type.ret.size() == 1 && TypesHelper::ConvertToDefaultType(it.type.ret.front()).Equals(*func_type_->return_type)) {
+                            if (func_type_->argument_types.size() == it.type.params.size()) {
+                                bool found = true;
+
+                                for (size_t i = 0; i < it.type.params.size(); i++) {
+                                    if (!TypesHelper::ConvertToDefaultType(it.type.params[i]).Equals(*func_type_->argument_types[i].second)) {
+                                        found = false;
+                                    }
+                                }
+
+                                if (found) {
+                                    symbol->func_iet = iet_->imports.size() + export_idx;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (symbol->func_iet == std::numeric_limits<uint32_t>::max()) {
+                symbol->func_iet = iet_->imports.size() + iet_->exports.size() + func_inner_idx_;
+                func_inner_idx_++;
+            }
 
             func_type_ = old_func_type;
         }
@@ -301,6 +360,9 @@ namespace semantic {
         StructType *struct_type_ = nullptr;
         TupleStructType *tuple_type_ = nullptr;
         FuncType *func_type_ = nullptr;
+        const ImportExportTable *iet_ = nullptr;
+        bool nested_func_ = false;
+        int func_inner_idx_ = 0;
     };
 
     class ExpressionVisitor final : public SpecificSyntaxTreeVisitor {
@@ -365,7 +427,7 @@ namespace semantic {
             SpecificSyntaxTreeVisitor::PostVisit(const_node);
 
             auto node = const_cast<LiteralExpressionNode *>(const_node);  // todo refactor
-            node->type_of_expression = &kDefaultTypes.at(kRawTypeToStr.at(node->GetLiteral()->GetToken()->GetTokenValue().GetType()));
+            node->type_of_expression = &TypesHelper::kDefaultTypes.at(TypesHelper::kRawTypeToStr.at(node->GetLiteral()->GetToken()->GetTokenValue().GetType()));
         }
 
         void PostVisit(const IdentifierExpressionNode *const_node) override {
@@ -380,6 +442,8 @@ namespace semantic {
             }
 
             node->type_of_expression = symbol->type;
+            node->symbol = const_cast<ISymbol *>(symbol);
+            ;
         }
 
         void PostVisit(const BinaryOperationNode *const_node) override {
@@ -392,7 +456,7 @@ namespace semantic {
             }
 
             auto check = [this](const ISymbolType *lhs, TokenValue::Type rhs) {
-                return lhs->Equals(kDefaultTypes.at(kRawTypeToStr.at(rhs)));
+                return lhs->Equals(TypesHelper::kDefaultTypes.at(TypesHelper::kRawTypeToStr.at(rhs)));
             };
 
             const ISymbolType *p1 = node->GetLeft()->type_of_expression;
@@ -401,7 +465,7 @@ namespace semantic {
             }
 
             if (kBoolOperations.count(node->GetToken()->GetType()) != 0) {
-                node->type_of_expression = &kDefaultTypes.at("bool");
+                node->type_of_expression = &TypesHelper::kDefaultTypes.at("bool");
             } else {
                 if (check(p1, TokenValue::Type::kBool) || check(p1, TokenValue::Type::kChar)) {
                     throw std::exception();  // todo
@@ -453,10 +517,10 @@ namespace semantic {
                     break;
                 }
                 case Token::Type::kNot:
-                    if (!node->GetRight()->type_of_expression->Equals(kDefaultTypes.at("bool"))) {
+                    if (!node->GetRight()->type_of_expression->Equals(TypesHelper::kDefaultTypes.at("bool"))) {
                         throw std::exception();  // todo
                     }
-                    node->type_of_expression = &kDefaultTypes.at("bool");
+                    node->type_of_expression = &TypesHelper::kDefaultTypes.at("bool");
                     break;
                 default:
                     throw std::exception();  // todo
@@ -469,15 +533,27 @@ namespace semantic {
 
             auto node = const_cast<InfiniteLoopNode *>(const_node);  // todo refactor
 
-            if (!node->GetBlock()->type_of_expression->Equals(kDefaultTypes.at("void"))) {
+            if (!node->GetBlock()->type_of_expression->Equals(TypesHelper::kDefaultTypes.at("void"))) {
                 throw std::exception();  // todo
             }
 
             if (!node->break_nodes.empty()) {
-                node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+                if (node->break_nodes.front()->GetExpression() != nullptr) {
+                    node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+                } else {
+                    node->type_of_expression = nullptr;
+                }
             }
 
             for (BreakNode *break_node : node->break_nodes) {
+                if (node->type_of_expression == nullptr) {
+                    if (break_node->GetExpression() == nullptr) {
+                        continue;
+                    } else {
+                        throw std::exception();  // todo
+                    }
+                }
+
                 if (!break_node->GetExpression()->type_of_expression->Equals(*node->type_of_expression)) {
                     throw std::exception();
                 }
@@ -489,7 +565,7 @@ namespace semantic {
 
             auto node = const_cast<PredicateLoopNode *>(const_node);  // todo refactor
 
-            if (!node->GetBlock()->type_of_expression->Equals(kDefaultTypes.at("void"))) {
+            if (!node->GetBlock()->type_of_expression->Equals(TypesHelper::kDefaultTypes.at("void"))) {
                 throw std::exception();  // todo
             }
 
@@ -499,10 +575,22 @@ namespace semantic {
             }
 
             if (!node->break_nodes.empty()) {
-                node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+                if (node->break_nodes.front()->GetExpression() != nullptr) {
+                    node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+                } else {
+                    node->type_of_expression = nullptr;
+                }
             }
 
             for (BreakNode *break_node : node->break_nodes) {
+                if (node->type_of_expression == nullptr) {
+                    if (break_node->GetExpression() == nullptr) {
+                        continue;
+                    } else {
+                        throw std::exception();  // todo
+                    }
+                }
+
                 if (!break_node->GetExpression()->type_of_expression->Equals(*node->type_of_expression)) {
                     throw std::exception();
                 }
@@ -514,15 +602,27 @@ namespace semantic {
 
             auto node = const_cast<IteratorLoopNode *>(const_node);  // todo refactor
 
-            if (!node->GetBlock()->type_of_expression->Equals(kDefaultTypes.at("void"))) {
+            if (!node->GetBlock()->type_of_expression->Equals(TypesHelper::kDefaultTypes.at("void"))) {
                 throw std::exception();  // todo
             }
 
             if (!node->break_nodes.empty()) {
-                node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+                if (node->break_nodes.front()->GetExpression() != nullptr) {
+                    node->type_of_expression = node->break_nodes.front()->GetExpression()->type_of_expression;
+                } else {
+                    node->type_of_expression = nullptr;
+                }
             }
 
             for (BreakNode *break_node : node->break_nodes) {
+                if (node->type_of_expression == nullptr) {
+                    if (break_node->GetExpression() == nullptr) {
+                        continue;
+                    } else {
+                        throw std::exception();  // todo
+                    }
+                }
+
                 if (!break_node->GetExpression()->type_of_expression->Equals(*node->type_of_expression)) {
                     throw std::exception();
                 }
@@ -557,7 +657,7 @@ namespace semantic {
             if (node->GetReturnExpression()) {
                 node->type_of_expression = node->GetReturnExpression()->type_of_expression;
             } else {
-                node->type_of_expression = &kDefaultTypes.at("void");
+                node->type_of_expression = &TypesHelper::kDefaultTypes.at("void");
             }
         }
 
@@ -566,7 +666,7 @@ namespace semantic {
 
             auto node = const_cast<BreakNode *>(const_node);  // todo refactor
 
-            node->type_of_expression = &kDefaultTypes.at("void");
+            node->type_of_expression = &TypesHelper::kDefaultTypes.at("void");
         }
 
         void PostVisit(const ContinueNode *const_node) override {
@@ -574,7 +674,7 @@ namespace semantic {
 
             auto node = const_cast<ContinueNode *>(const_node);  // todo refactor
 
-            node->type_of_expression = &kDefaultTypes.at("void");
+            node->type_of_expression = &TypesHelper::kDefaultTypes.at("void");
         }
 
         void PostVisit(const ReturnNode *const_node) override {
@@ -582,7 +682,7 @@ namespace semantic {
 
             auto node = const_cast<ReturnNode *>(const_node);  // todo refactor
 
-            node->type_of_expression = &kDefaultTypes.at("void");
+            node->type_of_expression = &TypesHelper::kDefaultTypes.at("void");
         }
 
         void PostVisit(const MemberAccessNode *const_node) override {
@@ -654,7 +754,7 @@ namespace semantic {
 
                 auto length_operand = expressions[1];
                 default_type = BrutalCast<const DefaultType *>(length_operand->type_of_expression);
-                if (default_type != &kDefaultTypes.at("usize")) {
+                if (default_type != &TypesHelper::kDefaultTypes.at("usize")) {
                     throw std::exception();  // todo
                 }
             } else if (!expressions.empty()) {
@@ -665,7 +765,7 @@ namespace semantic {
                     }
                 }
             } else {
-                node->type_of_expression = &kDefaultTypes.at("void");
+                node->type_of_expression = &TypesHelper::kDefaultTypes.at("void");
             }
         }
 
@@ -791,6 +891,8 @@ namespace semantic {
             if (!symbol->type->Equals(*node->GetExpression()->type_of_expression)) {
                 throw std::exception();
             }
+
+            node->let_symbol = symbol;
         }
 
         void PostVisit(const LetNode *const_node) override {
@@ -812,6 +914,7 @@ namespace semantic {
             auto let_symbol = std::make_unique<LetSymbol>();
             let_symbol->identifier = identifier;
             let_symbol->type = const_cast<ISymbolType *>(node->GetExpression()->type_of_expression);
+            const_cast<IdentifierPatternNode *>(pattern)->let_node = let_symbol.get();
             node->symbol_table->Add(std::move(let_symbol));
         }
 
@@ -840,12 +943,12 @@ namespace semantic {
 
     class SemanticAnalyzer final {
     public:
-        void Analyze(const SyntaxTree *node) const {
+        void Analyze(const SyntaxTree *node, const ImportExportTable *import_export_table) const {
             BaseStructVisitor base_struct_visitor;
-            base_struct_visitor.Visit(node);
+            base_struct_visitor.Visit(node, import_export_table);
 
             StructFuncVisitor struct_func_visitor;
-            struct_func_visitor.Visit(node);
+            struct_func_visitor.Visit(node, import_export_table);
 
             ExpressionVisitor expression_visitor;
             expression_visitor.Visit(node);

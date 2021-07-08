@@ -1,8 +1,8 @@
 #pragma once
 
+#include "ISymbol.hpp"
 #include "IdentifierNode.hpp"
 #include "LiteralNode.hpp"
-#include "ISymbol.hpp"
 
 class ExpressionNode : public SyntaxNode {
 public:
@@ -25,6 +25,8 @@ public:
     const IdentifierNode *GetIdentifier() const {
         return identifier_.get();
     }
+
+    ISymbol *symbol;
 
 private:
     std::unique_ptr<IdentifierNode> identifier_;

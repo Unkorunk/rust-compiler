@@ -13,6 +13,18 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+include(FetchContent)
+
+FetchContent_Declare(json
+  GIT_REPOSITORY https://github.com/nlohmann/json.git
+  GIT_TAG v3.7.3)
+
+FetchContent_GetProperties(json)
+if(NOT json_POPULATED)
+  FetchContent_Populate(json)
+  add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
+endif()
+
 add_library(rust-compiler-tokenizer
         Tokenizer.hpp Tokenizer.cpp
         Token.hpp
@@ -43,7 +55,9 @@ add_library(rust-compiler-parser
         StructNode.hpp StructNode.cpp
         FunctionNode.hpp FunctionNode.cpp
         ExpressionNode.hpp
-        Symbol.hpp SymbolTable.hpp SemanticAnalyzer.hpp ISymbol.hpp WasmGenerator.hpp)
+        Symbol.hpp SymbolTable.hpp SemanticAnalyzer.hpp ISymbol.hpp WasmGenerator.hpp ImportExportTable.hpp TypesHelper.hpp WasmTypes.hpp)
+
+target_link_libraries(rust-compiler-parser nlohmann_json::nlohmann_json)
 
 target_link_libraries(rust-compiler-parser rust-compiler-tokenizer)
 

@@ -4,15 +4,21 @@ SyntaxParser::SyntaxParser(Tokenizer *tokenizer) : tokenizer_(tokenizer) {
     current_token_ = NextToken();
 }
 
-std::unique_ptr<SyntaxTree> SyntaxParser::ParseStatements() {
+std::unique_ptr<SyntaxTree> SyntaxParser::ParseItems() {
     std::vector<std::unique_ptr<SyntaxNode>> statements;
 
-    Result<SyntaxNode> statement_result = ParseStatement();
-    if (statement_result.status) {
-        while (statement_result.status) {
-            statements.push_back(std::move(statement_result.node));
-            statement_result = ParseStatement();
+    Result<SyntaxNode> item_result = ParseItem();
+    if (item_result.status) {
+        while (item_result.status) {
+            statements.push_back(std::move(item_result.node));
+            item_result = ParseItem();
         }
+
+        if (tokenizer_->HasNext()) {
+            throw std::exception(); // todo
+        }
+    } else {
+        throw std::exception(); // todo
     }
 
     return std::make_unique<SyntaxTree>(std::move(statements));

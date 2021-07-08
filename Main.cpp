@@ -1,3 +1,4 @@
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 
@@ -579,6 +580,13 @@ int main(int argc, char **argv) {
     //    return 0;
     //}
 
+    std::filesystem::path p1(filename);
+    std::filesystem::path json_filename = p1.stem();
+    json_filename.replace_extension("json");
+    p1.replace_filename(json_filename);
+
+    ImportExportTable import_export_table(p1.string());
+
     std::ifstream ifs(filename);
 
     Tokenizer tokenizer(&ifs, Tokenizer::TargetType::kX64);
@@ -594,16 +602,20 @@ int main(int argc, char **argv) {
     }
 
     SyntaxParser parser(&tokenizer);
-    std::unique_ptr<SyntaxTree> syntax_tree = parser.ParseStatements();
+    std::unique_ptr<SyntaxTree> syntax_tree = parser.ParseItems();
 
     MyVisitor visitor;
     visitor.Visit(syntax_tree.get());
 
     semantic::SemanticAnalyzer analyzer;
-    analyzer.Analyze(syntax_tree.get());
+    analyzer.Analyze(syntax_tree.get(), &import_export_table);
+
+
+    std::cout << std::endl;
+    syntax_tree->symbol_table->Print();
 
     WasmGenerator generator;
-    generator.Visit(syntax_tree.get());
+    generator.Generate(syntax_tree.get(), &import_export_table);
     ByteArray::FileStream fs("result.wasm", std::ios::out | std::ios::binary);
     fs << generator.GetResult();
 

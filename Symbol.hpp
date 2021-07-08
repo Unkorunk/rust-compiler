@@ -73,7 +73,10 @@ namespace semantic {
         std::vector<const ISymbolType *> types;
     };
 
-    class LetSymbol : public ISymbol {};
+    class LetSymbol : public ISymbol {
+    public:
+        std::vector<uint32_t> local_indexes;
+    };
 
     class BlockSymbol : public ISymbol {
     public:
@@ -85,6 +88,8 @@ namespace semantic {
     class FuncSymbol : public BlockSymbol {
     public:
         FuncSymbol(SymbolTable *parent) : BlockSymbol(parent) {}
+
+        uint32_t func_iet = std::numeric_limits<uint32_t>::max();
     };
 
     class StructSymbol : public ISymbol {};
