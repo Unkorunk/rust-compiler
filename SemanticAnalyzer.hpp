@@ -253,7 +253,7 @@ namespace semantic {
 
         void PostVisit(const ParamFunctionNode *node) override {
             auto pattern = dynamic_cast<const IdentifierPatternNode *>(node->GetPattern());
-            if (pattern == nullptr || pattern->IsMut() || pattern->IsRef() || pattern->GetPattern() != nullptr) {
+            if (pattern == nullptr || pattern->IsRef() || pattern->GetPattern() != nullptr) {
                 throw std::exception();  // todo
             }
 
@@ -263,6 +263,7 @@ namespace semantic {
 
             auto let_symbol = std::make_unique<LetSymbol>();
             let_symbol->identifier = identifier;
+            let_symbol->is_mut_ = pattern->IsMut();
             let_symbol->type = const_cast<TypeNode *>(node->GetType());  // todo refactor
             const_cast<IdentifierPatternNode *>(pattern)->let_node = let_symbol.get();
             node->symbol_table->Add(std::move(let_symbol));
@@ -893,6 +894,10 @@ namespace semantic {
             }
 
             node->let_symbol = symbol;
+
+            if (!const_node->let_symbol->is_mut_) {
+                throw std::exception();
+            }
         }
 
         void PostVisit(const LetNode *const_node) override {
@@ -901,7 +906,7 @@ namespace semantic {
             auto node = const_cast<LetNode *>(const_node);  // todo refactor
 
             auto pattern = dynamic_cast<const IdentifierPatternNode *>(node->GetPattern());
-            if (pattern == nullptr || pattern->IsMut() || pattern->IsRef() || pattern->GetPattern() != nullptr) {
+            if (pattern == nullptr || pattern->IsRef() || pattern->GetPattern() != nullptr) {
                 throw std::exception();  // todo
             }
 
@@ -912,6 +917,7 @@ namespace semantic {
             }
 
             auto let_symbol = std::make_unique<LetSymbol>();
+            let_symbol->is_mut_ = pattern->IsMut();
             let_symbol->identifier = identifier;
             let_symbol->type = const_cast<ISymbolType *>(node->GetExpression()->type_of_expression);
             const_cast<IdentifierPatternNode *>(pattern)->let_node = let_symbol.get();

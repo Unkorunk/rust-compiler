@@ -76,6 +76,7 @@ namespace semantic {
     class LetSymbol : public ISymbol {
     public:
         std::vector<uint32_t> local_indexes;
+        bool is_mut_;
     };
 
     class BlockSymbol : public ISymbol {

@@ -323,270 +323,7 @@ protected:
         const auto type = dynamic_cast<const semantic::DefaultType *>(node->type_of_expression);
         const auto left_type = dynamic_cast<const semantic::DefaultType *>(node->GetLeft()->type_of_expression);
 
-        switch (node->GetToken()->GetType()) {
-        case Token::Type::kPlus: {
-            switch (type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x6a);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x7c);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x92);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0xa0);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        }
-        case Token::Type::kMinus: {
-            switch (type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x6b);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x7d);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x93);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0xa1);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        }
-        case Token::Type::kStar: {
-            switch (type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x6c);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x7e);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x94);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0xa2);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        }
-        case Token::Type::kSlash: {
-            switch (type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x6d);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x7f);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x95);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0xa3);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        }
-        case Token::Type::kOr:
-        case Token::Type::kOrOr:
-            switch (type->type) {
-            case TokenValue::Type::kBool:
-            case TokenValue::Type::kI32:
-                result.Push(0x72);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x84);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kAnd:
-        case Token::Type::kAndAnd:
-            switch (type->type) {
-            case TokenValue::Type::kBool:
-            case TokenValue::Type::kI32:
-                result.Push(0x71);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x83);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kShl:
-            switch (type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x74);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x86);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kShr:
-            switch (type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x75);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x87);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kCaret:
-            switch (type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x73);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x85);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kPercent:
-            switch (type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x6f);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x81);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kEqEq:
-            switch (left_type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x46);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x51);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x5b);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0x61);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kNe:
-            switch (left_type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x47);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x52);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x5c);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0x62);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kLt:
-            switch (left_type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x48);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x53);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x5d);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0x63);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kGt:
-            switch (left_type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x4a);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x55);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x5e);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0x64);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kLe:
-            switch (left_type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x4c);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x57);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x5f);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0x65);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        case Token::Type::kGe:
-            switch (left_type->type) {
-            case TokenValue::Type::kI32:
-                result.Push(0x4e);
-                break;
-            case TokenValue::Type::kI64:
-                result.Push(0x59);
-                break;
-            case TokenValue::Type::kF32:
-                result.Push(0x60);
-                break;
-            case TokenValue::Type::kF64:
-                result.Push(0x66);
-                break;
-            default:
-                throw std::exception();
-            }
-            break;
-        default:
-            throw std::exception();  // todo
-        }
+        result.Push(GetOperationOpcode(node->GetToken()->GetType(), left_type->type));
 
         stack_length_++;
         arguments_.top().push(result);
@@ -621,11 +358,8 @@ protected:
                 result.Push(0x10);
                 result.Push(ToUnsignedLeb128(symbol->func_iet));
             },
-            [](const semantic::TupleStructType *type)
-            {
-
-                // todo
-
+            [](const semantic::TupleStructType *) {
+                throw std::exception(); // todo
             }
         }, node->type);
         // clang-format on
@@ -639,6 +373,49 @@ protected:
 
     void PostVisit(const AssignmentNode *node) override {
         Visit(node->GetExpression());
+
+        if (node->GetOperation().GetType() != Token::Type::kEq) {
+            arguments_.top().top().Push(0x20);
+            arguments_.top().top().Push(ToUnsignedLeb128(node->let_symbol->local_indexes.front()));
+        }
+
+        const auto type = BrutalCast<const semantic::DefaultType *>(node->GetExpression()->type_of_expression);
+        switch (node->GetOperation().GetType()) {
+        case Token::Type::kEq:
+            break;
+        case Token::Type::kPlusEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kPlus, type->type));
+            break;
+        case Token::Type::kMinusEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kMinus, type->type));
+            break;
+        case Token::Type::kStarEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kStar, type->type));
+            break;
+        case Token::Type::kSlashEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kSlash, type->type));
+            break;
+        case Token::Type::kPercentEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kPercent, type->type));
+            break;
+        case Token::Type::kCaretEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kCaret, type->type));
+            break;
+        case Token::Type::kAndEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kAnd, type->type));
+            break;
+        case Token::Type::kOrEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kOr, type->type));
+            break;
+        case Token::Type::kShlEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kShl, type->type));
+            break;
+        case Token::Type::kShrEq:
+            arguments_.top().top().Push(GetOperationOpcode(Token::Type::kShr, type->type));
+            break;
+        default:
+            abort();
+        }
 
         arguments_.top().top().Push(0x21);
         arguments_.top().top().Push(ToUnsignedLeb128(node->let_symbol->local_indexes.front()));
@@ -773,7 +550,7 @@ private:
         return raw_type;
     }
 
-    ByteArray ToUnsignedLeb128(uint32_t value) {
+    static ByteArray ToUnsignedLeb128(uint32_t value) {
         ByteArray result;
 
         do {
@@ -789,7 +566,7 @@ private:
         return result;
     }
 
-    ByteArray ToSignedLeb128(int32_t value) {
+    static ByteArray ToSignedLeb128(int32_t value) {
         ByteArray result;
 
         value |= 0;
@@ -809,14 +586,14 @@ private:
     std::unordered_map<SectionType, uint32_t> section_count_entry_;
     std::unordered_map<SectionType, ByteArray> section_entries_;
 
-    ByteArray CreateModule() {
+    static ByteArray CreateModule() {
         ByteArray result;
         result.Push({0x00, 0x61, 0x73, 0x6d});  // magic number i.e., \0asm
         result.Push({0x01, 0x00, 0x00, 0x00});  // version number, 0x1
         return result;
     }
 
-    ByteArray CreateSection(SectionType section_type, const ByteArray &payload_data) {
+    static ByteArray CreateSection(SectionType section_type, const ByteArray &payload_data) {
         ByteArray result;
         result.Push(ToUnsignedLeb128(static_cast<uint32_t>(section_type)));
         result.Push(ToUnsignedLeb128(payload_data.GetSize()));
@@ -918,6 +695,205 @@ private:
 
                 result_.Push(CreateSection(section_type, payload_data));
             }
+        }
+    }
+
+    static ByteArray::Byte GetOperationOpcode(Token::Type operation, TokenValue::Type type) {
+        switch (operation) {
+        case Token::Type::kPlus: {
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x6a;
+            case TokenValue::Type::kI64:
+                return 0x7c;
+            case TokenValue::Type::kF32:
+                return 0x92;
+            case TokenValue::Type::kF64:
+                return 0xa0;
+            default:
+                throw std::exception();
+            }
+        }
+        case Token::Type::kMinus: {
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x6b;
+            case TokenValue::Type::kI64:
+                return 0x7d;
+            case TokenValue::Type::kF32:
+                return 0x93;
+            case TokenValue::Type::kF64:
+                return 0xa1;
+            default:
+                throw std::exception();
+            }
+        }
+        case Token::Type::kStar: {
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x6c;
+            case TokenValue::Type::kI64:
+                return 0x7e;
+            case TokenValue::Type::kF32:
+                return 0x94;
+            case TokenValue::Type::kF64:
+                return 0xa2;
+            default:
+                throw std::exception();
+            }
+        }
+        case Token::Type::kSlash: {
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x6d;
+            case TokenValue::Type::kI64:
+                return 0x7f;
+            case TokenValue::Type::kF32:
+                return 0x95;
+            case TokenValue::Type::kF64:
+                return 0xa3;
+            default:
+                throw std::exception();
+            }
+        }
+        case Token::Type::kOr:
+        case Token::Type::kOrOr:
+            switch (type) {
+            case TokenValue::Type::kBool:
+            case TokenValue::Type::kI32:
+                return 0x72;
+            case TokenValue::Type::kI64:
+                return 0x84;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kAnd:
+        case Token::Type::kAndAnd:
+            switch (type) {
+            case TokenValue::Type::kBool:
+            case TokenValue::Type::kI32:
+                return 0x71;
+            case TokenValue::Type::kI64:
+                return 0x83;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kShl:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x74;
+            case TokenValue::Type::kI64:
+                return 0x86;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kShr:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x75;
+            case TokenValue::Type::kI64:
+                return 0x87;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kCaret:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x73;
+            case TokenValue::Type::kI64:
+                return 0x85;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kPercent:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x6f;
+            case TokenValue::Type::kI64:
+                return 0x81;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kEqEq:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x46;
+            case TokenValue::Type::kI64:
+                return 0x51;
+            case TokenValue::Type::kF32:
+                return 0x5b;
+            case TokenValue::Type::kF64:
+                return 0x61;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kNe:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x47;
+            case TokenValue::Type::kI64:
+                return 0x52;
+            case TokenValue::Type::kF32:
+                return 0x5c;
+            case TokenValue::Type::kF64:
+                return 0x62;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kLt:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x48;
+            case TokenValue::Type::kI64:
+                return 0x53;
+            case TokenValue::Type::kF32:
+                return 0x5d;
+            case TokenValue::Type::kF64:
+                return 0x63;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kGt:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x4a;
+            case TokenValue::Type::kI64:
+                return 0x55;
+            case TokenValue::Type::kF32:
+                return 0x5e;
+            case TokenValue::Type::kF64:
+                return 0x64;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kLe:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x4c;
+            case TokenValue::Type::kI64:
+                return 0x57;
+            case TokenValue::Type::kF32:
+                return 0x5f;
+            case TokenValue::Type::kF64:
+                return 0x65;
+            default:
+                throw std::exception();
+            }
+        case Token::Type::kGe:
+            switch (type) {
+            case TokenValue::Type::kI32:
+                return 0x4e;
+            case TokenValue::Type::kI64:
+                return 0x59;
+            case TokenValue::Type::kF32:
+                return 0x60;
+            case TokenValue::Type::kF64:
+                return 0x66;
+            default:
+                throw std::exception();
+            }
+        default:
+            throw std::exception();  // todo
         }
     }
 };
