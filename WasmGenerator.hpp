@@ -260,6 +260,8 @@ protected:
             result.Push(ToUnsignedLeb128(p->local_indexes.front()));
             arguments_.top().push(result);
             stack_length_++;
+        } else {
+            throw std::exception();  // todo
         }
     }
 
@@ -368,7 +370,7 @@ protected:
     }
 
     void PostVisit(const PrefixUnaryOperationNode *node) override {
-        SpecificSyntaxTreeVisitor::PostVisit(node);
+        throw std::exception();  // todo
     }
 
     void PostVisit(const AssignmentNode *node) override {
@@ -469,6 +471,10 @@ protected:
         result.Push({0x0b, 0x0b});
 
         arguments_.top().push(result);
+    }
+
+    void PostVisit(const IteratorLoopNode *node) override {
+        throw std::exception();  // todo
     }
 
     void PostVisit(const IfNode *node) override {
