@@ -165,11 +165,6 @@ protected:
 
         ByteArray bytes;
 
-        if (arguments_.top().empty()) {
-        } else if (arguments_.top().size() == 1) {
-            bytes.Push(arguments_.top().top());
-        }
-
         std::vector<ByteArray> blocks;
         while (!arguments_.top().empty()) {
             blocks.push_back(arguments_.top().top());
@@ -699,9 +694,14 @@ protected:
         arguments_.top().push(result);
     }
 
-   void PostVisit(const IfNode *node) override
-    {
+    void PostVisit(const IfNode *node) override {
         SpecificSyntaxTreeVisitor::PostVisit(node);
+
+        ByteArray else_block;
+        if (node->GetElseIf() != nullptr || node->GetElseBlock()) {
+            else_block = arguments_.top().top();
+            arguments_.top().pop();
+        }
 
         const ByteArray block = arguments_.top().top();
         arguments_.top().pop();
@@ -712,9 +712,13 @@ protected:
 
         ByteArray result;
         result.Push(condition);
-        result.Push(0x02);
+        result.Push(0x04);
         result.Push(ToSignedLeb128(static_cast<int32_t>(ValueType::empty)));
         result.Push(block);
+        if (else_block.GetSize() != 0) {
+            result.Push(0x05);
+            result.Push(else_block);
+        }
         result.Push(0x0b);
 
         arguments_.top().push(result);
