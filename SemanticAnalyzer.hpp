@@ -500,7 +500,14 @@ namespace semantic {
                     process_get_ref(false);
                     break;
                 case Token::Type::kMinus: {
-                    const DefaultType *p1 = dynamic_cast<const DefaultType *>(node->GetRight()->type_of_expression);
+                    const auto *p1 = dynamic_cast<const DefaultType *>(node->GetRight()->type_of_expression);
+                    if (p1 == nullptr) {
+                        auto p2 = BrutalCast<const IdentifierTypeNode *>(node->GetRight()->type_of_expression);
+                        if (auto p3 = std::get_if<const DefaultType *>(&p2->type); p3 != nullptr) {
+                            p1 = *p3;
+                        }
+                    }
+
                     if (p1 == nullptr || p1->type == TokenValue::Type::kBool || p1->type == TokenValue::Type::kByteString || p1->type == TokenValue::Type::kChar ||
                         p1->type == TokenValue::Type::kEmpty || p1->type == TokenValue::Type::kText || p1->type == TokenValue::Type::kVoid)
                     {

@@ -558,27 +558,34 @@ protected:
 
 int main(int argc, char **argv) {
     bool print_tokenizer = false;
+    bool print_syntax = false;
+    bool print_semantic = false;
 
-    std::string filename = "main.txt";
-    // bool filename_found = true;
+    std::string filename;
+    bool filename_found = false;
 
-    // for (int k = 1; k < argc; k++) {
-    //    std::string arg(argv[k]);
+    for (int k = 1; k < argc; k++) {
+        std::string arg(argv[k]);
 
-    //    if (arg == "-t") {
-    //        print_tokenizer = true;
-    //    } else if (filename_found) {
-    //        std::cerr << "invalid arguments" << std::endl;
-    //        return 0;
-    //    } else {
-    //        filename = arg;
-    //        filename_found = true;
-    //    }
-    //}
+        if (arg == "-t") {
+            print_tokenizer = true;
+        } else if (arg == "-s") {
+            print_syntax = true;
+        } else if (arg == "-m") {
+            print_semantic = true;
+        } else if (filename_found) {
+            std::cerr << "invalid arguments" << std::endl;
+            return 0;
+        } else {
+            filename = arg;
+            filename_found = true;
+        }
+    }
 
-    // if (!filename_found) {
-    //    return 0;
-    //}
+    if (!filename_found) {
+        std::cerr << "no input file" << std::endl;
+        return 0;
+    }
 
     std::filesystem::path p1(filename);
     std::filesystem::path json_filename = p1.stem();
@@ -599,27 +606,74 @@ int main(int argc, char **argv) {
 
             std::cout << token.ToString(&ifs) << std::endl;
         }
+
+        ifs.close();
+        return 0;
     }
 
     SyntaxParser parser(&tokenizer);
     std::unique_ptr<SyntaxTree> syntax_tree = parser.ParseItems();
 
-    MyVisitor visitor;
-    visitor.Visit(syntax_tree.get());
+    if (print_syntax) {
+        MyVisitor visitor;
+        visitor.Visit(syntax_tree.get());
+    }
 
     semantic::SemanticAnalyzer analyzer;
     analyzer.Analyze(syntax_tree.get(), &import_export_table);
 
-
-    std::cout << std::endl;
-    syntax_tree->symbol_table->Print();
+    if (print_semantic) {
+        syntax_tree->symbol_table->Print();
+    }
 
     WasmGenerator generator;
     generator.Generate(syntax_tree.get(), &import_export_table);
-    ByteArray::FileStream fs("result.wasm", std::ios::out | std::ios::binary);
+    ByteArray::FileStream fs("index.wasm", std::ios::out | std::ios::binary);
     fs << generator.GetResult();
 
-    ifs.close();
+    std::ofstream index_ofs("index.html");
+    index_ofs << R"(<!doctype html>
+<html>
+  <body>
+    <script>
+      var importObject = {
+)";
 
+    std::unordered_map<std::string, std::vector<const ImportExportTable::Import *>> grouped;
+
+    for (const auto &it : import_export_table.imports) {
+        grouped[it.module].push_back(&it);
+    }
+
+    for (const auto&[group, imports] : grouped) {
+        index_ofs << "          " << group << ": {" << std::endl;
+
+        for (const auto &it : imports) {
+            index_ofs << "              " << it->field << ": (";
+            auto params = it->type.GetWasmParams();
+            for (size_t i = 0; i < params.size(); i++) {
+                index_ofs << "arg" << i;
+                if (i != params.size() - 1) {
+                    index_ofs << ", ";
+                }
+            }
+            index_ofs << ") => { /* todo */ }," << std::endl;
+        }
+
+        index_ofs << "          }," << std::endl;
+    }
+
+    index_ofs << R"(      };
+
+      WebAssembly.instantiateStreaming(fetch('index.wasm'), importObject).then(obj => {
+        // todo
+      });
+    </script>
+  </body>
+</html>)";
+
+    index_ofs.close();
+
+    ifs.close();
     return 0;
 }

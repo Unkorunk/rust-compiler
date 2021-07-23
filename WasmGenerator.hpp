@@ -291,7 +291,7 @@ protected:
         Visit(node->GetLeft());
         Visit(node->GetRight());
 
-        const auto left_type = dynamic_cast<const semantic::DefaultType *>(node->GetLeft()->type_of_expression);
+        const auto left_type = dynamic_cast<const semantic::DefaultType *>(UnrefType(node->GetLeft()->type_of_expression));
 
         current_result_.Push(GetOperationOpcode(node->GetToken()->GetType(), left_type->type));
 
@@ -330,7 +330,7 @@ protected:
             current_result_.Push(ToUnsignedLeb128(node->let_symbol->local_indexes.front()));
         }
 
-        const auto type = BrutalCast<const semantic::DefaultType *>(node->GetExpression()->type_of_expression);
+        const auto type = BrutalCast<const semantic::DefaultType *>(UnrefType(node->GetExpression()->type_of_expression));
         switch (node->GetOperation().GetType()) {
         case Token::Type::kEq:
             break;
@@ -420,16 +420,39 @@ protected:
         stack_length_--;
     }
 
-    void PostVisit(const BreakNode *node) override {
-        Visit(node->GetExpression());
+    void PostVisit(const PrefixUnaryOperationNode *node) override {
+        auto tokenType = node->GetToken()->GetType();
+        if (tokenType == Token::Type::kMinus) {
+            const auto type = dynamic_cast<const semantic::DefaultType *>(UnrefType(node->type_of_expression));
+            switch (type->type) {
+            case TokenValue::Type::kI32:
+                current_result_.Push(0x41);
+                current_result_.Push(ToSignedLeb128(static_cast<int32_t>(0)));
+                break;
+            case TokenValue::Type::kI64:
+                current_result_.Push(0x42);
+                current_result_.Push(ToSignedLeb128(static_cast<int64_t>(0)));
+                break;
+            case TokenValue::Type::kF32:
+                current_result_.Push(0x43);
+                current_result_.PushUInt(static_cast<uint32_t>(0));
+                break;
+            case TokenValue::Type::kF64:
+                current_result_.Push(0x44);
+                current_result_.PushUInt(static_cast<uint64_t>(0));
+                break;
+            default:
+                throw std::exception();  // todo
+            }
 
-        current_result_.Push(0x0c);
-        current_result_.Push(ToUnsignedLeb128(1));  // todo
-    }
-
-    void PostVisit(const ContinueNode *node) override {
-        current_result_.Push(0x0c);
-        current_result_.Push(ToUnsignedLeb128(0));  // todo
+            Visit(node->GetRight());
+            current_result_.Push(GetOperationOpcode(node->GetToken()->GetType(), type->type));
+        } else if (tokenType == Token::Type::kNot) {
+            Visit(node->GetRight());
+            current_result_.Push(0x45);
+        } else {
+            throw std::exception(); // todo
+        }
     }
 
     UNUSED(IdentifierTypeNode)
@@ -465,7 +488,8 @@ protected:
     NOT_IMPLEMENTED(LiteralNode)
     NOT_IMPLEMENTED(IdentifierNode)
     NOT_IMPLEMENTED(IteratorLoopNode)
-    NOT_IMPLEMENTED(PrefixUnaryOperationNode)
+    NOT_IMPLEMENTED(BreakNode)
+    NOT_IMPLEMENTED(ContinueNode)
 
 private:
     ByteArray result_;
